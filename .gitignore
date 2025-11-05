@@ -1,0 +1,20 @@
+# No subir imágenes
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# No subir vídeos
+*.mp4
+*.mov
+
+# No subir archivos de Photoshop
+*.psd
+
+# Carpetas con contenido pesado (si las tienes)
+Imágenes para trabajar/
+our best photos/
+planting photos/
+Photoshop Files/
+*.png
+*.docx
