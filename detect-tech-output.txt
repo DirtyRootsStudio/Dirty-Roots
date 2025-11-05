@@ -1,0 +1,3 @@
+detect-tech.js v1.3 • heurística plataformas (Squarespace/Shopify/Webflow/Wix) activada
+Analizando: https://www.zonafranka.es
+--- Informe resumido ---

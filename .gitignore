@@ -20,3 +20,5 @@ Photoshop Files/
 *.docx
 *.svg
 *.pdf
+/node_modules
+*.png
