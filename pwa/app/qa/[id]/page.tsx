@@ -1,7 +1,7 @@
 // src/app/qa/[id]/page.tsx  
 "use client";  
   
-import { useEffect, useState } from "react";  
+import { use, useEffect, useState } from "react"; // Añadir 'use'  
 import { addAnswer, getQuestion, listenAnswers } from "@/src/lib/firestore";  
 import { ensureAnonAuth, auth } from "@/src/lib/firebase";  
 import AnswerCard from "@/src/components/AnswerCard";  
@@ -9,8 +9,10 @@ import AnswerCard from "@/src/components/AnswerCard";
 // Configuración para permitir rutas dinámicas  
 export const dynamicParams = true;  
   
-export default function QuestionDetailPage({ params }: { params: { id: string } }) {  
-  const { id } = params;  
+export default function QuestionDetailPage({ params }: { params: Promise<{ id: string }> }) {  
+  // Unwrap la Promise usando React.use()  
+  const { id } = use(params);  
+    
   const [q, setQ] = useState<any | null>(null);  
   const [answers, setAnswers] = useState<any[]>([]);  
   const [text, setText] = useState("");  

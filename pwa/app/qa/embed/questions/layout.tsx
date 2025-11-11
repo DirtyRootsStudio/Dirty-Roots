@@ -1,0 +1,1 @@
+//qa/embed/questions/layout.tsx

@@ -3,7 +3,7 @@ import {
   collection, addDoc, serverTimestamp, Timestamp,  
   query, orderBy, limit, getDocs, doc, getDoc,  
   increment, runTransaction, onSnapshot, where, startAt, endAt,  
-  deleteDoc  
+  deleteDoc, updateDoc  
 } from "firebase/firestore";  
 import { db } from "./firebase";  
 import { LatLng, toGeohash, geohashBoundsForRadius, distanceM } from "./geoutils";  
@@ -30,6 +30,7 @@ export type Question = {
   answersCount: number;  
   createdBy: string;  
   createdAt: Timestamp;  
+  public?: boolean; // Solo true cuando tiene respuestas  
 };  
   
 export type Answer = {  
@@ -96,6 +97,7 @@ export async function addQuestion(input: Pick<Question, "text" | "context" | "cr
   const docRef = await addDoc(ref, {  
     ...input,  
     answersCount: 0,  
+    public: false, // Inicialmente no pública  
     createdAt: serverTimestamp(),  
   });  
   return docRef.id;  
@@ -115,18 +117,43 @@ export async function getQuestion(id: string) {
   return { id: snap.id, ...(snap.data() as Question) };  
 }  
   
+export async function deleteQuestion(questionId: string) {  
+  const ref = doc(db, "questions", questionId);  
+  await deleteDoc(ref);  
+}  
+  
+export async function updateQuestionPublic(questionId: string, isPublic: boolean) {  
+  const ref = doc(db, "questions", questionId);  
+  await updateDoc(ref, { public: isPublic });  
+}  
+  
 export async function addAnswer(questionId: string, input: Pick<Answer, "text" | "references" | "createdBy">) {  
   const qRef = doc(db, "questions", questionId);  
   const aRef = collection(qRef, "answers");  
   await runTransaction(db, async (tx) => {  
     const qSnap = await tx.get(qRef);  
     if (!qSnap.exists()) throw new Error("Question not found");  
+      
     const answerRef = await addDoc(aRef, {  
       ...input,  
       createdAt: serverTimestamp(),  
     });  
-    tx.update(qRef, { answersCount: increment(1) });  
+      
+    // Incrementar contador y marcar como pública  
+    tx.update(qRef, {   
+      answersCount: increment(1),  
+      public: true // Marcar como pública cuando recibe primera respuesta  
+    });  
+      
     return answerRef;  
+  });  
+}  
+  
+export async function updateAnswer(questionId: string, answerId: string, text: string, references?: string[]) {  
+  const aRef = doc(db, "questions", questionId, "answers", answerId);  
+  await updateDoc(aRef, {  
+    text,  
+    references: references || [],  
   });  
 }  
   
