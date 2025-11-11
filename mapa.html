@@ -1,0 +1,397 @@
+<!-- Leaflet CSS -->  
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />  
+  
+<!-- Leaflet JS -->  
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>  
+  
+<!-- Firebase SDK -->  
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>  
+  
+<!-- geofire-common para geohash -->  
+<script src="https://cdn.jsdelivr.net/npm/geofire-common@6.0.0/dist/geofire-common.min.js"></script>  
+  
+<style>  
+  /* Tema oscuro personalizado Dirty Roots */  
+  .leaflet-container {  
+    background: var(--color-grey-4, #0B0B0B);  
+  }  
+    
+  .leaflet-tile {  
+    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);  
+  }  
+    
+  .leaflet-popup-content-wrapper {  
+    background: var(--color-grey-7, #111111);  
+    color: var(--color-grey-96, #F5F5F5);  
+    border-radius: 12px;  
+    border: 1px solid rgba(164, 203, 62, 0.20);  
+  }  
+    
+  .leaflet-popup-tip {  
+    background: var(--color-grey-7, #111111);  
+  }  
+    
+  /* Marcador personalizado 🌿 */  
+  .custom-marker {  
+    font-size: 24px;  
+    text-align: center;  
+  }  
+    
+  /* Scrollbar personalizado para lista de lugares */  
+  .places-list::-webkit-scrollbar {  
+    width: 8px;  
+  }  
+    
+  .places-list::-webkit-scrollbar-track {  
+    background: #0F0F0F;  
+    border-radius: 4px;  
+  }  
+    
+  .places-list::-webkit-scrollbar-thumb {  
+    background: #2A2A2A;  
+    border-radius: 4px;  
+  }  
+    
+  .places-list::-webkit-scrollbar-thumb:hover {  
+    background: #A4CB3E;  
+  }  
+</style>  
+  
+<div data-layer="Container" class="Container" id="green-locations" style="align-self: stretch; padding-top: 0.98px; justify-content: center; align-items: flex-start; gap: 20px; display: inline-flex">  
+  <div id="stillness-map" data-layer="Map canvas" class="MapCanvas" style="width: 566px; align-self: stretch; background: var(--color-grey-4, #0B0B0B); border-radius: 20px; border: 1px var(--color-grey-13, #222222) solid; min-height: 400px;"></div>  
+  <div data-layer="Container" class="Container" style="width: 566px; align-self: stretch; flex-direction: column; justify-content: center; align-items: flex-start; gap: 12px; display: inline-flex">  
+    <div id="places-list-container" class="places-list" style="align-self: stretch; flex-direction: column; gap: 12px; display: flex; max-height: 400px; overflow-y: auto; padding-right: 8px;">  
+      <!-- Los lugares se cargarán dinámicamente aquí -->  
+      <div style="text-align: center; padding: 40px; color: var(--color-grey-73, #B6B9BF);">  
+        <div style="font-size: 32px; margin-bottom: 16px;">🌿</div>  
+        <p>Cargando lugares calmados...</p>  
+      </div>  
+    </div>  
+    <div data-layer="Link" class="Link" id="submit-spot-link" style="align-self: stretch; height: 66.45px; padding-top: 20.63px; padding-bottom: 21.82px; padding-left: 19px; padding-right: 19px; border-radius: 999px; outline: 1px var(--color-rose-69, #FF60A8) solid; outline-offset: -1px; justify-content: center; align-items: center; display: inline-flex; cursor: pointer; transition: all 0.2s;">  
+      <div data-layer="Submit a spot" class="SubmitASpot" style="flex: 1 1 0; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--color-grey-96, #F5F5F5); font-size: 16px; font-family: Segoe UI; font-weight: 700; line-height: 23.20px; letter-spacing: 0.40px; word-wrap: break-word">Submit a spot</div>  
+    </div>  
+  </div>  
+</div>  
+  
+<script>  
+(function(){  
+  // Configuración de Firebase  
+  const firebaseConfig = {  
+    apiKey: "AIzaSyDi-cNvkgCvf8bVl9M_umjH8KaDnOqJDO0",  
+    authDomain: "dirty-roots-1270f.firebaseapp.com",  
+    projectId: "dirty-roots-1270f",  
+    storageBucket: "dirty-roots-1270f.firebasestorage.app",  
+    messagingSenderId: "44442627071",  
+    appId: "1:44442627071:web:58a1cbf3f485fe1fa0d5ca",  
+    measurementId: "G-5DR9Y1V3HP"  
+  };  
+    
+  // Inicializar Firebase  
+  firebase.initializeApp(firebaseConfig);  
+  const db = firebase.firestore();  
+  const auth = firebase.auth();  
+    
+  // Autenticación anónima  
+  auth.signInAnonymously().catch(err => console.error('Auth error:', err));  
+    
+  let stillnessSpots = [];  
+  let map = null;  
+  let markers = [];  
+    
+  // Función para calcular geohash  
+  function calculateGeohash(lat, lng) {  
+    return geofire.geohashForLocation([lat, lng]);  
+  }  
+    
+  // Cargar lugares desde Firestore  
+  async function loadPlaces() {  
+    try {  
+      const snapshot = await db.collection('places')  
+        .where('status', '==', 'approved')  
+        .orderBy('createdAt', 'desc')  
+        .limit(100)  
+        .get();  
+        
+      stillnessSpots = snapshot.docs.map(doc => {  
+        const data = doc.data();  
+        return {  
+          id: doc.id,  
+          name: data.name,  
+          description: data.description || '',  
+          lat: data.coords.lat,  
+          lng: data.coords.lng,  
+          photo: data.photo || null,  
+          city: data.city || '',  
+          tags: data.tags || [],  
+          noiseLevel: data.noiseLevel || 0  
+        };  
+      });  
+        
+      renderMap();  
+      renderList();  
+    } catch (error) {  
+      console.error('Error loading places:', error);  
+      document.getElementById('places-list-container').innerHTML = `  
+        <div style="text-align: center; padding: 40px; color: var(--color-rose-69, #FF60A8);">  
+          <p>Error al cargar lugares. Por favor, recarga la página.</p>  
+        </div>  
+      `;  
+    }  
+  }  
+    
+  // Renderizar mapa  
+  function renderMap() {  
+    if (!map) {  
+      map = L.map('stillness-map', {  
+        center: [50.0, 10.0],  
+        zoom: 5,  
+        zoomControl: true,  
+        scrollWheelZoom: false  
+      });  
+        
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {  
+        attribution: '',  
+        maxZoom: 18  
+      }).addTo(map);  
+    }  
+      
+    // Limpiar marcadores existentes  
+    markers.forEach(marker => map.removeLayer(marker));  
+    markers = [];  
+      
+    // Añadir marcadores  
+    stillnessSpots.forEach(spot => {  
+      const icon = L.divIcon({  
+        html: '<div class="custom-marker">🌿</div>',  
+        className: 'custom-leaflet-marker',  
+        iconSize: [30, 30],  
+        iconAnchor: [15, 30]  
+      });  
+        
+      const marker = L.marker([spot.lat, spot.lng], { icon }).addTo(map);  
+      markers.push(marker);  
+        
+      const popupContent = `  
+        <div style="padding: 12px; min-width: 200px;">  
+          <h3 style="margin: 0 0 8px 0; color: var(--color-chartreuse-green-52, #A4CB3E); font-size: 16px; font-weight: 700;">  
+            ${spot.name}  
+          </h3>  
+          ${spot.city ? `<p style="margin: 0 0 8px 0; color: var(--color-grey-73, #B6B9BF); font-size: 12px;">📍 ${spot.city}</p>` : ''}  
+          <p style="margin: 0 0 12px 0; color: var(--color-grey-73, #B6B9BF); font-size: 14px; line-height: 1.5;">  
+            ${spot.description}  
+          </p>  
+          ${spot.photo ? `<img src="${spot.photo}" style="width: 100%; border-radius: 8px; margin-bottom: 12px;" />` : ''}  
+          ${spot.tags && spot.tags.length > 0 ? `<p style="margin: 0 0 8px 0; color: var(--color-grey-73, #B6B9BF); font-size: 12px;">#${spot.tags.join(' #')}</p>` : ''}  
+          ${spot.noiseLevel !== undefined ? `<p style="margin: 0 0 12px 0; color: var(--color-grey-73, #B6B9BF); font-size: 12px;">🔊 Nivel de ruido: ${spot.noiseLevel}/5</p>` : ''}  
+          <a href="https://www.google.com/maps?q=${spot.lat},${spot.lng}"   
+             target="_blank"   
+             style="color: var(--color-chartreuse-green-52, #A4CB3E); text-decoration: none; font-size: 13px;">  
+            📍 View on Google Maps  
+          </a>  
+        </div>  
+      `;  
+        
+      marker.bindPopup(popupContent, {  
+        maxWidth: 300,  
+        className: 'stillness-popup'  
+      });  
+        
+      marker.on('click', () => {  
+        updateSpotList(spot);  
+      });  
+    });  
+  }  
+    
+  // Renderizar lista lateral  
+  function renderList() {  
+    const container = document.getElementById('places-list-container');  
+      
+    if (stillnessSpots.length === 0) {  
+      container.innerHTML = `  
+        <div style="text-align: center; padding: 40px; color: var(--color-grey-73, #B6B9BF);">  
+          <div style="font-size: 32px; margin-bottom: 16px;">🌿</div>  
+          <p>No hay lugares todavía. ¡Sé el primero en añadir uno!</p>  
+        </div>  
+      `;  
+      return;  
+    }  
+      
+    const listHTML = stillnessSpots.slice(0, 10).map(spot => `  
+      <div class="place-card" data-spot-id="${spot.id}" style="align-self: stretch; padding: 12px 13px; background: var(--color-grey-6, #0F0F0F); border-radius: 14px; outline: 1px var(--color-grey-14, #242424) solid; outline-offset: -1px; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: flex; cursor: pointer; transition: all 0.2s;">  
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; margin-bottom: 4px;">  
+          <div style="justify-content: center; display: flex; flex-direction: column; color: var(--color-grey-96, #F5F5F5); font-size: 16px; font-family: Segoe UI; font-weight: 700; line-height: 23.20px; word-wrap: break-word; flex: 1;">  
+            ${spot.name}  
+          </div>  
+          ${spot.city ? `<span style="font-size: 12px; color: var(--color-grey-73, #B6B9BF); background: var(--color-grey-7, #111111); padding: 4px 8px; border-radius: 999px; margin-left: 8px;">📍 ${spot.city}</span>` : ''}  
+        </div>  
+        <div style="justify-content: center; display: flex; flex-direction: column; color: var(--color-grey-73, #B6B9BF); font-size: 14.60px; font-family: Segoe UI; font-weight: 400; line-height: 21.34px; word-wrap: break-word;">  
+          ${spot.description}  
+        </div>  
+        ${spot.tags && spot.tags.length > 0 ? `  
+          <div style="margin-top: 8px; font-size: 12px; color: var(--color-grey-73, #B6B9BF);">  
+            #${spot.tags.join(' #')}  
+          </div>  
+        ` : ''}  
+        ${spot.noiseLevel !== undefined ? `  
+          <div style="margin-top: 8px; font-size: 12px; color: var(--color-grey-73, #B6B9BF);">  
+            🔊 ${spot.noiseLevel}/5  
+          </div>  
+        ` : ''}  
+      </div>  
+    `).join('');  
+      
+    container.innerHTML = listHTML;  
+
+        // Añadir event listeners para hacer clic en las tarjetas  
+    document.querySelectorAll('.place-card').forEach((card, index) => {  
+      card.addEventListener('click', () => {  
+        const spot = stillnessSpots[index];  
+        map.flyTo([spot.lat, spot.lng], 15, { duration: 1.5 });  
+        updateSpotList(spot);  
+      });  
+        
+      card.addEventListener('mouseenter', () => {  
+        card.style.background = 'var(--color-grey-7, #111111)';  
+ card.style.outline = '1px solid rgba(164, 203, 62, 0.3)';  
+      });  
+        
+      card.addEventListener('mouseleave', () => {  
+        card.style.background = 'var(--color-grey-6, #0F0F0F)';  
+        card.style.outline = '1px var(--color-grey-14, #242424) solid';  
+      });  
+    });  
+  }  
+    
+  // Función para actualizar la lista lateral al hacer clic en marcador  
+  function updateSpotList(selectedSpot) {  
+    const spotCards = document.querySelectorAll('.place-card');  
+    spotCards.forEach((card) => {  
+      const spotId = card.getAttribute('data-spot-id');  
+      if (spotId === selectedSpot.id) {  
+        card.style.outline = '2px solid var(--color-chartreuse-green-52, #A4CB3E)';  
+        card.style.outlineOffset = '2px';  
+      } else {  
+        card.style.outline = '1px var(--color-grey-14, #242424) solid';  
+        card.style.outlineOffset = '-1px';  
+      }  
+    });  
+  }  
+    
+  // Inicializar la aplicación  
+  loadPlaces();  
+    
+  // Botón "Submit a spot" - Modal con integración Firebase  
+  const submitBtn = document.querySelector('[data-layer="Submit a spot"]').closest('.Link');  
+  submitBtn.addEventListener('click', (e) => {  
+    e.preventDefault();  
+      
+    const formHTML = `  
+      <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;" id="submit-spot-modal">  
+        <div style="background: var(--color-grey-7, #111111); padding: 32px; border-radius: 20px; max-width: 500px; width: 90%; border: 1px solid rgba(164, 203, 62, 0.20);">  
+          <h2 style="color: var(--color-chartreuse-green-52, #A4CB3E); margin: 0 0 24px 0;">Submit Your Stillness Spot</h2>  
+            
+          <input type="text" id="spot-name" placeholder="Spot name" style="width: 100%; padding: 12px; margin-bottom: 16px; background: var(--color-grey-4, #0B0B0B); border: 1px solid var(--color-grey-16, #2A2A2A); border-radius: 8px; color: var(--color-grey-96, #F5F5F5); font-family: Segoe UI;" />  
+            
+          <input type="text" id="spot-city" placeholder="City" style="width: 100%; padding: 12px; margin-bottom: 16px; background: var(--color-grey-4, #0B0B0B); border: 1px solid var(--color-grey-16, #2A2A2A); border-radius: 8px; color: var(--color-grey-96, #F5F5F5); font-family: Segoe UI;" />  
+            
+          <textarea id="spot-description" placeholder="Poetic description..." rows="3" style="width: 100%; padding: 12px; margin-bottom: 16px; background: var(--color-grey-4, #0B0B0B); border: 1px solid var(--color-grey-16, #2A2A2A); border-radius: 8px; color: var(--color-grey-96, #F5F5F5); font-family: Segoe UI; resize: vertical;"></textarea>  
+            
+          <input type="text" id="spot-coords" placeholder="Coordinates (lat, lng)" style="width: 100%; padding: 12px; margin-bottom: 16px; background: var(--color-grey-4, #0B0B0B); border: 1px solid var(--color-grey-16, #2A2A2A); border-radius: 8px; color: var(--color-grey-96, #F5F5F5); font-family: Segoe UI;" />  
+            
+          <input type="text" id="spot-tags" placeholder="Tags (comma separated)" style="width: 100%; padding: 12px; margin-bottom: 16px; background: var(--color-grey-4, #0B0B0B); border: 1px solid var(--color-grey-16, #2A2A2A); border-radius: 8px; color: var(--color-grey-96, #F5F5F5); font-family: Segoe UI;" />  
+            
+          <input type="number" id="spot-noise" placeholder="Noise level (0-5)" min="0" max="5" style="width: 100%; padding: 12px; margin-bottom: 24px; background: var(--color-grey-4, #0B0B0B); border: 1px solid var(--color-grey-16, #2A2A2A); border-radius: 8px; color: var(--color-grey-96, #F5F5F5); font-family: Segoe UI;" />  
+            
+          <div style="display: flex; gap: 12px;">  
+            <button id="submit-spot-btn" style="flex: 1; padding: 14px; background: var(--color-chartreuse-green-52, #A4CB3E); border: none; border-radius: 999px; color: var(--color-grey-4, #0B0B0B); font-weight: 700; cursor: pointer;">Submit</button>  
+            <button id="cancel-spot-btn" style="flex: 1; padding: 14px; background: transparent; border: 1px solid var(--color-rose-69, #FF60A8); border-radius: 999px; color: var(--color-grey-96, #F5F5F5); font-weight: 700; cursor: pointer;">Cancel</button>  
+          </div>  
+        </div>  
+      </div>  
+    `;  
+      
+    document.body.insertAdjacentHTML('beforeend', formHTML);  
+      
+    document.getElementById('cancel-spot-btn').addEventListener('click', () => {  
+      document.getElementById('submit-spot-modal').remove();  
+    });  
+      
+    document.getElementById('submit-spot-btn').addEventListener('click', async () => {  
+      const spotData = {  
+        name: document.getElementById('spot-name').value,  
+        city: document.getElementById('spot-city').value,  
+        description: document.getElementById('spot-description').value,  
+        coords: document.getElementById('spot-coords').value,  
+        tags: document.getElementById('spot-tags').value,  
+        noiseLevel: document.getElementById('spot-noise').value  
+      };  
+        
+      // Validar campos requeridos  
+      if (!spotData.name || !spotData.coords) {  
+        alert('Please fill in name and coordinates');  
+        return;  
+      }  
+        
+      // Parsear coordenadas (formato: "lat, lng")  
+      const coordsParts = spotData.coords.split(',').map(s => s.trim());  
+      if (coordsParts.length !== 2) {  
+        alert('Invalid coordinates format. Use: lat, lng');  
+        return;  
+      }  
+        
+      const lat = parseFloat(coordsParts[0]);  
+      const lng = parseFloat(coordsParts[1]);  
+        
+      if (isNaN(lat) || isNaN(lng)) {  
+        alert('Invalid coordinates. Please enter valid numbers.');  
+        return;  
+      }  
+        
+      // Validar rangos de coordenadas  
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {  
+        alert('Coordinates out of range. Latitude: -90 to 90, Longitude: -180 to 180');  
+        return;  
+      }  
+        
+      try {  
+        // Calcular geohash  
+        const geohash = calculateGeohash(lat, lng);  
+          
+        // Parsear tags  
+        const tagsArray = spotData.tags   
+          ? spotData.tags.split(',').map(t => t.trim()).filter(Boolean)   
+          : [];  
+          
+        // Parsear nivel de ruido  
+        const noiseLevel = spotData.noiseLevel ? parseInt(spotData.noiseLevel) : 0;  
+          
+        // Guardar en Firestore  
+        await db.collection('places').add({  
+          name: spotData.name,  
+          city: spotData.city || '',  
+          description: spotData.description || '',  
+          coords: { lat, lng },  
+          geohash: geohash,  
+          tags: tagsArray,  
+          noiseLevel: noiseLevel,  
+          photo: null,  
+          createdBy: auth.currentUser?.uid || 'anonymous',  
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),  
+          status: 'pending' // Requiere aprobación manual  
+        });  
+          
+        alert('Thank you! Your spot will be reviewed by the team.');  
+        document.getElementById('submit-spot-modal').remove();  
+          
+        // Recargar lugares para mostrar el nuevo (si está aprobado)  
+        loadPlaces();  
+      } catch (error) {  
+        console.error('Error submitting spot:', error);  
+        alert('Error submitting spot. Please try again.');  
+      }  
+    });  
+  });  
+})();  
+</script>
