@@ -35,7 +35,6 @@ export default function MapCanvas({
       style: "https://demotiles.maplibre.org/style.json",
       center: [center.lng, center.lat],
       zoom,
-      attributionControl: true,
     });
     instanceRef.current = map;
 

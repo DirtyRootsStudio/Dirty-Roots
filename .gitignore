@@ -22,3 +22,4 @@ Photoshop Files/
 *.pdf
 /node_modules
 *.png
+/pwa/dist
