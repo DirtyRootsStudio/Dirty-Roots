@@ -2,7 +2,6 @@
 import {  
   collection, addDoc, serverTimestamp, Timestamp,  
   query, orderBy, limit, getDocs, doc, getDoc,  
-  increment, runTransaction, onSnapshot, where, startAt, endAt,  
   deleteDoc, updateDoc  
 } from "firebase/firestore";  
 import { db } from "./firebase";  
@@ -27,14 +26,13 @@ export type Question = {
   id?: string;  
   text: string;  
   context?: string;  
-  answersCount: number;  
   createdBy: string;  
   createdAt: Timestamp;  
-  public?: boolean; // Solo true cuando tiene respuestas  
+  public?: boolean; // Solo true cuando tiene respuesta  
+  answer?: Answer; // Respuesta única (opcional)  
 };  
   
 export type Answer = {  
-  id?: string;  
   text: string;  
   references?: string[];  
   createdBy: string;  
@@ -96,9 +94,9 @@ export async function addQuestion(input: Pick<Question, "text" | "context" | "cr
   const ref = collection(db, "questions");  
   const docRef = await addDoc(ref, {  
     ...input,  
-    answersCount: 0,  
     public: false, // Inicialmente no pública  
     createdAt: serverTimestamp(),  
+    // No incluir campo 'answer' hasta que se añada una  
   });  
   return docRef.id;  
 }  
@@ -122,47 +120,29 @@ export async function deleteQuestion(questionId: string) {
   await deleteDoc(ref);  
 }  
   
-export async function updateQuestionPublic(questionId: string, isPublic: boolean) {  
+// Función para añadir o actualizar la respuesta única de una pregunta  
+export async function setAnswer(  
+  questionId: string,   
+  input: Pick<Answer, "text" | "references" | "createdBy">  
+) {  
   const ref = doc(db, "questions", questionId);  
-  await updateDoc(ref, { public: isPublic });  
-}  
+  const snap = await getDoc(ref);  
+    
+  if (!snap.exists()) {  
+    throw new Error("Question not found");  
+  }  
   
-export async function addAnswer(questionId: string, input: Pick<Answer, "text" | "references" | "createdBy">) {  
-  const qRef = doc(db, "questions", questionId);  
-  const aRef = collection(qRef, "answers");  
-  await runTransaction(db, async (tx) => {  
-    const qSnap = await tx.get(qRef);  
-    if (!qSnap.exists()) throw new Error("Question not found");  
-      
-    const answerRef = await addDoc(aRef, {  
-      ...input,  
-      createdAt: serverTimestamp(),  
-    });  
-      
-    // Incrementar contador y marcar como pública  
-    tx.update(qRef, {   
-      answersCount: increment(1),  
-      public: true // Marcar como pública cuando recibe primera respuesta  
-    });  
-      
-    return answerRef;  
-  });  
-}  
+  // Crear objeto de respuesta con timestamp  
+  const answer: Answer = {  
+    text: input.text,  
+    references: input.references || [],  
+    createdBy: input.createdBy,  
+    createdAt: serverTimestamp() as Timestamp,  
+  };  
   
-export async function updateAnswer(questionId: string, answerId: string, text: string, references?: string[]) {  
-  const aRef = doc(db, "questions", questionId, "answers", answerId);  
-  await updateDoc(aRef, {  
-    text,  
-    references: references || [],  
-  });  
-}  
-  
-export function listenAnswers(questionId: string, cb: (answers: Answer[]) => void) {  
-  const aRef = collection(db, "questions", questionId, "answers");  
-  const qs = query(aRef, orderBy("createdAt", "asc"));  
-  return onSnapshot(qs, (snap) => {  
-    const items: Answer[] = [];  
-    snap.forEach(d => items.push({ id: d.id, ...(d.data() as Answer) }));  
-    cb(items);  
+  // Actualizar el documento de la pregunta con la respuesta y marcar como pública  
+  await updateDoc(ref, {  
+    answer: answer,  
+    public: true,  
   });  
 }
