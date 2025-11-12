@@ -15,15 +15,13 @@ const MapCanvas = dynamic(() => import("./MapCanvas"), {
   
 const schema = z.object({    
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),    
-  placeType: z.enum(["park", "cafe"], {  
-    required_error: "Debes seleccionar un tipo de lugar"  
-  }),  
-  city: z.string().optional(), // NUEVO campo  
+  placeType: z.enum(["park", "cafe"]), // Sin segundo parámetro  
+  city: z.string().optional(),  
   address: z.string().optional(),  
   schedule: z.string().optional(),  
   description: z.string().optional(),    
   tags: z.string().optional(),    
-}); 
+});
     
 type FormValues = z.infer<typeof schema>;    
     
