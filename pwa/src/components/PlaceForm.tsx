@@ -13,8 +13,8 @@ const schema = z.object({
   name: z.string().min(2),  
   description: z.string().optional(),  
   tags: z.string().optional(),  
-  noiseLevel: z.coerce.number().min(0).max(5).optional(),  
-});  
+  noiseLevel: z.number().min(0).max(5).optional(),  
+}); 
   
 type FormValues = z.infer<typeof schema>;  
   
