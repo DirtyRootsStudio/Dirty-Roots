@@ -68,7 +68,7 @@ export default function AuthPage() {
           marginBottom: '32px',  
           color: '#F5F5F5'  
         }}>  
-          {isLogin ? '🔐 Iniciar Sesión' : '✨ Registrarse'}  
+          {isLogin ? '🔐 Login' : '✨ Register'}  
         </h1>  
             
         {error && (  
