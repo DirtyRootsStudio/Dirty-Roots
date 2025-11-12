@@ -55,7 +55,7 @@ export default function HomePage() {
         {/* Header */}  
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>  
           <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: '#F5F5F5' }}>  
-            Dirty Roots PWA  
+            Dirty Roots Console  
           </h1>  
           <button  
             onClick={handleLogout}  
