@@ -34,7 +34,7 @@ export default function NewPlacePage() {
               transition: 'all 0.2s'  
             }}  
           >  
-            ← Volver  
+            ← Go back  
           </Link>  
         </div>  
       </div>  

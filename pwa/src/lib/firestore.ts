@@ -10,17 +10,19 @@ import { LatLng, toGeohash, geohashBoundsForRadius, distanceM } from "./geoutils
 export type Place = {  
   id?: string;  
   name: string;  
-  city?: string;  
+  city: string;  
+  address?: string; // NUEVO: dirección de calle  
+  schedule?: string; // NUEVO: horario (ej: "9:00-18:00")  
+  placeType: "park" | "cafe"; // NUEVO: tipo de lugar  
   description?: string;  
   photo?: string | null;  
   coords: { lat: number; lng: number };  
   geohash: string;  
   tags?: string[];  
-  noiseLevel?: number;  
   createdBy: string;  
   createdAt: Timestamp;  
   status?: "approved" | "pending";  
-};  
+}; 
   
 export type Question = {  
   id?: string;  
