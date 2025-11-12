@@ -10,8 +10,8 @@ import { auth } from '@/src/lib/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';  
   
 const authSchema = z.object({  
-  email: z.string().email('Email inválido'),  
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),  
+  email: z.string().email('Invalid email'),  
+  password: z.string().min(6, 'The password must be at least 6 characters long'),  
 });  
   
 type AuthFormValues = z.infer<typeof authSchema>;  
@@ -38,7 +38,7 @@ export default function AuthPage() {
       }  
       router.push('/');  
     } catch (error: any) {  
-      setError(error.message || 'Error de autenticación');  
+      setError(error.message || 'Authentication error');  
     } finally {  
       setLoading(false);  
     }  
@@ -195,7 +195,7 @@ export default function AuthPage() {
               }  
             }}  
           >  
-            {loading ? 'Cargando...' : (isLogin ? 'Entrar' : 'Crear Cuenta')}  
+            {loading ? 'Loading...' : (isLogin ? 'Enter' : 'Create Account')}  
           </button>  
   
           <button  
@@ -214,7 +214,7 @@ export default function AuthPage() {
             onMouseEnter={(e) => e.currentTarget.style.color = '#F5F5F5'}  
             onMouseLeave={(e) => e.currentTarget.style.color = '#B6B9BF'}  
           >  
-            {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}  
+            {isLogin ? 'Dont have an account? Sign up' : 'Already have an account? Log in'}  
           </button>  
         </form>  
   

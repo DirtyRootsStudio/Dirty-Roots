@@ -15,10 +15,10 @@ export default function NewPlacePage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>  
           <div>  
             <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#F5F5F5' }}>  
-              🌿 Añadir lugar calmado  
+              🌿 Add a quiet place  
             </h1>  
             <p style={{ fontSize: '16px', color: '#B6B9BF' }}>  
-              Comparte un lugar tranquilo que hayas descubierto  
+              Share a quiet place you've discovered  
             </p>  
           </div>  
           <Link   

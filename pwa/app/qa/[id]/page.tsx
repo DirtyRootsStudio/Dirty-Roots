@@ -42,7 +42,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
         setRefs(question.answer.references?.join(", ") || "");  
       }  
     } catch (error) {  
-      console.error("Error cargando pregunta:", error);  
+      console.error("Error loading question:", error);  
     } finally {  
       setLoading(false);  
     }  
@@ -65,8 +65,8 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
       await loadQuestion();  
       setIsEditing(false);  
     } catch (error) {  
-      console.error("Error guardando respuesta:", error);  
-      alert("Error al guardar la respuesta. Por favor, intenta de nuevo.");  
+      console.error("Error saving response:", error);  
+      alert("Error saving response. Please try again.");  
     }  
   }  
   
@@ -87,7 +87,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B0B0B' }}>  
         <div style={{ textAlign: 'center' }}>  
           <div style={{ display: 'inline-block', width: '48px', height: '48px', border: '4px solid #A4CB3E', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '16px' }}></div>  
-          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Cargando...</p>  
+          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Loading...</p>  
         </div>  
       </div>  
     );  
@@ -99,7 +99,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B0B0B' }}>  
         <div style={{ textAlign: 'center' }}>  
           <div style={{ display: 'inline-block', width: '48px', height: '48px', border: '4px solid #A4CB3E', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '16px' }}></div>  
-          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Cargando pregunta...</p>  
+          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Loading question...</p>  
         </div>  
       </div>  
     );  
@@ -112,7 +112,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
         <div style={{ textAlign: 'center' }}>  
           <div style={{ fontSize: '56px', marginBottom: '24px' }}>❓</div>  
           <p style={{ fontSize: '20px', color: '#B6B9BF', marginBottom: '24px' }}>  
-            Pregunta no encontrada  
+            Question not found  
           </p>  
           <Link   
             href="/qa"  
@@ -127,7 +127,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
               transition: 'all 0.2s'  
             }}  
           >  
-            ← Volver a preguntas  
+            ← Back to questions  
           </Link>  
         </div>  
       </div>  
@@ -144,10 +144,10 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>  
           <div>  
             <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#F5F5F5' }}>  
-              💬 Pregunta y Respuesta  
+              💬 Question and Answer  
             </h1>  
             <p style={{ fontSize: '16px', color: '#B6B9BF' }}>  
-              {hasAnswer ? 'Respuesta de la comunidad' : 'Sé el primero en responder'}  
+              {hasAnswer ? 'Community response' : 'Be the first to reply'}  
             </p>  
           </div>  
           <Link   
@@ -163,7 +163,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
               transition: 'all 0.2s'  
             }}  
           >  
-            ← Volver  
+            ← Go back  
           </Link>  
         </div>  
       </div>  
@@ -199,7 +199,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                     padding: '4px 12px',  
                     borderRadius: '9999px'  
                   }}>  
-                    ✓ Respondida  
+                    ✓ Answered  
                   </span>  
                 ) : (  
                   <span style={{  
@@ -209,7 +209,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                     padding: '4px 12px',  
                     borderRadius: '9999px'  
                   }}>  
-                    Sin responder  
+                    No response  
                   </span>  
                 )}  
               </div>  
@@ -227,7 +227,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
               >  
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>  
                   <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#F5F5F5' }}>  
-                    Respuesta  
+                    Answer  
                   </h3>  
                   <button  
                     onClick={() => setIsEditing(true)}  
@@ -251,7 +251,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                       e.currentTarget.style.color = '#A4CB3E';  
                     }}  
                   >  
-                    ✏️ Modificar  
+                    ✏️ Modify  
                   </button>  
                 </div>  
                   
@@ -273,7 +273,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                   {q.answer.references && q.answer.references.length > 0 && (  
                     <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #1F1F1F' }}>  
                       <p style={{ fontSize: '12px', color: '#B6B9BF', marginBottom: '8px', fontWeight: '600' }}>  
-                        Referencias:  
+                        References:  
                       </p>  
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>  
                         {q.answer.references.map((ref: string, i: number) => (  
@@ -311,10 +311,10 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                 <div style={{ textAlign: 'center', padding: '40px' }}>  
                   <div style={{ fontSize: '48px', marginBottom: '16px' }}>💭</div>  
                   <p style={{ color: '#B6B9BF', fontSize: '16px', marginBottom: '8px' }}>  
-                    Esta pregunta aún no tiene respuesta  
+                    This question still has no answer.
                   </p>  
                   <p style={{ color: '#757575', fontSize: '14px' }}>  
-                    Usa el formulario de la derecha para responder  
+                    Use the form on the right to reply  
                   </p>  
                 </div>  
               </div>  
@@ -332,24 +332,24 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
               }}  
             >  
               <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', color: '#F5F5F5' }}>  
-                {hasAnswer ? 'Modificar respuesta' : 'Añadir respuesta'}  
+                {hasAnswer ? 'Modify response' : 'Add response'}  
               </h3>  
               <p style={{ fontSize: '14px', color: '#B6B9BF', marginBottom: '24px' }}>  
                 {hasAnswer   
-                  ? 'Actualiza la respuesta existente con nueva información'  
-                  : 'Comparte tu conocimiento con la comunidad'  
+                  ? 'Update the existing answer with new information.'  
+                  : 'Share your knowledge with the community'  
                 }  
               </p>  
   
   <div style={{ marginBottom: '16px' }}>  
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#F5F5F5' }}>  
-                  Tu respuesta  
+                  Your response  
                 </label>  
                 <textarea  
                   value={text}  
                   onChange={(e) => setText(e.target.value)}  
                   rows={5}  
-                  placeholder="Comparte tu conocimiento con la comunidad..."  
+                  placeholder="Share your knowledge with the community..."  
                   style={{  
                     width: '100%',  
                     background: '#0B0B0B',  
@@ -375,7 +375,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                   type="text"  
                   value={refs}  
                   onChange={(e) => setRefs(e.target.value)}  
-                  placeholder="IDs de lugares o URLs, separados por comas"  
+                  placeholder="Place IDs or URLs, separated by commas"  
                   style={{  
                     width: '100%',  
                     background: '#0B0B0B',  
@@ -418,7 +418,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                   }  
                 }}  
               >  
-                {hasAnswer ? 'Actualizar respuesta' : 'Publicar respuesta'}  
+                {hasAnswer ? 'Update response' : 'Post response'}  
               </button>  
             </div>  
           </div>  

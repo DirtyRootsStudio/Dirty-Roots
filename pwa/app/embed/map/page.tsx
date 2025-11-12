@@ -22,18 +22,18 @@ export default function EmbedMapPage() {
   useEffect(() => {  
     (async () => {  
       try {  
-        console.log('🔄 Inicializando autenticación anónima...');  
+        console.log('🔄 Initializing anonymous authentication...');  
         await ensureAnonAuth();  
-        console.log('✅ Autenticación exitosa');  
+        console.log('✅ Successful authentication');  
   
-        console.log('🔄 Cargando lugares desde Firestore...');  
+        console.log('🔄 Loading places from Firestore...');  
         const data = await listLatestPlaces(100);  
-        console.log(`✅ ${data.length} lugares cargados`);  
+        console.log(`✅ ${data.length} loaded places`);  
           
         setPlaces(data.filter(p => p.status === 'approved'));  
       } catch (err) {  
         console.error('❌ Error:', err);  
-        setError(err instanceof Error ? err.message : 'Error desconocido');  
+        setError(err instanceof Error ? err.message : 'Unknown error');  
       } finally {  
         setLoading(false);  
       }  
@@ -66,7 +66,7 @@ export default function EmbedMapPage() {
             animation: 'spin 1s linear infinite',   
             marginBottom: '16px'   
           }}></div>  
-          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Cargando mapa...</p>  
+          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Loading map...</p>  
         </div>  
         <style jsx>{`  
           @keyframes spin {  

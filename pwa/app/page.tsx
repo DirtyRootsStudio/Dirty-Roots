@@ -79,12 +79,12 @@ export default function HomePage() {
               e.currentTarget.style.color = '#F5F5F5';  
             }}  
           >  
-            Cerrar sesión  
+            Log out  
           </button>  
         </div>  
   
         <p style={{ textAlign: 'center', color: '#B6B9BF', fontSize: '18px' }}>  
-          ¿Qué quieres explorar?  
+          What do you want to explore?  
         </p>  
   
         {/* Cards Grid */}  
@@ -112,10 +112,10 @@ export default function HomePage() {
               }}  
             >  
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#F5F5F5' }}>  
-                🗺️ Lugares  
+                🗺️ Places  
               </h2>  
               <p style={{ fontSize: '16px', color: '#B6B9BF', lineHeight: '1.6' }}>  
-                Descubre y comparte lugares calmados  
+                Discover and share peaceful places  
               </p>  
             </div>  
           </Link>  
@@ -143,10 +143,10 @@ export default function HomePage() {
               }}  
             >  
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#F5F5F5' }}>  
-                💬 Preguntas  
+                💬 Questions  
               </h2>  
               <p style={{ fontSize: '16px', color: '#B6B9BF', lineHeight: '1.6' }}>  
-                Participa en la comunidad de preguntas y respuestas  
+                Participate in the question and answer community  
               </p>  
             </div>  
           </Link>  

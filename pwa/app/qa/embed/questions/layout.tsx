@@ -34,7 +34,7 @@ export default function EmbedQuestionsPage() {
             animation: 'spin 1s linear infinite',  
             marginBottom: '16px'  
           }}></div>  
-          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Cargando...</p>  
+          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Loading...</p>  
         </div>  
         <style jsx>{`  
           @keyframes spin {  
@@ -69,14 +69,14 @@ export default function EmbedQuestionsPage() {
           marginBottom: '16px',  
           color: '#F5F5F5'  
         }}>  
-          💬 Nueva pregunta  
+          💬 New question  
         </h2>  
         <p style={{  
           fontSize: '14px',  
           color: '#B6B9BF',  
           marginBottom: '24px'  
         }}>  
-          Las preguntas se harán públicas una vez que reciban una respuesta  
+          The questions will be made public once they receive an answer.
         </p>  
         <QuestionForm onCreated={(id) => {  
           // Redirigir a la página de detalle de la pregunta en la PWA principal  

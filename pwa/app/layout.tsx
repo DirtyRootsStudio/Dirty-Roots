@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });  
   
 export const metadata: Metadata = {  
-  title: "Dirty Roots - Lugares Calmados",  
-  description: "Descubre y comparte lugares tranquilos. Comunidad de espacios calmados y preguntas sobre bienestar.",  
+  title: "Dirty Roots Console",  
+  description: "Place management and question answer console",  
   manifest: "/manifest.json",  
   themeColor: "#0B0B0B",  
   appleWebApp: {  

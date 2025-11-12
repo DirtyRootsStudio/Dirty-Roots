@@ -17,7 +17,7 @@ export default function QaPage() {
         const q = await listQuestions(100);      
         setQuestions(q);      
       } catch (error) {      
-        console.error("Error cargando preguntas:", error);      
+        console.error("Error loading questions:", error);      
       } finally {      
         setLoading(false);      
       }      
@@ -25,7 +25,7 @@ export default function QaPage() {
   }, []);      
       
   const handleDeleteQuestion = async (questionId: string) => {      
-    if (!confirm("¿Estás seguro de que quieres eliminar esta pregunta?")) {      
+    if (!confirm("Are you sure you want to delete this question?")) {      
       return;      
     }      
           
@@ -33,8 +33,8 @@ export default function QaPage() {
       await deleteQuestion(questionId);      
       setQuestions(questions.filter(q => q.id !== questionId));      
     } catch (error) {      
-      console.error("Error eliminando pregunta:", error);      
-      alert("Error al eliminar la pregunta. Por favor, intenta de nuevo.");      
+      console.error("Error deleting question:", error);      
+      alert("Error deleting the question. Please try again.");      
     }      
   };      
       
@@ -43,7 +43,7 @@ export default function QaPage() {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B0B0B' }}>      
         <div style={{ textAlign: 'center' }}>      
           <div style={{ display: 'inline-block', width: '48px', height: '48px', border: '4px solid #A4CB3E', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '16px' }}></div>      
-          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Cargando preguntas...</p>      
+          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Loading questions...</p>      
         </div>      
       </div>      
     );      
@@ -56,10 +56,10 @@ export default function QaPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>      
           <div>      
             <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#F5F5F5' }}>      
-              💬 Preguntas y Respuestas      
+              💬 Questions and Answers      
             </h1>      
             <p style={{ fontSize: '16px', color: '#B6B9BF' }}>      
-              Explora y responde preguntas de la comunidad      
+              Explore and answer community questions      
             </p>      
           </div>      
           <Link       
@@ -84,7 +84,7 @@ export default function QaPage() {
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>      
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>      
           <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#F5F5F5', marginBottom: '8px' }}>      
-            Todas las preguntas      
+            All questions      
           </h2>      
       
           {questions.length === 0 ? (      
@@ -99,10 +99,10 @@ export default function QaPage() {
             >      
               <div style={{ fontSize: '56px', marginBottom: '24px' }}>💬</div>      
               <p style={{ marginBottom: '16px', fontSize: '20px', color: '#B6B9BF' }}>      
-                No hay preguntas todavía      
+                There are no questions yet.      
               </p>      
               <p style={{ fontSize: '14px', color: '#B6B9BF' }}>      
-                Sé el primero en hacer una pregunta      
+                Be the first to ask a question      
               </p>      
             </div>      
           ) : (      
@@ -185,7 +185,7 @@ export default function QaPage() {
                             padding: '4px 12px',      
                             borderRadius: '9999px'      
                           }}>      
-                            ✓ Respondida      
+                            ✓ Answered      
                           </span>    
                         ) : (    
                           <span style={{      
@@ -195,7 +195,7 @@ export default function QaPage() {
                             padding: '4px 12px',      
                             borderRadius: '9999px'      
                           }}>      
-                            Sin responder      
+                            No response      
                           </span>      
                         )}    
                         {q.public && (      
@@ -206,7 +206,7 @@ export default function QaPage() {
                             padding: '4px 12px',      
                             borderRadius: '9999px'      
                           }}>      
-                            ✓ Pública      
+                            ✓ Public      
                           </span>      
                         )}      
                       </div>      
