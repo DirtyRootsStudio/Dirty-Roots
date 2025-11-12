@@ -39,17 +39,17 @@ export default function PlacesPage() {
   };  
   
   const handleDeletePlace = async (placeId: string) => {  
-    if (!confirm("¿Estás seguro de que quieres eliminar este lugar?")) {  
+    if (!confirm("Are you sure you want to delete this place?")) {  
       return;  
     }  
       
     try {  
       await deletePlace(placeId);  
       setPlaces(places.filter(p => p.id !== placeId));  
-      alert("Lugar eliminado ✅");  
+      alert("Place deleted ✅");  
     } catch (error) {  
-      console.error("Error eliminando lugar:", error);  
-      alert("Error al eliminar el lugar");  
+      console.error("Error deleting place:", error);  
+      alert("Error deleting the place");  
     }  
   };  
     
@@ -58,7 +58,7 @@ export default function PlacesPage() {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B0B0B' }}>  
         <div style={{ textAlign: 'center' }}>  
           <div style={{ display: 'inline-block', width: '48px', height: '48px', border: '4px solid #A4CB3E', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '16px' }}></div>  
-          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Cargando lugares calmados...</p>  
+          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Loading calm places...</p>  
         </div>  
       </div>  
     );  
@@ -71,10 +71,10 @@ export default function PlacesPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>  
           <div>  
             <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#F5F5F5' }}>  
-              🗺️ Lugares calmados  
+              🗺️ Calm places  
             </h1>  
             <p style={{ fontSize: '16px', color: '#B6B9BF' }}>  
-              Descubre espacios tranquilos compartidos por la comunidad  
+              Discover peaceful spaces shared by the community 
             </p>  
           </div>  
           <div style={{ display: 'flex', gap: '12px' }}>  
@@ -91,7 +91,7 @@ export default function PlacesPage() {
                 transition: 'all 0.2s'  
               }}  
             >  
-              ← Inicio  
+              ← Go back  
             </Link>  
             <Link   
               href="/places/new"   
@@ -107,7 +107,7 @@ export default function PlacesPage() {
                 transition: 'all 0.2s'  
               }}  
             >  
-              + Añadir lugar  
+              + Add place  
             </Link>  
           </div>  
         </div>  
@@ -227,7 +227,7 @@ export default function PlacesPage() {
                         e.currentTarget.style.transform = 'scale(1)';  
                       }}  
                     >  
-                      🗑️ Eliminar  
+                      🗑️ Delete  
                     </button>  
   
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px', paddingRight: '100px' }}>  

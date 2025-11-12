@@ -369,7 +369,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
   
               <div style={{ marginBottom: '24px' }}>  
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#F5F5F5' }}>  
-                  Referencias (opcional)  
+                  References (optional) 
                 </label>  
                 <input  
                   type="text"  
