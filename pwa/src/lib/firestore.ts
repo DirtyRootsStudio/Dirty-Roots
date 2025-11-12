@@ -19,7 +19,6 @@ export type Place = {
   coords: { lat: number; lng: number };    
   geohash: string;    
   tags?: string[];    
-  // noiseLevel?: number; // ELIMINAR esta línea  
   createdBy: string;    
   createdAt: Timestamp;    
   status?: "approved" | "pending";    
