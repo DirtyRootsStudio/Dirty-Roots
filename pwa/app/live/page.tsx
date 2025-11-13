@@ -7,6 +7,7 @@ import { auth } from "@/src/lib/firebase";
 import {   
   listLiveSessions,   
   deleteLiveSession,  
+  addLiveSession,
   listSeatReservations   
 } from "@/src/lib/firestore";  
 import ProtectedRoute from "@/src/components/ProtectedRoute";  
