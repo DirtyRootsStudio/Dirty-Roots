@@ -1,81 +1,135 @@
-// src/lib/firestore.ts      
-import {      
-  collection,     
-  addDoc,     
-  serverTimestamp,     
-  Timestamp,      
-  query,     
-  orderBy,     
-  limit,     
-  getDocs,     
-  doc,     
-  getDoc,      
-  deleteDoc,     
-  updateDoc,     
-  startAt,     
-  endAt      
-} from "firebase/firestore";    
-import { db } from "./firebase";      
-import { LatLng, toGeohash, geohashBoundsForRadius, distanceM } from "./geoutils";      
-    
-// ========== TYPE DEFINITIONS ==========    
-    
-/**    
- * Representa un lugar tranquilo en el sistema    
- * Los lugares pueden ser parques, cafés, etc.    
- */    
-export type Place = {        
-  id?: string;        
-  name: string;        
-  city: string;        
-  placeType?: "park" | "cafe";    
-  address?: string;    
-  schedule?: string;    
-  description?: string;        
-  photo?: string | null;        
-  coords: { lat: number; lng: number };        
-  geohash: string; // Calculado automáticamente para búsquedas geoespaciales       
-  tags?: string[];        
-  createdBy: string;        
-  createdAt: Timestamp;        
-  status?: "approved" | "pending";        
-};    
-    
-/**    
- * Representa una pregunta en el sistema Q&A    
- * Las preguntas son privadas hasta que reciben una respuesta    
- */    
-export type Question = {      
-  id?: string;      
-  text: string;      
-  context?: string;      
-  createdBy: string;      
-  createdAt: Timestamp;      
-  public?: boolean; // Solo true cuando tiene respuesta      
-  answer?: Answer; // Respuesta única (opcional)      
-};      
-    
-/**    
- * Representa una respuesta a una pregunta    
- * Almacenada como campo dentro del documento Question    
- */    
-export type Answer = {      
-  text: string;      
-  references?: string[]; // URLs o referencias externas    
-  createdBy: string;      
-  createdAt: Timestamp;      
+// src/lib/firestore.ts  
+/**  
+ * Firestore Data Access Layer  
+ *   
+ * Este módulo centraliza todas las operaciones CRUD para las colecciones de Firebase Firestore.  
+ * Proporciona una API type-safe para interactuar con:  
+ * - Places (lugares tranquilos)  
+ * - Questions & Answers (sistema Q&A)  
+ * - Live Sessions (sesiones en vivo)  
+ * - Seat Reservations (reservas de asientos)  
+ *   
+ * Todas las funciones manejan automáticamente:  
+ * - Timestamps del servidor  
+ * - Geohashing para búsquedas espaciales  
+ * - Validación de tipos con TypeScript  
+ */  
+  
+import {  
+  collection,  
+  addDoc,  
+  serverTimestamp,  
+  Timestamp,  
+  query,  
+  orderBy,  
+  limit,  
+  getDocs,  
+  doc,  
+  getDoc,  
+  deleteDoc,  
+  updateDoc,  
+  startAt,  
+  endAt,  
+  where  
+} from "firebase/firestore";  
+import { db } from "./firebase";  
+import { LatLng, toGeohash, geohashBoundsForRadius, distanceM } from "./geoutils";  
+  
+// ========== TYPE DEFINITIONS ==========  
+  
+/**  
+ * Representa un lugar tranquilo en el sistema  
+ * Los lugares pueden ser parques, cafés, u otros espacios de calma  
+ *   
+ * @property id - ID del documento Firestore (opcional, asignado automáticamente)  
+ * @property name - Nombre del lugar (requerido)  
+ * @property city - Ciudad donde se encuentra (requerido)  
+ * @property placeType - Tipo de lugar: "park" o "cafe"  
+ * @property address - Dirección completa (opcional)  
+ * @property schedule - Horario de apertura (opcional)  
+ * @property description - Descripción detallada (opcional)  
+ * @property photo - URL de la foto (opcional)  
+ * @property coords - Coordenadas geográficas {lat, lng} (requerido)  
+ * @property geohash - Hash geoespacial para búsquedas (calculado automáticamente)  
+ * @property tags - Etiquetas descriptivas (opcional)  
+ * @property createdBy - UID del usuario creador (requerido)  
+ * @property createdAt - Timestamp de creación (asignado automáticamente)  
+ * @property status - Estado de moderación: "approved" o "pending"  
+ */  
+export type Place = {  
+  id?: string;  
+  name: string;  
+  city: string;  
+  placeType?: "park" | "cafe";  
+  address?: string;  
+  schedule?: string;  
+  description?: string;  
+  photo?: string | null;  
+  coords: { lat: number; lng: number };  
+  geohash: string;  
+  tags?: string[];  
+  createdBy: string;  
+  createdAt: Timestamp;  
+  status?: "approved" | "pending";  
+};  
+  
+/**  
+ * Representa una pregunta en el sistema Q&A  
+ * Las preguntas son privadas hasta que reciben una respuesta  
+ *   
+ * @property id - ID del documento Firestore (opcional)  
+ * @property text - Texto de la pregunta (requerido)  
+ * @property context - Contexto adicional (opcional)  
+ * @property createdBy - UID del usuario creador (requerido)  
+ * @property createdAt - Timestamp de creación (asignado automáticamente)  
+ * @property public - Indica si es visible públicamente (false por defecto)  
+ * @property answer - Respuesta única a la pregunta (opcional)  
+ */  
+export type Question = {  
+  id?: string;  
+  text: string;  
+  context?: string;  
+  createdBy: string;  
+  createdAt: Timestamp;  
+  public?: boolean;  
+  answer?: Answer;  
+};  
+  
+/**  
+ * Representa una respuesta a una pregunta  
+ * Almacenada como campo anidado dentro del documento Question  
+ *   
+ * @property text - Texto de la respuesta (requerido)  
+ * @property references - URLs o referencias externas (opcional)  
+ * @property createdBy - UID del usuario que respondió (requerido)  
+ * @property createdAt - Timestamp de creación (asignado automáticamente)  
+ */  
+export type Answer = {  
+  text: string;  
+  references?: string[];  
+  createdBy: string;  
+  createdAt: Timestamp;  
 };  
   
 /**  
  * Representa una sesión en vivo (Live Q&A)  
  * Los administradores crean sesiones con fecha y link de YouTube  
+ *   
+ * @property id - ID del documento Firestore (opcional)  
+ * @property title - Título de la sesión (requerido)  
+ * @property description - Descripción de la sesión (requerido)  
+ * @property date - Fecha y hora del evento (requerido)  
+ * @property youtubeLink - Link del directo programado (requerido)  
+ * @property createdBy - UID del administrador creador (requerido)  
+ * @property createdAt - Timestamp de creación (asignado automáticamente)  
+ * @property status - Estado: "upcoming", "live" o "ended"  
  */  
 export type LiveSession = {  
   id?: string;  
   title: string;  
   description: string;  
-  date: Timestamp; // Fecha y hora del evento  
-  youtubeLink: string; // Link del directo programado  
+  date: Timestamp;  
+  youtubeLink: string;  
   createdBy: string;  
   createdAt: Timestamp;  
   status?: "upcoming" | "live" | "ended";  
@@ -84,337 +138,608 @@ export type LiveSession = {
 /**  
  * Representa una reserva de asiento para una sesión en vivo  
  * Los usuarios reservan con su email para recibir el link  
+ *   
+ * @property id - ID del documento Firestore (opcional)  
+ * @property sessionId - ID de la sesión reservada (requerido)  
+ * @property email - Email del usuario (requerido)  
+ * @property createdBy - UID del usuario (puede ser anónimo) (requerido)  
+ * @property createdAt - Timestamp de creación (asignado automáticamente)  
  */  
 export type SeatReservation = {  
   id?: string;  
-  sessionId: string; // ID de la sesión reservada  
-  email: string; // Email del usuario  
+  sessionId: string;  
+  email: string;  
+  createdBy: string;  
   createdAt: Timestamp;  
 };  
-    
-// ========== PLACES CRUD OPERATIONS ==========    
-    
-/**    
- * Crea un nuevo lugar en Firestore    
- * El geohash se calcula automáticamente para búsquedas de proximidad    
- * El status por defecto es "approved"    
- *     
- * @param input - Datos del lugar (sin id, createdAt ni geohash)    
- * @returns ID del documento creado    
- */    
-export async function addPlace(input: Omit<Place, "id" | "createdAt" | "geohash">) {        
-  const ref = collection(db, "places");        
-  const docRef = await addDoc(ref, {        
-    ...input,        
-    geohash: toGeohash(input.coords),        
-    createdAt: serverTimestamp(),        
-    status: "approved",        
-  });        
-  return docRef.id;        
-}    
-    
-/**    
- * Lista los lugares más recientes    
- * Ordenados por fecha de creación descendente    
- *     
- * @param n - Número máximo de lugares a retornar (default: 50)    
- * @returns Array de lugares con sus IDs    
- */    
-export async function listLatestPlaces(n = 50) {      
-  const ref = collection(db, "places");      
-  const qs = query(ref, orderBy("createdAt", "desc"), limit(n));      
-  const snap = await getDocs(qs);      
-  return snap.docs.map(d => ({ id: d.id, ...(d.data() as Place) }));      
-}    
-    
-/**    
- * Busca lugares cercanos a una ubicación usando geohashes    
- * Implementa búsqueda en dos fases:    
- * 1. Filtro grueso por geohash (rápido, usando índice Firestore)    
- * 2. Filtro fino por distancia Haversine (preciso)    
- *     
- * @param center - Coordenadas del centro de búsqueda    
- * @param radiusM - Radio de búsqueda en metros (default: 2000)    
- * @param hardLimit - Límite máximo de resultados (default: 100)    
- * @returns Array de lugares dentro del radio especificado    
- */    
-export async function listPlacesNear(center: LatLng, radiusM = 2000, hardLimit = 100) {      
-  const ref = collection(db, "places");      
-  const bounds = geohashBoundsForRadius(center, radiusM);      
-  const results: Place[] = [];      
-      
-  // Fase 1: Búsqueda por geohash (coarse filter)    
-  await Promise.all(bounds.map(async (b) => {      
-    const qs = query(      
-      ref,      
-      orderBy("geohash"),      
-      startAt(b[0]),      
-      endAt(b[1])      
-    );      
-    const snap = await getDocs(qs);      
-        
-    // Fase 2: Filtro por distancia exacta (fine filter)    
-    snap.forEach((docSnap) => {      
-      const data = docSnap.data() as Place;      
-      if (!data?.coords) return;      
-      const dist = distanceM(center, data.coords);      
-      if (dist <= radiusM) {    
-        results.push({ id: docSnap.id, ...data });    
-      }      
-    });      
-  }));      
-      
-  // Deduplicar resultados (geohashes pueden solaparse)    
-  const dedup = new Map<string, Place>();      
-  results.forEach(p => dedup.set(p.id!, p));      
-  return Array.from(dedup.values()).slice(0, hardLimit);      
-}    
-    
-/**    
- * Elimina un lugar de Firestore    
- * Requiere permisos de administrador o ser el creador    
- *     
- * @param placeId - ID del lugar a eliminar    
- */    
-export async function deletePlace(placeId: string) {      
-  const ref = doc(db, "places", placeId);      
-  await deleteDoc(ref);      
-}    
-    
-// ========== Q&A CRUD OPERATIONS ==========    
-    
-/**    
- * Crea una nueva pregunta en Firestore    
- * Las preguntas se crean como privadas (public: false)    
- * Se vuelven públicas automáticamente cuando reciben una respuesta    
- *     
- * @param input - Texto, contexto y creador de la pregunta    
- * @returns ID del documento creado    
- */    
-export async function addQuestion(input: Pick<Question, "text" | "context" | "createdBy">) {      
-  const ref = collection(db, "questions");      
-  const docRef = await addDoc(ref, {      
-    ...input,      
-    public: false, // Inicialmente no pública      
-    createdAt: serverTimestamp(),      
-    // No incluir campo 'answer' hasta que se añada una      
-  });      
-  return docRef.id;      
-}    
-    
-/**    
- * Lista las preguntas más recientes    
- * Incluye tanto preguntas públicas como privadas    
- * Ordenadas por fecha de creación descendente    
- *     
- * @param n - Número máximo de preguntas a retornar (default: 50)    
- * @returns Array de preguntas con sus IDs    
- */    
-export async function listQuestions(n = 50) {      
-  const ref = collection(db, "questions");      
-  const qs = query(ref, orderBy("createdAt", "desc"), limit(n));      
-  const snap = await getDocs(qs);      
-  return snap.docs.map(d => ({ id: d.id, ...(d.data() as Question) }));      
-}    
-    
-/**    
- * Obtiene una pregunta específica por su ID    
- *     
- * @param id - ID de la pregunta    
- * @returns Pregunta con su ID, o null si no existe    
- */    
-export async function getQuestion(id: string) {      
-  const ref = doc(db, "questions", id);      
-  const snap = await getDoc(ref);      
-  if (!snap.exists()) return null;      
-  return { id: snap.id, ...(snap.data() as Question) };      
-}    
-    
-/**    
- * Elimina una pregunta de Firestore    
- * Requiere permisos de administrador o ser el creador    
- *     
- * @param questionId - ID de la pregunta a eliminar    
- */    
-export async function deleteQuestion(questionId: string) {      
-  const ref = doc(db, "questions", questionId);      
-  await deleteDoc(ref);      
-}    
-    
-/**    
- * Añade o actualiza la respuesta única de una pregunta    
- * Al añadir una respuesta, la pregunta se marca automáticamente como pública    
- *     
- * Flujo de estado:    
- * 1. Pregunta creada → public: false, sin campo answer    
- * 2. Respuesta añadida → public: true, answer: {...}    
- *     
- * @param questionId - ID de la pregunta a responder    
- * @param input - Texto, referencias y creador de la respuesta    
- * @throws Error si la pregunta no existe    
- */    
-export async function setAnswer(      
-  questionId: string,       
-  input: Pick<Answer, "text" | "references" | "createdBy">      
-) {      
-  const ref = doc(db, "questions", questionId);      
-  const snap = await getDoc(ref);      
-        
-  if (!snap.exists()) {      
-    throw new Error("Question not found");      
-  }      
-      
-  // Crear objeto de respuesta con timestamp del servidor    
-  const answer: Answer = {      
-    text: input.text,      
-    references: input.references || [],      
-    createdBy: input.createdBy,      
-    createdAt: serverTimestamp() as Timestamp,      
-  };      
-      
-  // Actualizar el documento de la pregunta con la respuesta y marcar como pública      
-  await updateDoc(ref, {      
-    answer: answer,      
-    public: true, // Transición de estado: privada → pública    
-  });      
+  
+// ========== PLACES CRUD OPERATIONS ==========  
+  
+/**  
+ * Crea un nuevo lugar en Firestore  
+ *   
+ * El geohash se calcula automáticamente usando las coordenadas proporcionadas  
+ * para permitir búsquedas de proximidad eficientes. El status por defecto es  
+ * "approved" para permitir visibilidad inmediata.  
+ *   
+ * @param input - Datos del lugar (sin id, createdAt ni geohash)  
+ * @returns Promise<string> - ID del documento creado  
+ * @throws Error si falla la creación en Firestore  
+ *   
+ * @example  
+ * const placeId = await addPlace({  
+ *   name: "Central Park",  
+ *   city: "New York",  
+ *   coords: { lat: 40.785091, lng: -73.968285 },  
+ *   createdBy: "user123"  
+ * });  
+ */  
+export async function addPlace(input: Omit<Place, "id" | "createdAt" | "geohash">): Promise<string> {  
+  try {  
+    const ref = collection(db, "places");  
+    const docRef = await addDoc(ref, {  
+      ...input,  
+      geohash: toGeohash(input.coords),  
+      createdAt: serverTimestamp(),  
+      status: input.status || "approved",  
+    });  
+    return docRef.id;  
+  } catch (error) {  
+    console.error("Error adding place:", error);  
+    throw new Error("Failed to create place");  
+  }  
+}  
+  
+/**  
+ * Lista los lugares más recientes  
+ *   
+ * Retorna lugares ordenados por fecha de creación descendente (más recientes primero).  
+ * Útil para mostrar los últimos lugares añadidos a la plataforma.  
+ *   
+ * @param n - Número máximo de lugares a retornar (default: 50, max recomendado: 100)  
+ * @returns Promise<Place[]> - Array de lugares con sus IDs  
+ * @throws Error si falla la consulta a Firestore  
+ *   
+ * @example  
+ * const recentPlaces = await listLatestPlaces(20);  
+ * console.log(`Loaded ${recentPlaces.length} places`);  
+ */  
+export async function listLatestPlaces(n = 50): Promise<Place[]> {  
+  try {  
+    const ref = collection(db, "places");  
+    const qs = query(ref, orderBy("createdAt", "desc"), limit(n));  
+    const snap = await getDocs(qs);  
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as Place) }));  
+  } catch (error) {  
+    console.error("Error listing places:", error);  
+    throw new Error("Failed to load places");  
+  }  
+}  
+  
+/**  
+ * Busca lugares cercanos a una ubicación usando geohashes  
+ *   
+ * Implementa búsqueda geoespacial en dos fases:  
+ * 1. Filtro grueso por geohash (rápido, usando índice Firestore)  
+ * 2. Filtro fino por distancia Haversine (preciso)  
+ *   
+ * Este enfoque optimiza el rendimiento al reducir el número de documentos  
+ * que necesitan cálculo de distancia exacta.  
+ *   
+ * @param center - Coordenadas del centro de búsqueda {lat, lng}  
+ * @param radiusM - Radio de búsqueda en metros (default: 2000m = 2km)  
+ * @param hardLimit - Límite máximo de resultados (default: 100)  
+ * @returns Promise<Place[]> - Array de lugares dentro del radio especificado  
+ * @throws Error si falla la consulta a Firestore  
+ *   
+ * @example  
+ * const nearbyPlaces = await listPlacesNear(  
+ *   { lat: 52.520008, lng: 13.404954 },  
+ *   5000, // 5km radius  
+ *   50    // max 50 results  
+ * );  
+ */  
+export async function listPlacesNear(  
+  center: LatLng,  
+  radiusM = 2000,  
+  hardLimit = 100  
+): Promise<Place[]> {  
+  try {  
+    const ref = collection(db, "places");  
+    const bounds = geohashBoundsForRadius(center, radiusM);  
+    const results: Place[] = [];  
+  
+    // Fase 1: Búsqueda por geohash (coarse filter)  
+    await Promise.all(  
+      bounds.map(async (b) => {  
+        const qs = query(ref, orderBy("geohash"), startAt(b[0]), endAt(b[1]));  
+        const snap = await getDocs(qs);  
+  
+        // Fase 2: Filtro por distancia exacta (fine filter)  
+        snap.forEach((docSnap) => {  
+          const data = docSnap.data() as Place;  
+          if (!data?.coords) return;  
+          const dist = distanceM(center, data.coords);  
+          if (dist <= radiusM) {  
+            results.push({ id: docSnap.id, ...data });  
+          }  
+        });  
+      })  
+    );  
+  
+    // Deduplicar resultados (geohashes pueden solaparse)  
+    const dedup = new Map<string, Place>();  
+    results.forEach((p) => dedup.set(p.id!, p));  
+    return Array.from(dedup.values()).slice(0, hardLimit);  
+  } catch (error) {  
+    console.error("Error searching nearby places:", error);  
+    throw new Error("Failed to search nearby places");  
+  }  
+}  
+  
+/**  
+ * Elimina un lugar de Firestore  
+ *   
+ * Requiere permisos de administrador o ser el creador del lugar.  
+ * Las reglas de seguridad de Firestore validan estos permisos.  
+ *   
+ * @param placeId - ID del lugar a eliminar  
+ * @returns Promise<void>  
+ * @throws Error si falla la eliminación o no hay permisos  
+ *   
+ * @example  
+ * await deletePlace("place123");  
+ */  
+export async function deletePlace(placeId: string): Promise<void> {  
+  try {  
+    const ref = doc(db, "places", placeId);  
+    await deleteDoc(ref);  
+  } catch (error) {  
+    console.error("Error deleting place:", error);  
+    throw new Error("Failed to delete place");  
+  }  
+}  
+  
+// ========== Q&A CRUD OPERATIONS ==========  
+  
+/**  
+ * Crea una nueva pregunta en Firestore  
+ *   
+ * Las preguntas se crean como privadas (public: false) y solo se vuelven  
+ * públicas cuando reciben una respuesta mediante setAnswer().  
+ *   
+ * @param input - Texto, contexto y creador de la pregunta  
+ * @returns Promise<string> - ID del documento creado  
+ * @throws Error si falla la creación en Firestore  
+ *   
+ * @example  
+ * const questionId = await addQuestion({  
+ *   text: "¿Conoces lugares tranquilos en Berlín?",  
+ *   context: "Busco cafés con terraza",  
+ *   createdBy: "user123"  
+ * });  
+ */  
+export async function addQuestion(  
+  input: Pick<Question, "text" | "context" | "createdBy">  
+): Promise<string> {  
+  try {  
+    const ref = collection(db, "questions");  
+    const docRef = await addDoc(ref, {  
+      ...input,  
+      public: false, // Inicialmente no pública  
+      createdAt: serverTimestamp(),  
+      // No incluir campo 'answer' hasta que se añada una  
+    });  
+    return docRef.id;  
+  } catch (error) {  
+    console.error("Error adding question:", error);  
+    throw new Error("Failed to create question");  
+  }  
+}  
+  
+/**  
+ * Lista las preguntas más recientes  
+ *   
+ * Incluye tanto preguntas públicas como privadas.  
+ * Ordenadas por fecha de creación descendente (más recientes primero).  
+ *   
+ * @param n - Número máximo de preguntas a retornar (default: 50)  
+ * @returns Promise<Question[]> - Array de preguntas con sus IDs  
+ * @throws Error si falla la consulta a Firestore  
+ *   
+ * @example  
+ * const questions = await listQuestions(30);  
+ */ 
+
+
+export async function listQuestions(n = 50): Promise<Question[]> {  
+  try {  
+    const ref = collection(db, "questions");  
+    const qs = query(ref, orderBy("createdAt", "desc"), limit(n));  
+    const snap = await getDocs(qs);  
+    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Question) }));  
+  
+
+  } catch (error) {  
+    console.error("Error listing questions:", error);  
+    throw new Error("Failed to load questions");  
+  }  
+}  
+  
+/**  
+ * Obtiene una pregunta específica por su ID  
+ *   
+ * Útil para la página de detalle de pregunta donde se muestra  
+ * la pregunta completa con su respuesta (si existe).  
+ *   
+ * @param id - ID del documento de la pregunta  
+ * @returns Promise<Question | null> - Pregunta con su ID, o null si no existe  
+ * @throws Error si falla la consulta a Firestore  
+ *   
+ * @example  
+ * const question = await getQuestion("abc123");  
+ * if (question?.answer) {  
+ *   console.log("Answered:", question.answer.text);  
+ * }  
+ */  
+export async function getQuestion(id: string): Promise<Question | null> {  
+  try {  
+    const ref = doc(db, "questions", id);  
+    const snap = await getDoc(ref);  
+    if (!snap.exists()) return null;  
+    return { id: snap.id, ...(snap.data() as Question) };  
+  } catch (error) {  
+    console.error("Error getting question:", error);  
+    throw new Error("Failed to load question");  
+  }  
+}  
+  
+/**  
+ * Elimina una pregunta de Firestore  
+ *   
+ * Requiere permisos de administrador o ser el creador de la pregunta.  
+ * Las reglas de seguridad de Firestore validan estos permisos.  
+ *   
+ * @param questionId - ID de la pregunta a eliminar  
+ * @returns Promise<void>  
+ * @throws Error si falla la eliminación o no hay permisos  
+ *   
+ * @example  
+ * await deleteQuestion("question123");  
+ */  
+export async function deleteQuestion(questionId: string): Promise<void> {  
+  try {  
+    const ref = doc(db, "questions", questionId);  
+    await deleteDoc(ref);  
+  } catch (error) {  
+    console.error("Error deleting question:", error);  
+    throw new Error("Failed to delete question");  
+  }  
+}  
+  
+/**  
+ * Añade o actualiza la respuesta única de una pregunta  
+ *   
+ * Esta función implementa el flujo de aprobación implícita:  
+ * 1. Crea objeto Answer con timestamp del servidor  
+ * 2. Actualiza el documento de la pregunta con la respuesta  
+ * 3. Marca automáticamente la pregunta como pública (public: true)  
+ *   
+ * Una vez que una pregunta tiene respuesta, se vuelve visible  
+ * públicamente sin necesidad de aprobación manual.  
+ *   
+ * @param questionId - ID de la pregunta a responder  
+ * @param input - Texto, referencias y creador de la respuesta  
+ * @returns Promise<void>  
+ * @throws Error si la pregunta no existe o falla la actualización  
+ *   
+ * @example  
+ * await setAnswer("question123", {  
+ *   text: "Sí, conozco varios lugares...",  
+ *   references: ["https://example.com/place1"],  
+ *   createdBy: "admin456"  
+ * });  
+ */  
+export async function setAnswer(  
+  questionId: string,  
+  input: Pick<Answer, "text" | "references" | "createdBy">  
+): Promise<void> {  
+  try {  
+    const ref = doc(db, "questions", questionId);  
+    const snap = await getDoc(ref);  
+  
+    if (!snap.exists()) {  
+      throw new Error("Question not found");  
+    }  
+  
+    // Crear objeto de respuesta con timestamp del servidor  
+    const answer: Answer = {  
+      text: input.text,  
+      references: input.references || [],  
+      createdBy: input.createdBy,  
+      createdAt: serverTimestamp() as Timestamp,  
+    };  
+  
+    // Actualizar el documento de la pregunta con la respuesta y marcar como pública  
+    await updateDoc(ref, {  
+      answer: answer,  
+      public: true, // Transición de estado: privada → pública  
+    });  
+  } catch (error) {  
+    console.error("Error setting answer:", error);  
+    throw new Error("Failed to save answer");  
+  }  
 }  
   
 // ========== LIVE SESSIONS CRUD OPERATIONS ==========  
   
 /**  
  * Crea una nueva sesión en vivo  
- * Los administradores usan esto para programar eventos  
+ *   
+ * Los administradores usan esta función para programar eventos de Q&A en vivo.  
+ * La sesión se crea con status "upcoming" por defecto y se puede actualizar  
+ * a "live" o "ended" posteriormente.  
  *   
  * @param input - Título, descripción, fecha y link de YouTube  
- * @returns ID del documento creado  
+ * @returns Promise<string> - ID del documento creado  
+ * @throws Error si falla la creación en Firestore  
+ *   
+ * @example  
+ * const sessionId = await addLiveSession({  
+ *   title: "Q&A de Primavera 2025",  
+ *   description: "Sesión sobre lugares tranquilos",  
+ *   date: Timestamp.fromDate(new Date("2025-03-15T18:00:00")),  
+ *   youtubeLink: "https://youtube.com/live/abc123",  
+ *   createdBy: "admin123"  
+ * });  
  */  
-export async function addLiveSession(input: Omit<LiveSession, "id" | "createdAt" | "status">) {  
-  const ref = collection(db, "liveSessions");  
-  const docRef = await addDoc(ref, {  
-    ...input,  
-    status: "upcoming", // Por defecto es upcoming  
-    createdAt: serverTimestamp(),  
-  });  
-  return docRef.id;  
+export async function addLiveSession(  
+  input: Omit<LiveSession, "id" | "createdAt" | "status">  
+): Promise<string> {  
+  try {  
+    const ref = collection(db, "liveSessions");  
+    const docRef = await addDoc(ref, {  
+      ...input,  
+      status: "upcoming", // Por defecto es upcoming  
+      createdAt: serverTimestamp(),  
+    });  
+    return docRef.id;  
+  } catch (error) {  
+    console.error("Error adding live session:", error);  
+    throw new Error("Failed to create live session");  
+  }  
 }  
   
 /**  
  * Lista las sesiones en vivo más recientes  
- * Ordenadas por fecha del evento ascendente (próximas primero)  
+ *   
+ * Ordenadas por fecha del evento ascendente (próximas primero).  
+ * Incluye sesiones con cualquier status: upcoming, live, ended.  
  *   
  * @param n - Número máximo de sesiones a retornar (default: 50)  
- * @returns Array de sesiones con sus IDs  
+ * @returns Promise<LiveSession[]> - Array de sesiones con sus IDs  
+ * @throws Error si falla la consulta a Firestore  
+ *   
+ * @example  
+ * const sessions = await listLiveSessions(20);  
+ * const upcomingSessions = sessions.filter(s => s.status === "upcoming");  
  */  
-export async function listLiveSessions(n = 50) {  
-  const ref = collection(db, "liveSessions");  
-  const qs = query(ref, orderBy("date", "asc"), limit(n));  
-  const snap = await getDocs(qs);  
-  return snap.docs.map(d => ({ id: d.id, ...(d.data() as LiveSession) }));  
+export async function listLiveSessions(n = 50): Promise<LiveSession[]> {  
+  try {  
+    const ref = collection(db, "liveSessions");  
+    const qs = query(ref, orderBy("date", "asc"), limit(n));  
+    const snap = await getDocs(qs);  
+    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as LiveSession) }));  
+  } catch (error) {  
+    console.error("Error listing live sessions:", error);  
+    throw new Error("Failed to load live sessions");  
+  }  
 }  
   
 /**  
  * Obtiene una sesión específica por su ID  
  *   
  * @param id - ID de la sesión  
- * @returns Sesión con su ID, o null si no existe  
+ * @returns Promise<LiveSession | null> - Sesión con su ID, o null si no existe  
+ * @throws Error si falla la consulta a Firestore  
+ *   
+ * @example  
+ * const session = await getLiveSession("session123");  
+ * if (session) {  
+ *   console.log(`Session: ${session.title} at ${session.date.toDate()}`);  
+ * }  
  */  
-export async function getLiveSession(id: string) {  
-  const ref = doc(db, "liveSessions", id);  
-  const snap = await getDoc(ref);  
-  if (!snap.exists()) return null;  
-  return { id: snap.id, ...(snap.data() as LiveSession) };  
+export async function getLiveSession(id: string): Promise<LiveSession | null> {  
+  try {  
+    const ref = doc(db, "liveSessions", id);  
+    const snap = await getDoc(ref);  
+    if (!snap.exists()) return null;  
+    return { id: snap.id, ...(snap.data() as LiveSession) };  
+  } catch (error) {  
+    console.error("Error getting live session:", error);  
+    throw new Error("Failed to load live session");  
+  }  
 }  
   
 /**  
  * Elimina una sesión en vivo  
- * Solo administradores pueden eliminar sesiones  
+ *   
+ * Solo administradores pueden eliminar sesiones.  
+ * Las reglas de Firestore validan los permisos.  
  *   
  * @param sessionId - ID de la sesión a eliminar  
+ * @returns Promise<void>  
+ * @throws Error si falla la eliminación o no hay permisos  
+ *   
+ * @example  
+ * await deleteLiveSession("session123");  
  */  
-export async function deleteLiveSession(sessionId: string) {  
-  const ref = doc(db, "liveSessions", sessionId);  
-  await deleteDoc(ref);  
+export async function deleteLiveSession(sessionId: string): Promise<void> {  
+  try {  
+    const ref = doc(db, "liveSessions", sessionId);  
+    await deleteDoc(ref);  
+  } catch (error) {  
+    console.error("Error deleting live session:", error);  
+    throw new Error("Failed to delete live session");  
+  }  
 }  
   
 /**  
  * Actualiza el estado de una sesión en vivo  
- * Permite cambiar entre "upcoming", "live" y "ended"  
+ *   
+ * Permite cambiar entre "upcoming", "live" y "ended".  
+ * Útil para marcar sesiones como en vivo durante el evento  
+ * o como finalizadas después del evento.  
  *   
  * @param sessionId - ID de la sesión  
  * @param status - Nuevo estado de la sesión  
+ * @returns Promise<void>  
+ * @throws Error si falla la actualización  
+ *   
+ * @example  
+ * // Marcar sesión como en vivo  
+ * await updateLiveSessionStatus("session123", "live");  
+ *   
+ * // Marcar sesión como finalizada  
+ * await updateLiveSessionStatus("session123", "ended");  
  */  
 export async function updateLiveSessionStatus(  
   sessionId: string,  
   status: "upcoming" | "live" | "ended"  
-) {  
-  const ref = doc(db, "liveSessions", sessionId);  
-  await updateDoc(ref, { status });  
+): Promise<void> {  
+  try {  
+    const ref = doc(db, "liveSessions", sessionId);  
+    await updateDoc(ref, { status });  
+  } catch (error) {  
+    console.error("Error updating live session status:", error);  
+    throw new Error("Failed to update session status");  
+  }  
 }  
   
 // ========== SEAT RESERVATIONS CRUD OPERATIONS ==========  
   
 /**  
  * Crea una reserva de asiento para una sesión  
- * Los usuarios proporcionan su email para recibir el link  
  *   
- * @param input - ID de sesión y email del usuario  
- * @returns ID del documento creado  
- */  
-export async function addSeatReservation(input: Omit<SeatReservation, "id" | "createdAt">) {  
-  const ref = collection(db, "seatReservations");  
-  const docRef = await addDoc(ref, {  
-    ...input,  
-    createdAt: serverTimestamp(),  
-  });  
-  return docRef.id;  
-} 
-
-/**  
- * Lista todas las reservas para una sesión específica  
- * Útil para que administradores vean quién reservó  
+ * Los usuarios proporcionan su email para recibir el link de YouTube.  
+ * Permite usuarios anónimos (autenticados con ensureAnonAuth()).  
  *   
- * @param sessionId - ID de la sesión  
- * @returns Array de reservas ordenadas por fecha de creación  
+ * @param input - ID de sesión, email y creador  
+ * @returns Promise<string> - ID del documento creado  
+ * @throws Error si falla la creación en Firestore  
+ *   
+ * @example  
+ * await addSeatReservation({  
+ *   sessionId: "session123",  
+ *   email: "user@example.com",  
+ *   createdBy: "anon456"  
+ * });  
  */  
-export async function listSeatReservations(sessionId: string) {  
-  const ref = collection(db, "seatReservations");  
-  const q = query(  
-    ref,  
-    orderBy("createdAt", "desc")  
-  );  
-  const snap = await getDocs(q);  
-    
-  // Filtrar solo las reservas de esta sesión  
-  const reservations = snap.docs  
-    .map(d => ({ id: d.id, ...(d.data() as SeatReservation) }))  
-    .filter(r => r.sessionId === sessionId);  
-    
-  return reservations;  
+export async function addSeatReservation(  
+  input: Omit<SeatReservation, "id" | "createdAt">  
+): Promise<string> {  
+  try {  
+    const ref = collection(db, "seatReservations");  
+    const docRef = await addDoc(ref, {  
+      ...input,  
+      createdAt: serverTimestamp(),  
+    });  
+    return docRef.id;  
+  } catch (error) {  
+    console.error("Error adding seat reservation:", error);  
+    throw new Error("Failed to create seat reservation");  
+  }  
 }  
   
 /**  
- * Obtiene todas las reservas (para administradores)  
- * Útil para el botón "Copy All Emails" en /live/page.tsx  
+ * Lista todas las reservas para una sesión específica  
+ *   
+ * Útil para que administradores vean quién reservó asientos.  
+ * Ordenadas por fecha de creación descendente (más recientes primero).  
+ *   
+ * NOTA: Esta función usa where() para filtrar por sessionId.  
+ * Asegúrate de tener un índice compuesto en Firestore para  
+ * (sessionId, createdAt) si tienes muchas reservas.  
  *   
  * @param sessionId - ID de la sesión  
- * @returns Array de emails únicos  
+ * @returns Promise<SeatReservation[]> - Array de reservas con sus IDs  
+ * @throws Error si falla la consulta a Firestore  
+ *   
+ * @example  
+ * const reservations = await listSeatReservations("session123");  
+ * console.log(`${reservations.length} people reserved seats`);  
  */  
-export async function getSessionEmails(sessionId: string) {  
-  const reservations = await listSeatReservations(sessionId);  
-    
-  // Extraer emails únicos usando Set  
-  const uniqueEmails = [...new Set(reservations.map(r => r.email))];  
-    
-  return uniqueEmails;  
+export async function listSeatReservations(  
+  sessionId: string  
+): Promise<SeatReservation[]> {  
+  try {  
+    const ref = collection(db, "seatReservations");  
+    const q = query(  
+      ref,  
+      where("sessionId", "==", sessionId)  
+      // Remove orderBy to avoid needing composite index  
+    );  
+    const snap = await getDocs(q);  
+      
+    // Sort in memory instead  
+    const reservations = snap.docs  
+      .map((d) => ({ id: d.id, ...(d.data() as SeatReservation) }))  
+      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());  
+      
+    return reservations;  
+  } catch (error) {  
+    console.error("Error listing seat reservations:", error);  
+    throw new Error("Failed to load seat reservations");  
+  }  
+} 
+  
+/**  
+ * Obtiene lista de emails únicos para una sesión  
+ *   
+ * Útil para exportar emails y enviar notificaciones manuales.  
+ * Elimina duplicados usando Set (por si un usuario reservó múltiples veces).  
+ *   
+ * @param sessionId - ID de la sesión  
+ * @returns Promise<string[]> - Array de emails únicos  
+ * @throws Error si falla la consulta a Firestore  
+ *   
+ * @example  
+ * const emails = await getSessionEmails("session123");  
+ * console.log(`Emails to notify:\n${emails.join('\n')}`);  
+ */  
+export async function getSessionEmails(sessionId: string): Promise<string[]> {  
+  try {  
+    const reservations = await listSeatReservations(sessionId);  
+  
+    // Extraer emails únicos usando Set  
+    const uniqueEmails = [...new Set(reservations.map((r) => r.email))];  
+  
+    return uniqueEmails;  
+  } catch (error) {  
+    console.error("Error getting session emails:", error);  
+    throw new Error("Failed to get session emails");  
+  }  
 }  
   
 /**  
  * Elimina una reserva de asiento  
- * Solo para administradores desde /live/page.tsx  
+ *   
+ * Solo para administradores desde /live/page.tsx.  
+ * Las reglas de Firestore validan los permisos.  
  *   
  * @param reservationId - ID de la reserva a eliminar  
+ * @returns Promise<void>  
+ * @throws Error si falla la eliminación o no hay permisos  
+ *   
+ * @example  
+ * await deleteSeatReservation("reservation123");  
  */  
-export async function deleteSeatReservation(reservationId: string) {  
-  const ref = doc(db, "seatReservations", reservationId);  
-  await deleteDoc(ref);  
+export async function deleteSeatReservation(reservationId: string): Promise<void> {  
+  try {  
+    const ref = doc(db, "seatReservations", reservationId);  
+    await deleteDoc(ref);  
+  } catch (error) {  
+    console.error("Error deleting seat reservation:", error);  
+    throw new Error("Failed to delete seat reservation");  
+  }  
 }
