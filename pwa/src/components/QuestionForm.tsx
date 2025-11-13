@@ -37,12 +37,12 @@ export default function QuestionForm({ onCreated }: { onCreated?: (id: string) =
             marginBottom: '8px',   
             color: '#F5F5F5'   
           }}>  
-            Pregunta  
+            Question  
           </label>  
           <textarea   
             {...register("text")}   
             rows={3}   
-            placeholder="¿Conoces sitios tranquilos en Prenzlauer Berg?"  
+            placeholder="Do you know of any quiet places in Prenzlauer Berg?"  
             style={{  
               width: '100%',  
               background: '#0B0B0B',  
@@ -79,11 +79,11 @@ export default function QuestionForm({ onCreated }: { onCreated?: (id: string) =
             marginBottom: '8px',   
             color: '#F5F5F5'   
           }}>  
-            Contexto (opcional)  
+            Context (optional)  
           </label>  
           <input   
             {...register("context")}   
-            placeholder="Café con terraza, poco ruido"  
+            placeholder="Cafe with terrace, quiet"  
             style={{  
               width: '100%',  
               background: '#0B0B0B',  
@@ -126,7 +126,7 @@ export default function QuestionForm({ onCreated }: { onCreated?: (id: string) =
             e.currentTarget.style.transform = 'scale(1)';  
           }}  
         >  
-          Publicar pregunta  
+          Send question  
         </button>  
       </form>  
   
