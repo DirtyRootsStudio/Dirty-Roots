@@ -86,7 +86,6 @@ export default function LiveSessionsPage() {
         date: Timestamp.fromDate(dateTime),  // ✅ Convert Date to Timestamp  
         youtubeLink: youtubeLink.trim(),  
         createdBy: user.uid,  
-        status: "upcoming"  
         });  
   
       // Reset form  
