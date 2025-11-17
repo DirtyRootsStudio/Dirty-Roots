@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";    
 import Image from "next/image";    
 import dynamic from "next/dynamic";   
-import { listLatestPlaces, deletePlace } from "@/src/lib/firestore";    
+import { listAllPlaces, deletePlace } from "@/src/lib/firestore";    
 import { Place } from "@/src/types/place";    
     
 // Importar MapCanvas dinámicamente para evitar SSR    
@@ -22,7 +22,7 @@ export default function PlacesPage() {
   useEffect(() => {    
     (async () => {    
       try {    
-        const data = await listLatestPlaces(100);    
+        const data = await listAllPlaces();    
         setPlaces(data);    
       } catch (error) {    
         console.error("Error loading places:", error);    

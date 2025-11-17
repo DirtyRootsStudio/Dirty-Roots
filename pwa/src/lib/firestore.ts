@@ -215,6 +215,29 @@ export async function listLatestPlaces(n = 50): Promise<Place[]> {
     throw new Error("Failed to load places");  
   }  
 }  
+
+
+/**    
+ * Lista TODOS los lugares de la colección  
+ *     
+ * Retorna todos los lugares ordenados por fecha de creación descendente.  
+ * ADVERTENCIA: Esta función puede ser costosa si tienes muchos lugares (>1000).  
+ * Considera usar paginación para colecciones grandes.  
+ *     
+ * @returns Promise<Place[]> - Array con todos los lugares  
+ * @throws Error si falla la consulta a Firestore    
+ */    
+export async function listAllPlaces(): Promise<Place[]> {    
+  try {    
+    const ref = collection(db, "places");    
+    const qs = query(ref, orderBy("createdAt", "desc"));    
+    const snap = await getDocs(qs);    
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as Place) }));    
+  } catch (error) {    
+    console.error("Error listing all places:", error);    
+    throw new Error("Failed to load all places");    
+  }    
+}
   
 /**  
  * Busca lugares cercanos a una ubicación usando geohashes  

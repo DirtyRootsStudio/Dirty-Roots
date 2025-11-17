@@ -3,7 +3,7 @@
         
 import { useEffect, useState } from "react";        
 import dynamic from "next/dynamic";        
-import { listLatestPlaces } from "@/src/lib/firestore";        
+import { listAllPlaces  } from "@/src/lib/firestore";        
 import { Place } from "@/src/types/place";        
 import { ensureAnonAuth } from "@/src/lib/firebase";        
         
@@ -27,7 +27,7 @@ export default function EmbedMapPage() {
         console.log('✅ Successful authentication');        
         
         console.log('🔄 Loading places from Firestore...');        
-        const data = await listLatestPlaces(100);        
+        const data = await listAllPlaces();
         console.log(`✅ ${data.length} loaded places`);        
                 
         setPlaces(data.filter(p => p.status === 'approved'));        
