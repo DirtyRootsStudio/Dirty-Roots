@@ -125,6 +125,7 @@ export default function EmbedGrowSlowlyShopPage() {
           className="product-carousel-wrapper"  
           style={{  
             width: '100%',  
+            minWidth: '1200px', // NUEVO: Fuerza 1200px mínimo en escritorio  
             height: 'calc(100% - 100px)',  
             display: 'flex',  
             flexDirection: 'row',  
@@ -232,39 +233,52 @@ export default function EmbedGrowSlowlyShopPage() {
         </div>  
       )}  
   
-      <style jsx>{`  
+        <style jsx>{`  
         @keyframes spin {  
-          to { transform: rotate(360deg); }  
+            to { transform: rotate(360deg); }  
         }  
-  
+        
         /* Ocultar scrollbar en todos los navegadores */  
         .product-carousel-wrapper::-webkit-scrollbar {  
-          display: none;  
+            display: none;  
         }  
-          
+            
         .product-carousel-wrapper {  
-          -ms-overflow-style: none;  
-          scrollbar-width: none;  
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
         }  
-  
-        /* Ajustes para móvil */  
+        
+        .product-card {  
+            flex: 0 0 280px;  
+            min-width: 280px;  
+            max-width: 280px;  
+            scroll-snap-align: start;  
+            transition: transform 0.2s;  
+        }  
+        
+        .product-card:hover {  
+            transform: translateY(-4px);  
+        }  
+        
+        /* Ajustes para móvil - ELIMINAR minWidth */  
         @media (max-width: 768px) {  
-          .product-carousel-wrapper {  
+            .product-carousel-wrapper {  
+            min-width: auto !important; /* Elimina el mínimo en móvil */  
             padding: 10px !important;  
             gap: 16px !important;  
-          }  
-  
-          .product-card {  
+            }  
+        
+            .product-card {  
             flex: 0 0 calc(100% - 32px) !important;  
             min-width: 260px !important;  
             max-width: 300px !important;  
-          }  
-  
-          .product-card .Background {  
+            }  
+        
+            .product-card .Background {  
             height: 240px !important;  
-          }  
+            }  
         }  
-      `}</style>  
+        `}</style>
     </div>  
   );  
 }
