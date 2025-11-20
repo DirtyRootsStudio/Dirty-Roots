@@ -59,92 +59,54 @@ export default function EmbedGrowSlowlyShopPage() {
             animation: 'spin 1s linear infinite',  
             marginBottom: '16px'  
           }}></div>  
-          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Loading shop...</p>  
+          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>Loading products...</p>  
         </div>  
-        <style jsx>{`  
-          @keyframes spin {  
-            to { transform: rotate(360deg); }  
-          }  
-        `}</style>  
       </div>  
     );  
   }  
   
   return (  
     <div style={{  
+      minWidth: '1200px',  
       width: '100%',  
-      minWidth: '1200px', // Fuerza 1200px en escritorio  
       height: '600px',  
       position: 'relative',  
       background: '#0B0B0B',  
       overflow: 'hidden'  
     }}>  
-      {/* Header */}  
-      <div style={{  
-        padding: '20px',  
-        textAlign: 'center',  
-        borderBottom: '1px solid #242424'  
-      }}>  
-        <h1 style={{  
-          fontSize: '28px',  
-          fontWeight: 'bold',  
-          color: '#F5F5F5',  
-          margin: '0 0 8px 0'  
-        }}>  
-          🛍️ Things that grow slowly shop  
-        </h1>  
-        <p style={{  
-          fontSize: '14px',  
-          color: '#B6B9BF',  
-          margin: 0  
-        }}>  
-          Exclusive items for mindful living  
-        </p>  
-      </div>  
-  
-      {/* Products carousel */}  
       {products.length === 0 ? (  
         <div style={{  
+          width: '100%',  
+          height: '100%',  
           display: 'flex',  
           alignItems: 'center',  
           justifyContent: 'center',  
-          height: 'calc(100% - 100px)',  
-          padding: '40px'  
+          flexDirection: 'column',  
+          gap: '16px'  
         }}>  
-          <div style={{ textAlign: 'center' }}>  
-            <div style={{ fontSize: '64px', marginBottom: '16px' }}>🛍️</div>  
-            <p style={{ fontSize: '18px', color: '#B6B9BF', marginBottom: '8px' }}>  
-              No products yet  
-            </p>  
-            <p style={{ fontSize: '14px', color: '#757575' }}>  
-              Check back soon for exclusive items  
-            </p>  
-          </div>  
+          <div style={{ fontSize: '48px' }}>🛍️</div>  
+          <p style={{ color: '#B6B9BF', fontSize: '18px' }}>No products available yet.</p>  
         </div>  
       ) : (  
-        <div     
-            id="product-carousel"  
-            className="product-carousel-wrapper"    
-            style={{    
-                width: '100%',    
-                height: 'calc(100% - 100px)',    
-                display: 'flex',    
-                flexDirection: 'row',    
-                overflowX: 'auto',    
-                overflowY: 'hidden',    
-                scrollSnapType: 'x mandatory',    
-                WebkitOverflowScrolling: 'touch',    
-                gap: '20px',    
-                padding: '20px',    
-                boxSizing: 'border-box',    
-                alignItems: 'center',    
-                justifyContent: 'flex-start',  
-                // Añadir estas propiedades inline  
-                msOverflowStyle: 'none',  // IE y Edge  
-                scrollbarWidth: 'none'  // Firefox  
-            }}    
-            >
-          {products.map(product => (  
+        <div   
+          className="product-carousel-scroll"  
+          style={{  
+            width: '100%',  
+            height: '600px',  
+            display: 'flex',  
+            flexDirection: 'row',  
+            overflowX: 'auto',  
+            overflowY: 'hidden',  
+            scrollSnapType: 'x mandatory',  
+            WebkitOverflowScrolling: 'touch',  
+            gap: '20px',  
+            padding: '20px',  
+            boxSizing: 'border-box',  
+            scrollbarWidth: 'none',  
+            msOverflowStyle: 'none'  
+          }}  
+        >  
+          {products.map((product) => (  
             <a  
               key={product.id}  
               href={product.link}  
@@ -153,83 +115,104 @@ export default function EmbedGrowSlowlyShopPage() {
               className="product-card"  
               style={{  
                 textDecoration: 'none',  
-                flex: '0 0 280px',  
-                minWidth: '280px',  
-                maxWidth: '280px',  
-                scrollSnapAlign: 'start',  
-                transition: 'transform 0.2s',  
+                color: 'inherit',  
+                transition: 'transform 0.2s'  
+              }}  
+            >  
+              <div style={{  
+                width: '273px',  
                 padding: '1px',  
                 background: 'linear-gradient(180deg, #141414 0%, #0F0F0F 100%)',  
                 overflow: 'hidden',  
                 borderRadius: '18px',  
                 outline: '1px rgba(255, 255, 255, 0.08) solid',  
                 outlineOffset: '-1px',  
-                display: 'flex',  
-                flexDirection: 'column'  
-              }}  
-              onMouseEnter={(e) => {  
-                e.currentTarget.style.transform = 'translateY(-4px)';  
-              }}  
-              onMouseLeave={(e) => {  
-                e.currentTarget.style.transform = 'translateY(0)';  
-              }}  
-            >  
-              {/* Background image */}  
-              <div   
-                className="Background"  
-                style={{  
-                  width: '100%',  
+                flexDirection: 'column',  
+                justifyContent: 'flex-start',  
+                alignItems: 'flex-start',  
+                display: 'inline-flex'  
+              }}>  
+                {/* Background con imagen */}  
+                <div style={{  
+                  alignSelf: 'stretch',  
                   height: '338.75px',  
-                  background: product.imageBase64   
-                    ? `url(${product.imageBase64})`   
-                    : '#0B0B0B',  
+                  background: '#0B0B0B',  
+                  backgroundImage: `url(${product.imageBase64})`,  
                   backgroundSize: 'cover',  
                   backgroundPosition: 'center'  
-                }}  
-              />  
+                }}></div>  
   
-              {/* Product info */}  
-              <div style={{  
-                padding: '14px',  
-                display: 'flex',  
-                flexDirection: 'column',  
-                gap: '7.20px'  
-              }}>  
-                {/* Label and Price */}  
+                {/* Container de información */}  
                 <div style={{  
-                  display: 'flex',  
-                  justifyContent: 'space-between',  
-                  alignItems: 'center'  
+                  alignSelf: 'stretch',  
+                  padding: '14px',  
+                  flexDirection: 'column',  
+                  justifyContent: 'flex-start',  
+                  alignItems: 'flex-start',  
+                  gap: '7.20px',  
+                  display: 'flex'  
                 }}>  
+                  {/* Label y Precio */}  
                   <div style={{  
-                    color: '#B6B9BF',  
-                    fontSize: '14.40px',  
-                    fontFamily: 'Segoe UI, system-ui, sans-serif',  
-                    fontWeight: 400,  
-                    lineHeight: '20.88px'  
+                    alignSelf: 'stretch',  
+                    justifyContent: 'space-between',  
+                    alignItems: 'center',  
+                    display: 'inline-flex'  
                   }}>  
-                    {product.label}  
+                    <div style={{  
+                      flexDirection: 'column',  
+                      justifyContent: 'flex-start',  
+                      alignItems: 'flex-start',  
+                      display: 'inline-flex'  
+                    }}>  
+                      <div style={{  
+                        justifyContent: 'center',  
+                        display: 'flex',  
+                        flexDirection: 'column',  
+                        color: '#B6B9BF',  
+                        fontSize: '14.40px',  
+                        fontFamily: 'Segoe UI, system-ui, sans-serif',  
+                        fontWeight: 400,  
+                        lineHeight: '20.88px',  
+                        wordWrap: 'break-word'  
+                      }}>  
+                        {product.label}  
+                      </div>  
+                    </div>  
+                    <div style={{  
+                      flexDirection: 'column',  
+                      justifyContent: 'flex-start',  
+                      alignItems: 'flex-start',  
+                      display: 'inline-flex'  
+                    }}>  
+                      <div style={{  
+                        justifyContent: 'center',  
+                        display: 'flex',  
+                        flexDirection: 'column',  
+                        color: '#B6B9BF',  
+                        fontSize: '14.40px',  
+                        fontFamily: 'Segoe UI, system-ui, sans-serif',  
+                        fontWeight: 400,  
+                        lineHeight: '20.88px',  
+                        wordWrap: 'break-word'  
+                      }}>  
+                        €{product.price.toFixed(2)}  
+                      </div>  
+                    </div>  
                   </div>  
-                  <div style={{  
-                    color: '#B6B9BF',  
-                    fontSize: '14.40px',  
-                    fontFamily: 'Segoe UI, system-ui, sans-serif',  
-                    fontWeight: 400,  
-                    lineHeight: '20.88px'  
-                  }}>  
-                    €{product.price.toFixed(2)}  
-                  </div>  
-                </div>  
   
-                {/* Product Name */}  
-                <div style={{  
-                  color: '#F5F5F5',  
-                  fontSize: '16.80px',  
-                  fontFamily: 'Segoe UI, system-ui, sans-serif',  
-                  fontWeight: 700,  
-                  lineHeight: '24.36px'  
-                }}>  
-                  {product.name}  
+                  {/* Nombre del producto */}  
+                  <div style={{  
+                    alignSelf: 'stretch',  
+                    color: '#F5F5F5',  
+                    fontSize: '16.92px',  
+                    fontFamily: 'Segoe UI, system-ui, sans-serif',  
+                    fontWeight: 700,  
+                    lineHeight: '24.36px',  
+                    wordWrap: 'break-word'  
+                  }}>  
+                    {product.name}  
+                  </div>  
                 </div>  
               </div>  
             </a>  
@@ -237,65 +220,60 @@ export default function EmbedGrowSlowlyShopPage() {
         </div>  
       )}  
   
-<style jsx>{`    
-  @keyframes spin {    
-    to { transform: rotate(360deg); }    
-  }    
-    
-  /* Ocultar scrollbar en WebKit (Chrome, Safari, Edge) */    
-  #product-carousel::-webkit-scrollbar {    
-    width: 0 !important;  
-    height: 0 !important;  
-    display: none !important;    
-  }    
-    
-  /* Ocultar scrollbar en Firefox */    
-  #product-carousel {    
-    scrollbar-width: none !important;    
-  }    
-    
-  /* Ocultar scrollbar en IE y Edge antiguo */    
-  #product-carousel {    
-    -ms-overflow-style: none !important;    
-  }    
-    
-  /* Estilos para tarjetas */    
-  .product-card {    
-    flex: 0 0 280px;    
-    min-width: 280px;    
-    max-width: 280px;    
-    scroll-snap-align: start;    
-    transition: transform 0.2s;    
-  }    
-    
-  .product-card:hover {    
-    transform: translateY(-4px);    
-  }    
-    
-  /* Media query para móvil */    
-  @media (max-width: 768px) {    
-    div[style*="minWidth: 1200px"] {    
-      min-width: 100% !important;    
-      width: 100% !important;    
-    }    
-    
-    #product-carousel {    
-      min-width: auto !important;    
-      padding: 10px !important;    
-      gap: 16px !important;    
-    }    
-    
-    .product-card {    
-      flex: 0 0 calc(100% - 32px) !important;    
-      min-width: 260px !important;    
-      max-width: 300px !important;    
-    }    
-    
-    .product-card .Background {    
-      height: 240px !important;    
-    }    
-  }    
-`}</style>
+      <style jsx>{`  
+        @keyframes spin {  
+          to { transform: rotate(360deg); }  
+        }  
+  
+        /* Ocultar scrollbar en todos los navegadores - PATRÓN DE QUESTIONS */  
+        .product-carousel-scroll::-webkit-scrollbar {  
+          display: none !important;  
+          width: 0 !important;  
+          height: 0 !important;  
+        }  
+  
+        .product-carousel-scroll {  
+          scrollbar-width: none !important;  
+          -ms-overflow-style: none !important;  
+        }  
+  
+        /* Estilos para tarjetas */  
+        .product-card {  
+          flex: 0 0 280px;  
+          min-width: 280px;  
+          max-width: 280px;  
+          scroll-snap-align: start;  
+          transition: transform 0.2s;  
+        }  
+  
+        .product-card:hover {  
+          transform: translateY(-4px);  
+        }  
+  
+        /* Media query para móvil */  
+        @media (max-width: 768px) {  
+          div[style*="minWidth: 1200px"] {  
+            min-width: 100% !important;  
+            width: 100% !important;  
+          }  
+  
+          .product-carousel-scroll {  
+            min-width: auto !important;  
+            padding: 10px !important;  
+            gap: 16px !important;  
+          }  
+  
+          .product-card {  
+            flex: 0 0 calc(100% - 32px) !important;  
+            min-width: 260px !important;  
+            max-width: 300px !important;  
+          }  
+  
+          .product-card .Background {  
+            height: 240px !important;  
+          }  
+        }  
+      `}</style>  
     </div>  
   );  
 }
