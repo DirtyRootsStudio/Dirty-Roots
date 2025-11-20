@@ -13,11 +13,11 @@ import imageCompression from 'browser-image-compression';
 
   
 const productSchema = z.object({  
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),  
-  label: z.string().min(1, 'La etiqueta es requerida'),  
-  price: z.number().positive('El precio debe ser positivo'),  
-  link: z.string().url('Debe ser una URL válida'),  
-  imageBase64: z.string().min(1, 'La imagen es requerida')  
+  name: z.string().min(2, 'The name must be at least 2 characters long'),  
+  label: z.string().min(1, 'The label is required'),  
+  price: z.number().positive('The price must be positive.'),  
+  link: z.string().url('It must be a valid URL'),  
+  imageBase64: z.string().min(1, 'Image required')  
 });  
   
 type ProductFormValues = z.infer<typeof productSchema>;  
@@ -65,7 +65,7 @@ function GrowSlowlyShopPage() {
     if (!file) return;  
     
     try {  
-        setError('Comprimiendo imagen...');  
+        setError('Compressing image...');  
         
         // Opciones de compresión agresivas  
         const options = {  
@@ -89,7 +89,7 @@ function GrowSlowlyShopPage() {
             
         // Verificar que no exceda ~900KB (margen de seguridad)  
         if (sizeInBytes > 900000) {  
-            setError('La imagen sigue siendo demasiado grande después de comprimir. Intenta con una imagen más pequeña.');  
+            setError('The image is still too large after compression. Try a smaller image.');  
             return;  
         }  
             
@@ -99,8 +99,8 @@ function GrowSlowlyShopPage() {
         reader.readAsDataURL(compressedFile);  
         
     } catch (error) {  
-        console.error('Error comprimiendo imagen:', error);  
-        setError('Error al procesar la imagen. Intenta con otra imagen.');  
+        console.error('Image compression error:', error);  
+        setError('Error processing the image. Please try another image.');  
     }  
     };  
   
@@ -121,17 +121,17 @@ function GrowSlowlyShopPage() {
   };  
   
   const handleDeleteProduct = async (productId: string) => {  
-    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {  
+    if (!confirm('Are you sure you want to remove this product?')) {  
       return;  
     }  
   
     try {  
       await deleteProduct(productId);  
       setProducts(products.filter(p => p.id !== productId));  
-      alert('✅ Producto eliminado');  
+      alert('✅ Product removed');  
     } catch (error) {  
-      console.error('Error eliminando producto:', error);  
-      alert('Error al eliminar el producto');  
+      console.error('Error deleting product:', error);  
+      alert('Error deleting product');  
     }  
   };  
   
@@ -183,7 +183,7 @@ function GrowSlowlyShopPage() {
         setSuccess(false);  
       }, 2000);  
     } catch (err: any) {  
-      setError(err.message || 'Error al guardar el producto');  
+      setError(err.message || 'Error saving product');  
     } finally {  
       setLoading(false);  
     }  
@@ -229,7 +229,7 @@ function GrowSlowlyShopPage() {
             onMouseEnter={(e) => e.currentTarget.style.borderColor = '#A4CB3E'}  
             onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2A2A2A'}  
           >  
-            ← Volver al Dashboard  
+            ← Go back  
           </button>  
         </div>  
   
@@ -243,7 +243,7 @@ function GrowSlowlyShopPage() {
             marginBottom: '24px'  
           }}>  
             <p style={{ color: '#A4CB3E', fontSize: '14px', margin: 0 }}>  
-              ✅ {editingProductId ? 'Producto actualizado' : 'Producto creado'} exitosamente  
+              ✅ {editingProductId ? 'Product updated' : 'Product created'} successfully  
             </p>  
           </div>  
         )}  
@@ -283,7 +283,7 @@ function GrowSlowlyShopPage() {
               color: '#F5F5F5',  
               margin: 0  
             }}>  
-              {editingProductId ? '✏️ Editar Producto' : '➕ Crear Nuevo Producto'}  
+              {editingProductId ? '✏️ Edit Product' : '➕ Create New Product'}  
             </h2>  
             {editingProductId && (  
               <button  
@@ -323,7 +323,7 @@ function GrowSlowlyShopPage() {
                 marginBottom: '8px',  
                 color: '#F5F5F5'  
               }}>  
-                Nombre del producto *  
+                Name of the product *  
               </label>  
               <input  
                 {...register('name')}  
@@ -363,7 +363,7 @@ function GrowSlowlyShopPage() {
                 marginBottom: '8px',  
                 color: '#F5F5F5'  
               }}>  
-                Etiqueta *  
+                Label *  
               </label>  
               <input  
                 {...register('label')}  
@@ -403,7 +403,7 @@ function GrowSlowlyShopPage() {
                 marginBottom: '8px',  
                 color: '#F5F5F5'  
               }}>  
-                Precio (€) *  
+                Price (€) *  
               </label>  
               <input  
                 type="number"  
@@ -445,7 +445,7 @@ function GrowSlowlyShopPage() {
                 marginBottom: '8px',  
                 color: '#F5F5F5'  
               }}>  
-                Link de compra *  
+                Link to the store *  
               </label>  
               <input  
                 type="url"  
@@ -486,7 +486,7 @@ function GrowSlowlyShopPage() {
                 marginBottom: '8px',  
                 color: '#F5F5F5'  
               }}>  
-                Imagen del producto * (máx. 1MB)  
+                Image of the product * (máx. 1MB)  
               </label>  
               <input  
                 type="file"  
@@ -567,7 +567,7 @@ function GrowSlowlyShopPage() {
                 }  
               }}  
             >  
-              {loading ? (editingProductId ? 'Actualizando...' : 'Creando producto...') : (editingProductId ? 'Actualizar Producto' : 'Crear Producto')}  
+              {loading ? (editingProductId ? 'Actualizando...' : 'Creando producto...') : (editingProductId ? 'Update Product' : 'Create Product')}  
             </button>  
           </form>  
         </div>  
@@ -582,7 +582,7 @@ function GrowSlowlyShopPage() {
             color: '#F5F5F5',  
             marginBottom: '24px'  
           }}>  
-            📦 Productos Existentes ({products.length})  
+            📦 Existing Products ({products.length})  
           </h2>  
   
           {loadingProducts ? (  
@@ -593,7 +593,7 @@ function GrowSlowlyShopPage() {
               borderRadius: '24px',  
               border: '1px solid #242424'  
             }}>  
-              <p style={{ color: '#B6B9BF' }}>Cargando productos...</p>  
+              <p style={{ color: '#B6B9BF' }}>Loading products...</p>  
             </div>  
           ) : products.length === 0 ? (  
             <div style={{  
@@ -604,7 +604,7 @@ function GrowSlowlyShopPage() {
               border: '1px solid #242424'  
             }}>  
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>🛍️</div>  
-              <p style={{ color: '#B6B9BF' }}>No hay productos todavía</p>  
+              <p style={{ color: '#B6B9BF' }}>There are no products yet.</p>  
             </div>  
           ) : (  
             <div style={{  
@@ -654,7 +654,7 @@ function GrowSlowlyShopPage() {
                       onMouseEnter={(e) => e.currentTarget.style.background = '#8FB82E'}  
                       onMouseLeave={(e) => e.currentTarget.style.background = '#A4CB3E'}  
                     >  
-                      ✏️ Editar  
+                      ✏️ Edit  
                     </button>  
                     <button  
                       onClick={() => handleDeleteProduct(product.id)}  
@@ -672,7 +672,7 @@ function GrowSlowlyShopPage() {
                       onMouseEnter={(e) => e.currentTarget.style.background = '#FF4090'}  
                       onMouseLeave={(e) => e.currentTarget.style.background = '#FF60A8'}  
                     >  
-                      🗑️ Eliminar  
+                      🗑️ Delete  
                     </button>  
                   </div>  
   
