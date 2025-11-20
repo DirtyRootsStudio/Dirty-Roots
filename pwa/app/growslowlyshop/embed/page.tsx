@@ -122,24 +122,28 @@ export default function EmbedGrowSlowlyShopPage() {
           </div>  
         </div>  
       ) : (  
-        <div   
-          className="product-carousel-wrapper"  
-          style={{  
-            width: '100%',  
-            height: 'calc(100% - 100px)',  
-            display: 'flex',  
-            flexDirection: 'row',  
-            overflowX: 'auto',  
-            overflowY: 'hidden',  
-            scrollSnapType: 'x mandatory',  
-            WebkitOverflowScrolling: 'touch',  
-            gap: '20px',  
-            padding: '20px',  
-            boxSizing: 'border-box',  
-            alignItems: 'center',  
-            justifyContent: 'flex-start'  
-          }}  
-        >  
+        <div     
+            id="product-carousel"  
+            className="product-carousel-wrapper"    
+            style={{    
+                width: '100%',    
+                height: 'calc(100% - 100px)',    
+                display: 'flex',    
+                flexDirection: 'row',    
+                overflowX: 'auto',    
+                overflowY: 'hidden',    
+                scrollSnapType: 'x mandatory',    
+                WebkitOverflowScrolling: 'touch',    
+                gap: '20px',    
+                padding: '20px',    
+                boxSizing: 'border-box',    
+                alignItems: 'center',    
+                justifyContent: 'flex-start',  
+                // Añadir estas propiedades inline  
+                msOverflowStyle: 'none',  // IE y Edge  
+                scrollbarWidth: 'none'  // Firefox  
+            }}    
+            >
           {products.map(product => (  
             <a  
               key={product.id}  
@@ -233,58 +237,65 @@ export default function EmbedGrowSlowlyShopPage() {
         </div>  
       )}  
   
-      <style jsx>{`  
-        @keyframes spin {  
-            to { transform: rotate(360deg); }  
-        }  
-        
-        /* Ocultar scrollbar en todos los navegadores */  
-        .product-carousel-wrapper::-webkit-scrollbar {  
-            display: none;  
-        }  
-            
-        .product-carousel-wrapper {  
-            -ms-overflow-style: none;  /* IE y Edge */  
-            scrollbar-width: none;  /* Firefox */  
-        }  
-        
-        /* Estilos para tarjetas */  
-        .product-card {  
-            flex: 0 0 280px;  
-            min-width: 280px;  
-            max-width: 280px;  
-            scroll-snap-align: start;  
-            transition: transform 0.2s;  
-        }  
-        
-        .product-card:hover {  
-            transform: translateY(-4px);  
-        }  
-        
-        /* Media query para móvil */  
-        @media (max-width: 768px) {  
-            div[style*="minWidth: 1200px"] {  
-            min-width: 100% !important;  
-            width: 100% !important;  
-            }  
-        
-            .product-carousel-wrapper {  
-            min-width: auto !important;  
-            padding: 10px !important;  
-            gap: 16px !important;  
-            }  
-        
-            .product-card {  
-            flex: 0 0 calc(100% - 32px) !important;  
-            min-width: 260px !important;  
-            max-width: 300px !important;  
-            }  
-        
-            .product-card .Background {  
-            height: 240px !important;  
-            }  
-        }  
-        `}</style>
+<style jsx>{`    
+  @keyframes spin {    
+    to { transform: rotate(360deg); }    
+  }    
+    
+  /* Ocultar scrollbar en WebKit (Chrome, Safari, Edge) */    
+  #product-carousel::-webkit-scrollbar {    
+    width: 0 !important;  
+    height: 0 !important;  
+    display: none !important;    
+  }    
+    
+  /* Ocultar scrollbar en Firefox */    
+  #product-carousel {    
+    scrollbar-width: none !important;    
+  }    
+    
+  /* Ocultar scrollbar en IE y Edge antiguo */    
+  #product-carousel {    
+    -ms-overflow-style: none !important;    
+  }    
+    
+  /* Estilos para tarjetas */    
+  .product-card {    
+    flex: 0 0 280px;    
+    min-width: 280px;    
+    max-width: 280px;    
+    scroll-snap-align: start;    
+    transition: transform 0.2s;    
+  }    
+    
+  .product-card:hover {    
+    transform: translateY(-4px);    
+  }    
+    
+  /* Media query para móvil */    
+  @media (max-width: 768px) {    
+    div[style*="minWidth: 1200px"] {    
+      min-width: 100% !important;    
+      width: 100% !important;    
+    }    
+    
+    #product-carousel {    
+      min-width: auto !important;    
+      padding: 10px !important;    
+      gap: 16px !important;    
+    }    
+    
+    .product-card {    
+      flex: 0 0 calc(100% - 32px) !important;    
+      min-width: 260px !important;    
+      max-width: 300px !important;    
+    }    
+    
+    .product-card .Background {    
+      height: 240px !important;    
+    }    
+  }    
+`}</style>
     </div>  
   );  
 }
