@@ -41,8 +41,8 @@ export default function EmbedGrowSlowlyShopPage() {
   if (!mounted || loading) {  
     return (  
       <div style={{  
-        width: '100vw',  
-        height: '100vh',  
+        width: '100%',  
+        height: '600px',  
         display: 'flex',  
         alignItems: 'center',  
         justifyContent: 'center',  
@@ -72,8 +72,8 @@ export default function EmbedGrowSlowlyShopPage() {
   
   return (  
     <div style={{  
-      width: '100vw',  
-      height: '100vh',  
+      width: '100%',  
+      height: '600px',  
       position: 'relative',  
       background: '#0B0B0B',  
       overflow: 'hidden'  
@@ -135,7 +135,8 @@ export default function EmbedGrowSlowlyShopPage() {
             gap: '20px',  
             padding: '20px',  
             boxSizing: 'border-box',  
-            alignItems: 'center'  
+            alignItems: 'center',  
+            justifyContent: 'flex-start'  
           }}  
         >  
           {products.map(product => (  
