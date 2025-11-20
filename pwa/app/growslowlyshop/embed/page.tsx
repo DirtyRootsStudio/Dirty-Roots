@@ -235,55 +235,56 @@ export default function EmbedGrowSlowlyShopPage() {
   
       <style jsx>{`  
         @keyframes spin {  
-          to { transform: rotate(360deg); }  
+            to { transform: rotate(360deg); }  
         }  
-          
+        
         /* Ocultar scrollbar en todos los navegadores */  
         .product-carousel-wrapper::-webkit-scrollbar {  
-          display: none;  
+            display: none;  
         }  
-          
+            
         .product-carousel-wrapper {  
-          -ms-overflow-style: none;  
-          scrollbar-width: none;  
+            -ms-overflow-style: none;  /* IE y Edge */  
+            scrollbar-width: none;  /* Firefox */  
         }  
-          
+        
+        /* Estilos para tarjetas */  
         .product-card {  
-          flex: 0 0 280px;  
-          min-width: 280px;  
-          max-width: 280px;  
-          scroll-snap-align: start;  
-          transition: transform 0.2s;  
+            flex: 0 0 280px;  
+            min-width: 280px;  
+            max-width: 280px;  
+            scroll-snap-align: start;  
+            transition: transform 0.2s;  
         }  
-          
+        
         .product-card:hover {  
-          transform: translateY(-4px);  
+            transform: translateY(-4px);  
         }  
-          
-        /* Ajustes para móvil */  
+        
+        /* Media query para móvil */  
         @media (max-width: 768px) {  
-          /* CRÍTICO: Eliminar minWidth del contenedor raíz en móvil */  
-          div[style*="minWidth: 1200px"] {  
+            div[style*="minWidth: 1200px"] {  
             min-width: 100% !important;  
             width: 100% !important;  
-          }  
-            
-          .product-carousel-wrapper {  
+            }  
+        
+            .product-carousel-wrapper {  
+            min-width: auto !important;  
             padding: 10px !important;  
             gap: 16px !important;  
-          }  
-          
-          .product-card {  
+            }  
+        
+            .product-card {  
             flex: 0 0 calc(100% - 32px) !important;  
             min-width: 260px !important;  
             max-width: 300px !important;  
-          }  
-          
-          .product-card .Background {  
+            }  
+        
+            .product-card .Background {  
             height: 240px !important;  
-          }  
+            }  
         }  
-      `}</style>  
+        `}</style>
     </div>  
   );  
 }
