@@ -58,8 +58,8 @@ export default function EmbedQuestionsPage() {
   if (!mounted) {  
     return (  
         <div style={{  
-          width: '90vw',        // REDUCIDO: de 100vw a 90vw  
-          height: '85vh',       // REDUCIDO: de 100vh a 85vh  
+          width: '70vw',        // REDUCIDO: de 100vw a 90vw  
+          height: '65vh',       // REDUCIDO: de 100vh a 85vh  
           maxWidth: '1200px',   // NUEVO: limita ancho máximo  
           margin: '0 auto',     // NUEVO: centra horizontalmente  
           position: 'relative',  
