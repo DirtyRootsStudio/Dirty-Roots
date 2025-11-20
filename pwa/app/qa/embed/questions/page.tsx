@@ -384,26 +384,26 @@ export default function EmbedQuestionsPage() {
         
         /* Ocultar scrollbar en .questions-scroll */  
         .questions-scroll {  
-          scrollbar-width: none; /* Firefox */  
-          -ms-overflow-style: none; /* IE y Edge */  
+          scrollbar-width: none !important; /* Firefox */  
+          -ms-overflow-style: none !important; /* IE y Edge */  
         }  
         
         .questions-scroll::-webkit-scrollbar {    
-          display: none; /* Chrome, Safari, Opera */  
-          width: 0;  
-          height: 0;  
+          display: none !important; /* Chrome, Safari, Opera */  
+          width: 0 !important;  
+          height: 0 !important;  
         }    
         
         /* Ocultar scrollbar en .drawer-scroll */  
         .drawer-scroll {  
-          scrollbar-width: none; /* Firefox */  
-          -ms-overflow-style: none; /* IE y Edge */  
+          scrollbar-width: none !important; /* Firefox */  
+          -ms-overflow-style: none !important; /* IE y Edge */  
         }  
         
         .drawer-scroll::-webkit-scrollbar {    
-          display: none; /* Chrome, Safari, Opera */  
-          width: 0;  
-          height: 0;  
+          display: none !important; /* Chrome, Safari, Opera */  
+          width: 0 !important;  
+          height: 0 !important;  
         }    
       `}</style>
     </div>  
