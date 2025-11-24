@@ -20,6 +20,9 @@ export default function EmbedSeasonalToolkitPage() {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);  
   const [locationError, setLocationError] = useState<string | null>(null);  
   const [sunPosition, setSunPosition] = useState<{lat: number, lng: number} | null>(null);  
+  const [mapCenter, setMapCenter] = useState<{lat: number, lng: number}>({ lat: 50.0, lng: 10.0 });  
+  const [mapZoom, setMapZoom] = useState<number>(15);  
+  const [mapKey, setMapKey] = useState(0);  
   
   // Primer useEffect: marcar como montado  
   useEffect(() => {  
@@ -41,25 +44,27 @@ export default function EmbedSeasonalToolkitPage() {
     })();  
   }, [mounted]);  
   
+  // Actualizar mapCenter cuando se obtiene la ubicación del usuario  
+  useEffect(() => {  
+    if (userLocation) {  
+      setMapCenter(userLocation);  
+    }  
+  }, [userLocation]);  
+  
   // Calcular posición del sol cuando tenemos ubicación  
   useEffect(() => {  
     if (!userLocation) return;  
   
-    // Calcular posición aproximada del sol basada en la hora  
     const now = new Date();  
     const hour = now.getHours();  
     const minute = now.getMinutes();  
     const timeDecimal = hour + minute / 60;  
   
     // Aproximación simple: el sol se mueve de este a oeste  
-    // Amanecer ~6am (90°), mediodía ~12pm (180°), atardecer ~6pm (270°)  
     let azimuthDegrees = 90 + ((timeDecimal - 6) / 12) * 180;  
-      
-    // Limitar entre 0-360  
     azimuthDegrees = ((azimuthDegrees % 360) + 360) % 360;  
   
-    // Calcular posición del sol a ~500m del usuario  
-    const distance = 0.005; // ~500m en grados  
+    const distance = 0.005;  
     const azimuthRad = (azimuthDegrees * Math.PI) / 180;  
       
     const sunLat = userLocation.lat + distance * Math.cos(azimuthRad);  
@@ -109,25 +114,13 @@ export default function EmbedSeasonalToolkitPage() {
     }  
   }  
   
-  // Calcular trayectoria solar (arco del día)  
-  const calculateSunPath = () => {  
-    if (!userLocation) return [];  
-      
-    const points: [number, number][] = [];  
-    const distance = 0.005;  
-      
-    // Generar 12 puntos desde amanecer (6am) hasta atardecer (6pm)  
-    for (let hour = 6; hour <= 18; hour += 1) {  
-      const azimuthDegrees = 90 + ((hour - 6) / 12) * 180;  
-      const azimuthRad = (azimuthDegrees * Math.PI) / 180;  
-        
-      const lat = userLocation.lat + distance * Math.cos(azimuthRad);  
-      const lng = userLocation.lng + distance * Math.sin(azimuthRad);  
-        
-      points.push([lat, lng]);  
+  // Función para recentrar el mapa  
+  const handleRecenter = () => {  
+    if (userLocation) {  
+      setMapCenter(userLocation);  
+      setMapZoom(15);  
+      setMapKey(prev => prev + 1); // Forzar re-render del mapa  
     }  
-      
-    return points;  
   };  
   
   const handleOpenKit = (toolkit: any) => {  
@@ -408,7 +401,7 @@ export default function EmbedSeasonalToolkitPage() {
               marginBottom: '32px'  
             }}>  
               <p style={{  
-                fontSize:  '16px',  
+                fontSize: '16px',  
                 color: '#A4CB3E',  
                 fontStyle: 'italic',  
                 lineHeight: '1.6',  
@@ -424,8 +417,8 @@ export default function EmbedSeasonalToolkitPage() {
                 fontSize: '20px',  
                 fontWeight: 'bold',  
                 color: '#F5F5F5',  
-                marginBottom: '16px'  
-              }}>  
+                marginBottom: '16px '
+                              }}>  
                 ✓ Calm Checklist  
               </h3>  
               <ul style={{  
@@ -450,7 +443,7 @@ export default function EmbedSeasonalToolkitPage() {
               </ul>  
             </div>  
   
-            {/* Interactive Light Map with Sun Visualization */}  
+            {/* Interactive Light Map with Recenter Button */}  
             <div style={{ marginBottom: '32px' }}>  
               <h3 style={{  
                 fontSize: '20px',  
@@ -490,7 +483,7 @@ export default function EmbedSeasonalToolkitPage() {
                 </div>  
               )}  
   
-              {/* Interactive Map with Explicit Sun Position */}  
+              {/* Map Container with Recenter Button */}  
               {userLocation ? (  
                 <div style={{  
                   height: '400px',  
@@ -502,96 +495,108 @@ export default function EmbedSeasonalToolkitPage() {
                 }}>  
                   <MapCanvas  
                     height="400px"  
-                    center={userLocation}  
+                    center={mapCenter}  
                     zoom={15}  
                     selectable={false}  
+                    key={mapKey}  
                   />  
-                    
-                  {/* Enhanced Sun Position Overlay with Visual Indicators */}  
-                  <div style={{  
-                    position: 'absolute',  
-                    top: '16px',  
-                    left: '16px',  
-                    background: 'rgba(11, 11, 11, 0.95)',  
-                    padding: '16px',  
-                    borderRadius: '12px',  
-                    border: '1px solid #2A2A2A',  
-                    zIndex: 1000,  
-                    minWidth: '200px'  
-                  }}>  
-                    <div style={{  
-                      fontSize: '14px',  
-                      color: '#B6B9BF',  
-                      marginBottom: '12px',  
-                      fontWeight: '600'  
-                    }}>  
-                      ☀️ Sun Position  
-                    </div>  
-                      
-                    {/* Current Time */}  
-                    <div style={{  
-                      fontSize: '18px',  
-                      color: '#F5F5F5',  
-                      fontWeight: '700',  
-                      marginBottom: '8px'  
-                    }}>  
-                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}  
-                    </div>  
-                      
-                    {/* Season Pattern */}  
-                    <div style={{  
-                      fontSize: '13px',  
-                      color: '#A4CB3E',  
-                      marginBottom: '12px'  
-                    }}>  
-                      {selectedToolkit.season.charAt(0).toUpperCase() + selectedToolkit.season.slice(1)} light pattern  
-                    </div>  
   
-                    {/* Visual Legend */}  
-                    <div style={{  
-                      borderTop: '1px solid #2A2A2A',  
-                      paddingTop: '12px',  
-                      fontSize: '12px',  
-                      color: '#B6B9BF'  
-                    }}>  
-                      <div style={{ marginBottom: '6px' }}>  
-                        📍 Your location  
-                      </div>  
-                      <div style={{ marginBottom: '6px' }}>  
-                        ☀️ Current sun position  
-                      </div>  
-                      <div>  
-                        ━━━ Sun path (dawn to dusk)  
-                      </div>  
-                    </div>  
-                  </div>  
-  
-                  {/* User Location Marker Overlay */}  
+                  {/* User Location Marker (Fixed Overlay) */}  
                   <div style={{  
                     position: 'absolute',  
                     top: '50%',  
                     left: '50%',  
                     transform: 'translate(-50%, -50%)',  
                     fontSize: '32px',  
-                    zIndex: 999,  
+                    zIndex: 1000,  
                     pointerEvents: 'none',  
-                    textShadow: '0 2px 8px rgba(0,0,0,0.8)'  
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'  
                   }}>  
                     📍  
                   </div>  
   
-                  {/* Sun Position Marker Overlay (simplified visualization) */}  
+                  {/* Sun Position Marker (Fixed Overlay) */}  
+                  {sunPosition && (  
+                    <div style={{  
+                      position: 'absolute',  
+                      top: '20%',  
+                      right: '20%',  
+                      fontSize: '40px',  
+                      zIndex: 1000,  
+                      pointerEvents: 'none',  
+                      animation: 'pulse 2s ease-in-out infinite',  
+                      filter: 'drop-shadow(0 0 8px rgba(253, 184, 19, 0.6))'  
+                    }}>  
+                      ☀️  
+                    </div>  
+                  )}  
+  
+                  {/* Recenter Button */}  
+                  <button  
+                    onClick={handleRecenter}  
+                    style={{  
+                      position: 'absolute',  
+                      bottom: '16px',  
+                      right: '16px',  
+                      width: '48px',  
+                      height: '48px',  
+                      borderRadius: '50%',  
+                      background: '#A4CB3E',  
+                      border: 'none',  
+                      cursor: 'pointer',  
+                      display: 'flex',  
+                      alignItems: 'center',  
+                      justifyContent: 'center',  
+                      fontSize: '20px',  
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',  
+                      zIndex: 1001,  
+                      transition: 'all 0.2s'  
+                    }}  
+                    onMouseEnter={(e) => {  
+                      e.currentTarget.style.transform = 'scale(1.1)';  
+                      e.currentTarget.style.background = '#8FB82E';  
+                    }}  
+                    onMouseLeave={(e) => {  
+                      e.currentTarget.style.transform = 'scale(1)';  
+                      e.currentTarget.style.background = '#A4CB3E';  
+                    }}  
+                    title="Recenter on your location"  
+                  >  
+                    🎯  
+                  </button>  
+  
+                  {/* Sun Info Overlay */}  
                   <div style={{  
                     position: 'absolute',  
-                    top: '30%',  
-                    right: '25%',  
-                    fontSize: '28px',  
-                    zIndex: 998,  
-                    pointerEvents: 'none',  
-                    textShadow: '0 2px 8px rgba(0,0,0,0.8)',  
-                    animation: 'pulse 2s ease-in-out infinite'  
+                    top: '16px',  
+                    left: '16px',  
+                    background: 'rgba(11, 11, 11, 0.9)',  
+                    padding: '12px 16px',  
+                    borderRadius: '12px',  
+                    border: '1px solid #2A2A2A',  
+                    zIndex: 1000  
                   }}>  
-                    ☀️  
+                    <div style={{  
+                      fontSize: '12px',  
+                      color: '#B6B9BF',  
+                      marginBottom: '4px'  
+                    }}>  
+                      ☀️ Sun Position  
+                    </div>  
+                    <div style={{  
+                      fontSize: '14px',  
+                      color: '#F5F5F5',  
+                      fontWeight: '600'  
+                    }}>  
+                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}  
+                    </div>  
+                    <div style={{  
+                      fontSize: '12px',  
+                      color: '#A4CB3E',  
+                      marginTop: '4px'  
+                    }}>  
+                      {selectedToolkit.season} light pattern  
+                    </div>  
                   </div>  
                 </div>  
               ) : (  
@@ -605,12 +610,14 @@ export default function EmbedSeasonalToolkitPage() {
                   justifyContent: 'center',  
                   marginBottom: '16px'  
                 }}>  
-                  <div style={{ textAlign: 'center', padding: '40px' }}>  
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>  
-                    <p style={{ color: '#B6B9BF', fontSize: '14px', margin: 0 }}>  
-                      Enable location to see your personalized light map  
-                    </p>  
-                  </div>  
+                  <p style={{  
+                    color: '#B6B9BF',  
+                    fontSize: '14px',  
+                    textAlign: 'center',  
+                    padding: '20px'  
+                  }}>  
+                    📍 Enable location access to see your personalized light map  
+                  </p>  
                 </div>  
               )}  
   
@@ -702,7 +709,6 @@ export default function EmbedSeasonalToolkitPage() {
                       ✓ Checklist PDF  
                     </a>  
                   )}  
-  
                   {selectedToolkit.downloadables.posterPdf && (  
                     <a  
                       href={selectedToolkit.downloadables.posterPdf}  
@@ -733,7 +739,6 @@ export default function EmbedSeasonalToolkitPage() {
                       🖼️ Poster PDF  
                     </a>  
                   )}  
-  
                   {selectedToolkit.downloadables.guidePdf && (  
                     <a  
                       href={selectedToolkit.downloadables.guidePdf}  
