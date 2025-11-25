@@ -1,7 +1,6 @@
-// pwa/app/growslowlyshop/embed/page.tsx  
 "use client";  
   
-import { useEffect, useState } from "react";  
+import { useEffect, useState, useRef } from "react";  
 import { ensureAnonAuth } from "@/src/lib/firebase";  
 import { listProducts } from "@/src/lib/firestore";  
   
@@ -9,6 +8,10 @@ export default function EmbedGrowSlowlyShopPage() {
   const [mounted, setMounted] = useState(false);  
   const [products, setProducts] = useState<any[]>([]);  
   const [loading, setLoading] = useState(true);  
+  const scrollContainerRef = useRef<HTMLDivElement>(null);  
+  const [isDragging, setIsDragging] = useState(false);  
+  const [startX, setStartX] = useState(0);  
+  const [scrollLeft, setScrollLeft] = useState(0);  
   
   useEffect(() => {  
     setMounted(true);  
@@ -38,6 +41,39 @@ export default function EmbedGrowSlowlyShopPage() {
     }  
   }  
   
+  // Drag-to-scroll handlers  
+  const handleMouseDown = (e: React.MouseEvent) => {  
+    if (!scrollContainerRef.current) return;  
+    setIsDragging(true);  
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);  
+    setScrollLeft(scrollContainerRef.current.scrollLeft);  
+    scrollContainerRef.current.style.cursor = 'grabbing';  
+  };  
+  
+  const handleMouseMove = (e: React.MouseEvent) => {  
+    if (!isDragging || !scrollContainerRef.current) return;  
+    e.preventDefault();  
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;  
+    const walk = (x - startX) * 2;  
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;  
+  };  
+  
+  const handleMouseUp = () => {  
+    setIsDragging(false);  
+    if (scrollContainerRef.current) {  
+      scrollContainerRef.current.style.cursor = 'grab';  
+    }  
+  };  
+  
+  const handleMouseLeave = () => {  
+    if (isDragging) {  
+      setIsDragging(false);  
+      if (scrollContainerRef.current) {  
+        scrollContainerRef.current.style.cursor = 'grab';  
+      }  
+    }  
+  };  
+  
   if (!mounted || loading) {  
     return (  
       <div style={{  
@@ -66,14 +102,24 @@ export default function EmbedGrowSlowlyShopPage() {
   }  
   
   return (  
-    <div style={{  
-      minWidth: '1200px',  
-      width: '100%',  
-      height: '600px',  
-      position: 'relative',  
-      background: '#0B0B0B',  
-      overflow: 'visible'  
-    }}>  
+    <div   
+      ref={scrollContainerRef}  
+      onMouseDown={handleMouseDown}  
+      onMouseMove={handleMouseMove}  
+      onMouseUp={handleMouseUp}  
+      onMouseLeave={handleMouseLeave}  
+      className="scroll-container"  
+      style={{  
+        width: '1192px',  
+        maxWidth: '100%',  
+        height: '600px',  
+        position: 'relative',  
+        background: '#0B0B0B',  
+        overflowX: 'auto',  
+        overflowY: 'hidden',  
+        cursor: 'grab',  
+        userSelect: 'none'  
+      }}>  
       {products.length === 0 ? (  
         <div style={{  
           width: '100%',  
@@ -88,22 +134,14 @@ export default function EmbedGrowSlowlyShopPage() {
           <p style={{ color: '#B6B9BF', fontSize: '18px' }}>No products available yet.</p>  
         </div>  
       ) : (  
-        <div   
+        <div     
           className="product-carousel-scroll"  
           style={{  
-            width: '100%',  
-            height: '600px',  
             display: 'flex',  
             flexDirection: 'row',  
-            overflowX: 'auto',  
-            overflowY: 'hidden',  
-            scrollSnapType: 'x mandatory',  
-            WebkitOverflowScrolling: 'touch',  
             gap: '20px',  
             padding: '20px',  
-            boxSizing: 'border-box',  
-            scrollbarWidth: 'none',  
-            msOverflowStyle: 'none'  
+            height: '100%'  
           }}  
         >  
           {products.map((product) => (  
@@ -116,7 +154,9 @@ export default function EmbedGrowSlowlyShopPage() {
               style={{  
                 textDecoration: 'none',  
                 color: 'inherit',  
-                transition: 'transform 0.2s'  
+                transition: 'transform 0.2s',  
+                flexShrink: 0,  
+                pointerEvents: isDragging ? 'none' : 'auto'  
               }}  
             >  
               <div style={{  
@@ -132,7 +172,6 @@ export default function EmbedGrowSlowlyShopPage() {
                 alignItems: 'flex-start',  
                 display: 'inline-flex'  
               }}>  
-                {/* Background con imagen */}  
                 <div style={{  
                   alignSelf: 'stretch',  
                   height: '338.75px',  
@@ -142,7 +181,6 @@ export default function EmbedGrowSlowlyShopPage() {
                   backgroundPosition: 'center'  
                 }}></div>  
   
-                {/* Container de información */}  
                 <div style={{  
                   alignSelf: 'stretch',  
                   padding: '14px',  
@@ -152,7 +190,6 @@ export default function EmbedGrowSlowlyShopPage() {
                   gap: '7.20px',  
                   display: 'flex'  
                 }}>  
-                  {/* Label y Precio */}  
                   <div style={{  
                     alignSelf: 'stretch',  
                     justifyContent: 'space-between',  
@@ -201,7 +238,6 @@ export default function EmbedGrowSlowlyShopPage() {
                     </div>  
                   </div>  
   
-                  {/* Nombre del producto */}  
                   <div style={{  
                     alignSelf: 'stretch',  
                     color: '#F5F5F5',  
@@ -225,25 +261,16 @@ export default function EmbedGrowSlowlyShopPage() {
           to { transform: rotate(360deg); }  
         }  
   
-        /* Ocultar scrollbar en todos los navegadores - PATRÓN DE QUESTIONS */  
-        .product-carousel-scroll::-webkit-scrollbar {  
+        /* Ocultar scrollbar del contenedor con scroll */  
+        .scroll-container::-webkit-scrollbar {  
           display: none !important;  
           width: 0 !important;  
           height: 0 !important;  
         }  
   
-        .product-carousel-scroll {  
+        .scroll-container {  
           scrollbar-width: none !important;  
           -ms-overflow-style: none !important;  
-        }  
-  
-        /* Estilos para tarjetas */  
-        .product-card {  
-          flex: 0 0 280px;  
-          min-width: 280px;  
-          max-width: 280px;  
-          scroll-snap-align: start;  
-          transition: transform 0.2s;  
         }  
   
         .product-card:hover {  
@@ -252,25 +279,17 @@ export default function EmbedGrowSlowlyShopPage() {
   
         /* Media query para móvil */  
         @media (max-width: 768px) {  
-          div[style*="minWidth: 1200px"] {  
-            min-width: 100% !important;  
+          .scroll-container {  
             width: 100% !important;  
           }  
   
           .product-carousel-scroll {  
-            min-width: auto !important;  
             padding: 10px !important;  
             gap: 16px !important;  
           }  
   
-          .product-card {  
-            flex: 0 0 calc(100% - 32px) !important;  
-            min-width: 260px !important;  
-            max-width: 300px !important;  
-          }  
-  
-          .product-card .Background {  
-            height: 240px !important;  
+          .product-card div[style*="width: 273px"] {  
+            width: 260px !important;  
           }  
         }  
       `}</style>  
