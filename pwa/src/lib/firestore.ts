@@ -178,7 +178,7 @@ export type SeasonalToolkit = {
 
 
 export type Brand = {  
-  id: string;  
+  id?: string; // Match the pattern used by other types  
   name: string;  
   description: string;  
   discount?: string;  
