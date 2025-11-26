@@ -1,11 +1,8 @@
-// app/brands/embed/page.tsx  
 "use client";  
   
 import { useEffect, useState } from "react";  
-import { Brand, listBrands } from '@/src/lib/firestore';
+import { Brand, listBrands } from '@/src/lib/firestore';  
 import { ensureAnonAuth } from "@/src/lib/firebase";  
-  
-
   
 export default function BrandsEmbedPage() {  
   const [brands, setBrands] = useState<Brand[]>([]);  
@@ -19,11 +16,11 @@ export default function BrandsEmbedPage() {
         console.log('🔄 Initializing anonymous authentication...');  
         await ensureAnonAuth();  
         console.log('✅ Successful authentication');  
-            
+          
         console.log('🔄 Loading brands from Firestore...');  
         const data = await listBrands(50);  
         console.log(`✅ ${data.length} loaded brands`);  
-                    
+          
         setBrands(data);  
       } catch (err) {  
         console.error('❌ Error:', err);  
@@ -49,8 +46,9 @@ export default function BrandsEmbedPage() {
   if (loading) {  
     return (  
       <div style={{  
-        width: '100vw',  
-        height: '100vh',  
+        width: '1192px',  
+        maxWidth: '100%',  
+        height: '600px',  
         display: 'flex',  
         alignItems: 'center',  
         justifyContent: 'center',  
@@ -81,8 +79,9 @@ export default function BrandsEmbedPage() {
   if (error) {  
     return (  
       <div style={{  
-        width: '100vw',  
-        height: '100vh',  
+        width: '1192px',  
+        maxWidth: '100%',  
+        height: '600px',  
         display: 'flex',  
         alignItems: 'center',  
         justifyContent: 'center',  
@@ -113,8 +112,9 @@ export default function BrandsEmbedPage() {
   if (brands.length === 0) {  
     return (  
       <div style={{  
-        width: '100vw',  
-        height: '100vh',  
+        width: '1192px',  
+        maxWidth: '100%',  
+        height: '600px',  
         display: 'flex',  
         alignItems: 'center',  
         justifyContent: 'center',  
@@ -129,275 +129,270 @@ export default function BrandsEmbedPage() {
   }  
   
   return (  
-    // Main container - update to match shop embed dimensions  
-    <div style={{  
-    width: '1192px',  
-    maxWidth: '100%',  
-    height: '600px',  
-    position: 'relative',  
-    background: '#0B0B0B',  
-    overflowX: 'auto',  
-    overflowY: 'hidden',  
-    cursor: 'grab',  
-    userSelect: 'none'  
-    }}> 
-      {/* Carousel Container */}  
-      <div style={{    
-        display: 'flex',    
-        alignItems: 'center',    
-        justifyContent: 'center',    
-        height: '100%',  // Cambiar de '100vh' a '100%'  
-        padding: '0 80px'    
-        }}>
-        {/* Navigation Buttons */}  
-        <button  
-          onClick={prevSlide}  
-          style={{  
-            position: 'absolute',  
-            left: '20px',  
-            top: '50%',  
-            transform: 'translateY(-50%)',  
-            width: '48px',  
-            height: '48px',  
-            borderRadius: '50%',  
-            background: 'rgba(164, 203, 62, 0.2)',  
-            border: '1px solid #A4CB3E',  
-            color: '#A4CB3E',  
-            fontSize: '20px',  
-            cursor: 'pointer',  
-            transition: 'all 0.2s',  
-            zIndex: 10  
-          }}  
-          onMouseEnter={(e) => {  
-            e.currentTarget.style.background = '#A4CB3E';  
-            e.currentTarget.style.color = '#0B0B0B';  
-          }}  
-          onMouseLeave={(e) => {  
-            e.currentTarget.style.background = 'rgba(164, 203, 62, 0.2)';  
-            e.currentTarget.style.color = '#A4CB3E';  
-          }}  
-        >  
-          ←  
-        </button>  
+    <div   
+      className="brands-carousel"  
+      style={{  
+        width: '1192px',  
+        maxWidth: '100%',  
+        height: '600px',  
+        position: 'relative',  
+        background: '#0B0B0B',  
+        overflowX: 'auto',  
+        overflowY: 'hidden',  
+        cursor: 'grab',  
+        userSelect: 'none'  
+      }}  
+    >  
+      {/* Navigation Buttons */}  
+      <button  
+        onClick={prevSlide}  
+        style={{  
+          position: 'absolute',  
+          left: '20px',  
+          top: '50%',  
+          transform: 'translateY(-50%)',  
+          width: '48px',  
+          height: '48px',  
+          borderRadius: '50%',  
+          background: 'rgba(164, 203, 62, 0.2)',  
+          border: '1px solid #A4CB3E',  
+          color: '#A4CB3E',  
+          fontSize: '20px',  
+          cursor: 'pointer',  
+          transition: 'all 0.2s',  
+          zIndex: 10  
+        }}  
+        onMouseEnter={(e) => {  
+          e.currentTarget.style.background = '#A4CB3E';  
+          e.currentTarget.style.color = '#0B0B0B';  
+        }}  
+        onMouseLeave={(e) => {  
+          e.currentTarget.style.background = 'rgba(164, 203, 62, 0.2)';  
+          e.currentTarget.style.color = '#A4CB3E';  
+        }}  
+      >  
+        ←  
+      </button>  
   
-        <button  
-          onClick={nextSlide}  
-          style={{  
-            position: 'absolute',  
-            right: '20px',  
-            top: '50%',  
-            transform: 'translateY(-50%)',  
-            width: '48px',  
-            height: '48px',  
-            borderRadius: '50%',  
-            background: 'rgba(164, 203, 62, 0.2)',  
-            border: '1px solid #A4CB3E',  
-            color: '#A4CB3E',  
-            fontSize: '20px',  
-            cursor: 'pointer',  
-            transition: 'all 0.2s',  
-            zIndex: 10  
-          }}  
-          onMouseEnter={(e) => {  
-            e.currentTarget.style.background = '#A4CB3E';  
-            e.currentTarget.style.color = '#0B0B0B';  
-          }}  
-          onMouseLeave={(e) => {  
-            e.currentTarget.style.background = 'rgba(164, 203, 62, 0.2)';  
-            e.currentTarget.style.color = '#A4CB3E';  
-          }}  
-        >  
-          →  
-        </button>  
+      <button  
+        onClick={nextSlide}  
+        style={{  
+          position: 'absolute',  
+          right: '20px',  
+          top: '50%',  
+          transform: 'translateY(-50%)',  
+          width: '48px',  
+          height: '48px',  
+          borderRadius: '50%',  
+          background: 'rgba(164, 203, 62, 0.2)',  
+          border: '1px solid #A4CB3E',  
+          color: '#A4CB3E',  
+          fontSize: '20px',  
+          cursor: 'pointer',  
+          transition: 'all 0.2s',  
+          zIndex: 10  
+        }}  
+        onMouseEnter={(e) => {  
+          e.currentTarget.style.background = '#A4CB3E';  
+          e.currentTarget.style.color = '#0B0B0B';  
+        }}  
+        onMouseLeave={(e) => {  
+          e.currentTarget.style.background = 'rgba(164, 203, 62, 0.2)';  
+          e.currentTarget.style.color = '#A4CB3E';  
+        }}  
+      >  
+        →  
+      </button>  
   
-        {/* Brand Cards */}  
-        <div style={{  
-          display: 'flex',  
-          gap: '32px',  
-          alignItems: 'center',  
-          maxWidth: '1200px',  
-          width: '100%'  
-        }}>  
-          {brands.map((brand, index) => {  
-            const isActive = index === currentIndex;  
-            const isAdjacent = Math.abs(index - currentIndex) === 1 ||   
-                              (currentIndex === 0 && index === brands.length - 1) ||  
-                              (currentIndex === brands.length - 1 && index === 0);  
-              
-            return (  
-              <div  
-                key={brand.id}  
-                style={{  
-                  flex: isActive ? '2' : isAdjacent ? '1' : '0.5',  
-                  height: isActive ? '500px' : isAdjacent ? '400px' : '300px',  
-                  borderRadius: '24px',  
-                  background: '#0F0F0F',  
-                  border: isActive ? '2px solid #A4CB3E' : '1px solid #242424',  
-                  overflow: 'hidden',  
-                  position: 'relative',  
-                  cursor: 'pointer',  
-                  transition: 'all 0.3s ease',  
-                  opacity: isActive ? 1 : isAdjacent ? 0.7 : 0.3,  
-                  transform: `scale(${isActive ? 1 : isAdjacent ? 0.9 : 0.8})`  
-                }}  
-                onClick={() => goToSlide(index)}  
-                onMouseEnter={(e) => {  
-                  if (!isActive) {  
-                    e.currentTarget.style.transform = 'scale(0.95)';  
-                    e.currentTarget.style.borderColor = 'rgba(164, 203, 62, 0.5)';  
-                  }  
-                }}  
-                onMouseLeave={(e) => {  
-                  if (!isActive) {  
-                    e.currentTarget.style.transform = `scale(${isAdjacent ? 0.9 : 0.8})`;  
-                    e.currentTarget.style.borderColor = '#242424';  
-                  }  
-                }}  
-              >  
-                {/* Brand Image with Overlay */}  
-                <div style={{  
-                  width: '100%',  
-                  height: '100%',  
-                  position: 'relative',  
-                  background: `url(${brand.imageBase64}) center/cover no-repeat`  
-                }}>  
-                  {/* Initial State: Image + Brand Name */}  
-                  <div  
-                    style={{  
-                      position: 'absolute',  
-                      inset: 0,  
-                      background: 'linear-gradient(to bottom, transparent 0%, rgba(11, 11, 11, 0.8) 100%)',  
-                      display: 'flex',  
-                      alignItems: 'flex-end',  
-                      padding: '24px',  
-                      opacity: isActive ? 0 : 1,  
-                      transition: 'opacity 0.3s ease'  
-                    }}  
-                  >  
+      {/* Brand Cards - Direct flex layout like shop embed */}  
+      <div style={{  
+        display: 'flex',  
+        flexDirection: 'row',  
+        gap: '32px',  
+        padding: '20px',  
+        height: '100%',  
+        alignItems: 'center'  
+      }}>  
+        {brands.map((brand, index) => {  
+          const isActive = index === currentIndex;  
+          const isAdjacent = Math.abs(index - currentIndex) === 1 ||   
+                            (currentIndex === 0 && index === brands.length - 1) ||   
+                            (currentIndex === brands.length - 1 && index === 0);  
+            
+          return (  
+            <div  
+              key={brand.id}  
+              style={{  
+                flexShrink: 0,  
+                width: isActive ? '400px' : isAdjacent ? '300px' : '200px',  
+                height: isActive ? '500px' : isAdjacent ? '400px' : '300px',  
+                borderRadius: '24px',  
+                background: '#0F0F0F',  
+                border: isActive ? '2px solid #A4CB3E' : '1px solid #242424',  
+                overflow: 'hidden',  
+                position: 'relative',  
+                cursor: 'pointer',  
+                transition: 'all 0.3s ease',  
+                opacity: isActive ? 1 : isAdjacent ? 0.7 : 0.3,  
+                transform: `scale(${isActive ? 1 : isAdjacent ? 0.9 : 0.8})`  
+              }}  
+              onClick={() => goToSlide(index)}  
+              onMouseEnter={(e) => {  
+                if (!isActive) {  
+                  e.currentTarget.style.transform = 'scale(0.95)';  
+                  e.currentTarget.style.borderColor = 'rgba(164, 203, 62, 0.5)';  
+                }  
+              }}  
+              onMouseLeave={(e) => {  
+                if (!isActive) {  
+                  e.currentTarget.style.transform = `scale(${isAdjacent ? 0.9 : 0.8})`;  
+                  e.currentTarget.style.borderColor = '#242424';  
+                }  
+              }}  
+            >  
+              {/* Brand Image with Overlay */}  
+              <div style={{  
+                width: '100%',  
+                height: '100%',  
+                position: 'relative',  
+                background: `url(${brand.imageBase64}) center/cover no-repeat`  
+              }}>  
+                {/* Initial State: Image + Brand Name */}  
+                <div  
+                  style={{  
+                    position: 'absolute',  
+                    inset: 0,  
+                    background: 'linear-gradient(to bottom, transparent 0%, rgba(11, 11, 11, 0.8) 100%)',  
+                    display: 'flex',  
+                    alignItems: 'flex-end',  
+                    padding: '24px',  
+                    opacity: isActive ? 0 : 1,  
+                    transition: 'opacity 0.3s ease'  
+                  }}  
+                >  
+                  <h3 style={{  
+                    fontSize: '24px',  
+                    fontWeight: 'bold',  
+                    color: '#F5F5F5',  
+                    margin: 0,  
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'  
+                  }}>  
+                    {brand.name}  
+                  </h3>  
+                </div>  
+  
+                {/* Hover State: Full Info */}  
+                <div  
+                  style={{  
+                    position: 'absolute',  
+                    inset: 0,  
+                    background: 'rgba(11, 11, 11, 0.95)',  
+                    padding: '32px',  
+                    display: 'flex',  
+                    flexDirection: 'column',  
+                    justifyContent: 'space-between',  
+                    opacity: isActive ? 1 : 0,  
+                    transition: 'opacity 0.3s ease'  
+                  }}  
+                >  
+                  <div>  
                     <h3 style={{  
-                      fontSize: '24px',  
+                      fontSize: '28px',  
                       fontWeight: 'bold',  
                       color: '#F5F5F5',  
-                      margin: 0,  
-                      textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'  
+                      margin: '0 0 16px 0'  
                     }}>  
                       {brand.name}  
                     </h3>  
+                        
+                    <p style={{  
+                      fontSize: '16px',  
+                      color: '#B6B9BF',  
+                      lineHeight: '1.6',  
+                      margin: '0 0 20px 0'  
+                    }}>  
+                      {brand.description}  
+                    </p>  
+  
+                    {brand.discount && (  
+                      <div style={{  
+                        background: 'rgba(164, 203, 62, 0.1)',  
+                        border: '1px solid #A4CB3E',  
+                        borderRadius: '8px',  
+                        padding: '8px 12px',  
+                        marginBottom: '20px',  
+                        display: 'inline-block'  
+                      }}>  
+                        <span style={{  
+                          fontSize: '14px',  
+                          color: '#A4CB3E',  
+                          fontWeight: '600'  
+                        }}>  
+                          🎁 {brand.discount}  
+                        </span>  
+                      </div>  
+                    )}  
                   </div>  
   
-                  {/* Hover State: Full Info */}  
-                  <div  
-                    style={{  
-                      position: 'absolute',  
-                      inset: 0,  
-                      background: 'rgba(11, 11, 11, 0.95)',  
-                      padding: '32px',  
-                      display: 'flex',  
-                      flexDirection: 'column',  
-                      justifyContent: 'space-between',  
-                      opacity: isActive ? 1 : 0,  
-                      transition: 'opacity 0.3s ease'  
-                    }}  
-                  >  
-                    <div>  
-                      <h3 style={{  
-                        fontSize: '28px',  
-                        fontWeight: 'bold',  
-                        color: '#F5F5F5',  
-                        margin: '0 0 16px 0'  
-                      }}>  
-                        {brand.name}  
-                      </h3>  
-                        
-                      <p style={{  
+                  <div>  
+                    <a  
+                      href={brand.link}  
+                      target="_blank"  
+                      rel="noopener noreferrer"  
+                      style={{  
+                        display: 'inline-block',  
+                        padding: '12px 24px',  
+                        background: '#A4CB3E',  
+                        color: '#0B0B0B',  
+                        borderRadius: '9999px',  
+                        textDecoration: 'none',  
                         fontSize: '16px',  
-                        color: '#B6B9BF',  
-                        lineHeight: '1.6',  
-                        margin: '0 0 20px 0'  
-                      }}>  
-                        {brand.description}  
-                      </p>  
-  
-                      {brand.discount && (  
-                        <div style={{  
-                          background: 'rgba(164, 203, 62, 0.1)',  
-                          border: '1px solid #A4CB3E',  
-                          borderRadius: '8px',  
-                          padding: '8px 12px',  
-                          marginBottom: '20px',  
-                          display: 'inline-block'  
-                        }}>  
-                          <span style={{  
-                            fontSize: '14px',  
-                            color: '#A4CB3E',  
-                            fontWeight: '600'  
-                          }}>  
-                            🎁 {brand.discount}  
-                          </span>  
-                        </div>  
-                      )}  
-                    </div>  
-  
-                    <div>  
-                      <a  
-                        href={brand.link}  
-                        target="_blank"  
-                        rel="noopener noreferrer"  
-                        style={{  
-                          display: 'inline-block',  
-                          padding: '12px 24px',  
-                          background: '#A4CB3E',  
-                          color: '#0B0B0B',  
-                          borderRadius: '9999px',  
-                          textDecoration: 'none',  
-                          fontSize: '16px',  
-                          fontWeight: '600',  
-                          transition: 'all 0.2s',  
-                          textAlign: 'center'  
-                        }}  
-                        onMouseEnter={(e) => {  
-                          e.currentTarget.style.background = '#8FB82E';  
-                        }}  
-                        onMouseLeave={(e) => {  
-                          e.currentTarget.style.background = '#A4CB3E';  
-                        }}  
-                      >  
-                        More Info →  
-                      </a>  
-                    </div>  
+                        fontWeight: '600',  
+                        transition: 'all 0.2s',  
+                        textAlign: 'center'  
+                      }}  
+                      onMouseEnter={(e) => {  
+                        e.currentTarget.style.background = '#8FB82E';  
+                      }}  
+                      onMouseLeave={(e) => {  
+                        e.currentTarget.style.background = '#A4CB3E';  
+                      }}  
+                    >  
+                      More Info →  
+                    </a>  
                   </div>  
                 </div>  
               </div>  
-            );  
-          })}  
-        </div>  
+            </div>  
+          );  
+        })}  
+      </div>  
   
-        {/* Navigation Dots */}  
-        <div style={{  
-          position: 'absolute',  
-          bottom: '40px',  
-          left: '50%',  
-          transform: 'translateX(-50%)',  
-          display: 'flex',  
-          gap: '12px',  
-          zIndex: 10  
-        }}>  
-          {brands.map((_, index) => (  
-            <button  
-              key={index}  
-              onClick={() => goToSlide(index)}  
-              style={{  
-                width: currentIndex === index ? '32px' : '12px',  
-                height: '12px',  
-                borderRadius: '9999px',  
-                background: currentIndex === index ? '#A4CB3E' : 'rgba(164, 203, 62, 0.3)',  
-                border: 'none',  
-                cursor: 'pointer',  
-                transition: 'all 0.3s ease'  
-              }}  
-            />  
-          ))}  
-        </div>  
+      {/* Navigation Dots */}  
+      <div style={{  
+        position: 'absolute',  
+        bottom: '40px',  
+        left: '50%',  
+        transform: 'translateX(-50%)',  
+        display: 'flex',  
+        gap: '12px',  
+        zIndex: 10  
+      }}>  
+        {brands.map((_, index) => (  
+          <button  
+            key={index}  
+            onClick={() => goToSlide(index)}  
+            style={{  
+              width: currentIndex === index ? '32px' : '12px',  
+              height: '12px',  
+              borderRadius: '9999px',  
+              background: currentIndex === index ? '#A4CB3E' : 'rgba(164, 203, 62, 0.3)',  
+              border: 'none',  
+              cursor: 'pointer',  
+              transition: 'all 0.3s ease'  
+            }}  
+          />  
+        ))}  
       </div>  
   
       <style jsx>{`  
@@ -424,13 +419,9 @@ export default function BrandsEmbedPage() {
   
         /* Mobile responsive */  
         @media (max-width: 768px) {  
-          .brands-container {  
-            padding: 0 20px !important;  
-          }  
-  
-          .brand-card {  
-            min-width: 280px !important;  
-            height: 400px !important;  
+          .brands-carousel {  
+            padding: 10px !important;  
+            gap: 16px !important;  
           }  
         }  
       `}</style>  
