@@ -2,7 +2,7 @@
 "use client";  
   
 import { useEffect, useState } from "react";  
-import { listBrands } from "@/src/lib/firestore";  
+import { Brand, listBrands } from '@/src/lib/firestore';
 import { ensureAnonAuth } from "@/src/lib/firebase";  
   
 interface Brand {  
