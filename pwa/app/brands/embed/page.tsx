@@ -8,6 +8,7 @@ export default function BrandsEmbedPage() {
   const [brands, setBrands] = useState<Brand[]>([]);  
   const [loading, setLoading] = useState(true);  
   const [error, setError] = useState<string | null>(null);  
+  const [currentIndex, setCurrentIndex] = useState(0);  
   
   useEffect(() => {  
     (async () => {  
@@ -29,6 +30,18 @@ export default function BrandsEmbedPage() {
       }  
     })();  
   }, []);  
+  
+  const nextSlide = () => {  
+    setCurrentIndex((prev) => (prev + 1) % brands.length);  
+  };  
+  
+  const prevSlide = () => {  
+    setCurrentIndex((prev) => (prev - 1 + brands.length) % brands.length);  
+  };  
+  
+  const goToSlide = (index: number) => {  
+    setCurrentIndex(index);  
+  };  
   
   if (loading) {  
     return (  
@@ -102,7 +115,7 @@ export default function BrandsEmbedPage() {
       style={{  
         width: '1192px',  
         maxWidth: '100%',  
-        height: '600px',  
+        minHeight: '600px',  
         position: 'relative',  
         background: '#0B0B0B',  
         overflowX: 'auto',  
@@ -111,49 +124,104 @@ export default function BrandsEmbedPage() {
         userSelect: 'none'  
       }}  
     >  
+      {/* Navigation Buttons */}  
+      <button  
+        onClick={prevSlide}  
+        style={{  
+          position: 'absolute',  
+          left: '20px',  
+          top: '50%',  
+          transform: 'translateY(-50%)',  
+          width: '48px',  
+          height: '48px',  
+          borderRadius: '50%',  
+          background: 'rgba(164, 203, 62, 0.2)',  
+          border: '1px solid #A4CB3E',  
+          color: '#A4CB3E',  
+          fontSize: '20px',  
+          cursor: 'pointer',  
+          transition: 'all 0.2s',  
+          zIndex: 10  
+        }}  
+        onMouseEnter={(e) => {  
+          e.currentTarget.style.background = '#A4CB3E';  
+          e.currentTarget.style.color = '#0B0B0B';  
+        }}  
+        onMouseLeave={(e) => {  
+          e.currentTarget.style.background = 'rgba(164, 203, 62, 0.2)';  
+          e.currentTarget.style.color = '#A4CB3E';  
+        }}  
+      >  
+        ←  
+      </button>  
+  
+      <button  
+        onClick={nextSlide}  
+        style={{  
+          position: 'absolute',  
+          right: '20px',  
+          top: '50%',  
+          transform: 'translateY(-50%)',  
+          width: '48px',  
+          height: '48px',  
+          borderRadius: '50%',  
+          background: 'rgba(164, 203, 62, 0.2)',  
+          border: '1px solid #A4CB3E',  
+          color: '#A4CB3E',  
+          fontSize: '20px',  
+          cursor: 'pointer',  
+          transition: 'all 0.2s',  
+          zIndex: 10  
+        }}  
+        onMouseEnter={(e) => {  
+          e.currentTarget.style.background = '#A4CB3E';  
+          e.currentTarget.style.color = '#0B0B0B';  
+        }}  
+        onMouseLeave={(e) => {  
+          e.currentTarget.style.background = 'rgba(164, 203, 62, 0.2)';  
+          e.currentTarget.style.color = '#A4CB3E';  
+        }}  
+      >  
+        →  
+      </button>  
+  
       <div style={{  
         display: 'flex',  
         flexDirection: 'row',  
-        gap: '20px',  
+        gap: '32px',  
         padding: '20px',  
-        height: '100%',  
+        minHeight: '100%',  
         alignItems: 'center'  
       }}>  
-        {brands.map((brand) => (  
-          <a  
-            key={brand.id}  
-            href={brand.link}  
-            target="_blank"  
-            rel="noopener noreferrer"  
-            style={{  
-              textDecoration: 'none',  
-              color: 'inherit',  
-              flexShrink: 0  
-            }}  
-          >  
-            <div style={{  
-              width: '273px',  
-              height: '500px',  
-              borderRadius: '24px',  
-              background: '#0F0F0F',  
-              border: '1px solid #242424',  
-              overflow: 'hidden',  
-              position: 'relative',  
-              cursor: 'pointer',  
-              transition: 'all 0.2s'  
-            }}  
-            onMouseEnter={(e) => {  
-              e.currentTarget.style.transform = 'translateY(-4px)';  
-              e.currentTarget.style.borderColor = '#A4CB3E';  
-            }}  
-            onMouseLeave={(e) => {  
-              e.currentTarget.style.transform = 'translateY(0)';  
-              e.currentTarget.style.borderColor = '#242424';  
-            }}>  
+        {brands.map((brand, index) => {  
+          const isActive = index === currentIndex;  
+          const isAdjacent = Math.abs(index - currentIndex) === 1 ||   
+                            (currentIndex === 0 && index === brands.length - 1) ||   
+                            (currentIndex === brands.length - 1 && index === 0);  
+            
+          return (  
+            <div  
+              key={brand.id}  
+              style={{  
+                flexShrink: 0,  
+                width: isActive ? '400px' : isAdjacent ? '300px' : '200px',  
+                minHeight: isActive ? '500px' : isAdjacent ? '400px' : '300px',  
+                borderRadius: '24px',  
+                background: '#0F0F0F',  
+                border: isActive ? '2px solid #A4CB3E' : '1px solid #242424',  
+                overflow: 'hidden',  
+                position: 'relative',  
+                cursor: 'pointer',  
+                transition: 'all 0.3s ease',  
+                opacity: isActive ? 1 : isAdjacent ? 0.7 : 0.3,  
+                transform: `scale(${isActive ? 1 : isAdjacent ? 0.9 : 0.8})`  
+              }}  
+              onClick={() => goToSlide(index)}  
+            >  
               {/* Brand Image */}  
               <div style={{  
                 width: '100%',  
-                height: '338.75px',  
+                height: '100%',  
                 background: `url(${brand.imageBase64}) center/cover no-repeat`,  
                 position: 'relative'  
               }}>  
@@ -165,11 +233,11 @@ export default function BrandsEmbedPage() {
                   display: 'flex',  
                   alignItems: 'flex-end',  
                   padding: '24px',  
-                  opacity: 1,  
+                  opacity: isActive ? 0 : 1,  
                   transition: 'opacity 0.3s ease'  
                 }}>  
                   <h3 style={{  
-                    fontSize: '24px',  
+                    fontSize: isActive ? '28px' : '20px',  
                     fontWeight: 'bold',  
                     color: '#F5F5F5',  
                     margin: 0,  
@@ -179,29 +247,21 @@ export default function BrandsEmbedPage() {
                   </h3>  
                 </div>  
   
-                {/* Hover State: Full Info */}  
+                {/* Hover/Active State: Full Info */}  
                 <div style={{  
                   position: 'absolute',  
                   inset: 0,  
                   background: 'rgba(11, 11, 11, 0.95)',  
-                  padding: '32px',  
+                  padding: isActive ? '32px' : '24px',  
                   display: 'flex',  
                   flexDirection: 'column',  
                   justifyContent: 'space-between',  
-                  opacity: 0,  
+                  opacity: isActive ? 1 : 0,  
                   transition: 'opacity 0.3s ease'  
-                }}  
-                onMouseEnter={(e) => {  
-                  e.currentTarget.style.opacity = '1';  
-                  e.currentTarget.parentElement?.querySelector('div[style*="opacity: 1"]')?.setAttribute('style', e.currentTarget.parentElement?.querySelector('div[style*="opacity: 1"]')?.getAttribute('style')?.replace('opacity: 1', 'opacity: 0') || '');  
-                }}  
-                onMouseLeave={(e) => {  
-                  e.currentTarget.style.opacity = '0';  
-                  e.currentTarget.parentElement?.querySelector('div[style*="opacity: 0"]')?.setAttribute('style', e.currentTarget.parentElement?.querySelector('div[style*="opacity: 0"]')?.getAttribute('style')?.replace('opacity: 0', 'opacity: 1') || '');  
                 }}>  
                   <div>  
                     <h3 style={{  
-                      fontSize: '28px',  
+                      fontSize: isActive ? '32px' : '24px',  
                       fontWeight: 'bold',  
                       color: '#F5F5F5',  
                       margin: '0 0 16px 0'  
@@ -210,7 +270,7 @@ export default function BrandsEmbedPage() {
                     </h3>  
                       
                     <p style={{  
-                      fontSize: '16px',  
+                      fontSize: isActive ? '16px' : '14px',  
                       color: '#B6B9BF',  
                       lineHeight: '1.6',  
                       margin: '0 0 20px 0'  
@@ -261,6 +321,7 @@ export default function BrandsEmbedPage() {
                       onMouseLeave={(e) => {  
                         e.currentTarget.style.background = '#A4CB3E';  
                       }}  
+                      onClick={(e) => e.stopPropagation()}  
                     >  
                       More Info →  
                     </a>  
@@ -268,7 +329,34 @@ export default function BrandsEmbedPage() {
                 </div>  
               </div>  
             </div>  
-          </a>  
+          );  
+        })}  
+      </div>  
+  
+      {/* Navigation Dots */}  
+      <div style={{  
+        position: 'absolute',  
+        bottom: '40px',  
+        left: '50%',  
+        transform: 'translateX(-50%)',  
+        display: 'flex',  
+        gap: '12px',  
+        zIndex: 10  
+      }}>  
+        {brands.map((_, index) => (  
+          <button  
+            key={index}  
+            onClick={() => goToSlide(index)}  
+            style={{  
+              width: currentIndex === index ? '32px' : '12px',  
+              height: '12px',  
+              borderRadius: '9999px',  
+              background: currentIndex === index ? '#A4CB3E' : 'rgba(164, 203, 62, 0.3)',  
+              border: 'none',  
+              cursor: 'pointer',  
+              transition: 'all 0.3s ease'  
+            }}  
+          />  
         ))}  
       </div>  
   
