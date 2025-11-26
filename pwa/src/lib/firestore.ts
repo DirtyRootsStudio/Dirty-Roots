@@ -176,6 +176,21 @@ export type SeasonalToolkit = {
   createdAt: Timestamp;  
 };
 
+
+export type Brand = {  
+  id?: string;  
+  name: string;  
+  description: string;  
+  discount?: string;  
+  link: string;  
+  imageBase64: string;  
+  createdBy: string;  
+  createdAt: Timestamp;  
+  status?: "active" | "deleted";  
+  updatedAt?: Timestamp;  
+  deletedAt?: Timestamp;  
+};
+
 // ========== PLACES CRUD OPERATIONS ==========  
   
 /**  
@@ -951,5 +966,105 @@ export async function updateSeasonalToolkit(
   } catch (error) {  
     console.error("Error updating seasonal toolkit:", error);  
     throw new Error("Failed to update seasonal toolkit");  
+  }  
+}
+
+/**  
+ * Crea una nueva marca en Firestore  
+ *   
+ * @param input - Datos de la marca (sin id, createdAt ni status)  
+ * @returns Promise<string> - ID del documento creado  
+ * @throws Error si falla la creación en Firestore  
+ */  
+export async function addBrand(  
+  input: Omit<Brand, "id" | "createdAt" | "status">  
+): Promise<string> {  
+  try {  
+    const ref = collection(db, "brands");  
+    const docRef = await addDoc(ref, {  
+      ...input,  
+      createdAt: serverTimestamp(),  
+      status: "active",  
+    });  
+    return docRef.id;  
+  } catch (error) {  
+    console.error("Error adding brand:", error);  
+    throw new Error("Failed to create brand");  
+  }  
+}  
+  
+/**  
+ * Lista las marcas más recientes  
+ *   
+ * @param n - Número máximo de marcas a retornar (default: 50)  
+ * @returns Promise<Brand[]> - Array de marcas con sus IDs  
+ * @throws Error si falla la consulta a Firestore  
+ */  
+export async function listBrands(limit: number = 50): Promise<Brand[]> {  
+  try {  
+    const ref = collection(db, "brands");  
+    const q = query(  
+      ref,   
+      where("status", "==", "active")  
+      // Remove orderBy to avoid needing composite index  
+    );  
+    const snap = await getDocs(q);  
+      
+    // Sort in memory instead  
+    const brands = snap.docs  
+      .map((d) => ({ id: d.id, ...(d.data() as Brand) }))  
+      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())  
+      .slice(0, limit);  
+        
+    return brands;  
+  } catch (error) {  
+    console.error("Error listing brands:", error);  
+    throw new Error("Failed to load brands");  
+  }  
+}
+  
+/**  
+ * Actualiza una marca existente  
+ *   
+ * @param id - ID de la marca a actualizar  
+ * @param updates - Datos a actualizar (sin id, createdAt, createdBy)  
+ * @returns Promise<void>  
+ * @throws Error si falla la actualización  
+ */  
+export async function updateBrand(  
+  id: string,   
+  updates: Partial<Omit<Brand, "id" | "createdAt" | "createdBy">>  
+): Promise<void> {  
+  try {  
+    const ref = doc(db, "brands", id);  
+    await updateDoc(ref, {  
+      ...updates,  
+      updatedAt: serverTimestamp()  
+    });  
+  } catch (error) {  
+    console.error("Error updating brand:", error);  
+    throw new Error("Failed to update brand");  
+  }  
+}  
+  
+/**  
+ * Elimina una marca (soft delete)  
+ *   
+ * Cambia el status a 'deleted' en lugar de eliminar permanentemente  
+ *   
+ * @param id - ID de la marca a eliminar  
+ * @returns Promise<void>  
+ * @throws Error si falla la eliminación  
+ */  
+export async function deleteBrand(id: string): Promise<void> {  
+  try {  
+    const ref = doc(db, "brands", id);  
+    await updateDoc(ref, {  
+      status: "deleted",  
+      deletedAt: serverTimestamp()  
+    });  
+  } catch (error) {  
+    console.error("Error deleting brand:", error);  
+    throw new Error("Failed to delete brand");  
   }  
 }

@@ -245,6 +245,37 @@ export default function HomePage() {
               </p>  
             </div>  
           </Link>
+
+          <Link  
+            href="/brands"  
+            style={{ textDecoration: 'none' }}  
+          >  
+            <div  
+              style={{  
+                borderRadius: '24px',  
+                padding: '32px',  
+                border: '1px solid #242424',  
+                background: '#0F0F0F',  
+                cursor: 'pointer',  
+                transition: 'all 0.2s'  
+              }}  
+              onMouseEnter={(e) => {  
+                e.currentTarget.style.background = '#111111';  
+                e.currentTarget.style.borderColor = 'rgba(164, 203, 62, 0.3)';  
+              }}  
+              onMouseLeave={(e) => {  
+                e.currentTarget.style.background = '#0F0F0F';  
+                e.currentTarget.style.borderColor = '#242424';  
+              }}  
+            >  
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#F5F5F5' }}>  
+                🏷️ Brands  
+              </h2>  
+              <p style={{ fontSize: '16px', color: '#B6B9BF', lineHeight: '1.6' }}>  
+                Manage partner brands and their promotional content  
+              </p>  
+            </div>  
+          </Link>
         </div>      
       </div>      
 
