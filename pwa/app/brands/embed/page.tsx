@@ -169,13 +169,13 @@ export default function BrandsEmbedPage() {
       </div>  
   
       {/* Carousel Container */}  
-      <div style={{  
-        display: 'flex',  
-        alignItems: 'center',  
-        justifyContent: 'center',  
-        height: '100vh',  
-        padding: '0 80px'  
-      }}>  
+      <div style={{    
+        display: 'flex',    
+        alignItems: 'center',    
+        justifyContent: 'center',    
+        height: '100%',  // Cambiar de '100vh' a '100%'  
+        padding: '0 80px'    
+        }}>
         {/* Navigation Buttons */}  
         <button  
           onClick={prevSlide}  
