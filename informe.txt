@@ -1,0 +1,307 @@
+Dirty Roots Platform: User & Administrator Manual
+
+Welcome to the official user and administrator manual for the Dirty Roots platform. This comprehensive guide details the functionality of each core feature module, providing clear instructions for both platform administrators and public users. All data operations are managed through a centralized, type-safe Data Access Layer (firestore.ts), ensuring data integrity and consistency across all modules. This document is structured by feature—Places, Q&A, Live Sessions, Grow Slowly Shop, and the Seasonal Toolkit—and clearly delineates the administrative functionalities from the public-facing features available through the platform's embeddable widgets. All public widgets utilize a consistent anonymous Firebase authentication pattern, allowing for immediate data access without requiring user registration.
+
+
+--------------------------------------------------------------------------------
+
+
+1.0 The "Places" Module
+
+1.1 For Administrators: Managing Calm Places
+
+The /places interface is a comprehensive administrative tool designed for curating the platform's database of calm locations. Its strategic importance lies in ensuring the quality, accuracy, and relevance of the data provided to the community, forming the foundation of the platform's location-sharing feature.
+
+1.1.1 Viewing and Navigating the Places Dashboard
+
+The administrative dashboard provides a powerful, synchronized view of all locations in the database.
+
+* Core Interface Layout: The interface is organized into a two-column view. The left column features a large, interactive map fixed at 650px wide, while the right column contains a vertically scrollable list of all registered places.
+* Key UI Elements:
+  * Place Counter: A display at the top of the list shows the total number of places currently in the system.
+  * Map-List Synchronization: The map and list are dynamically linked. Clicking on any place card in the right-hand list automatically centers the map on that location's coordinates and sets the zoom level to 15 for a detailed view.
+* Information Displayed on Each Place Card: Each card in the list provides a comprehensive summary of a location's details:
+  * Primary Details:
+    * Name and type (e.g., 🌳 park or ☕ café)
+    * City, displayed with a location badge
+    * Full street address
+  * Additional Information:
+    * Opening hours
+    * A brief description of the place
+    * A photo, if one has been uploaded
+    * A list of categorized tags
+
+1.1.2 Creating a New Place
+
+Administrators can add new locations to the database through a dedicated creation form.
+
+* Initiation Process: To begin, an administrator clicks the + Add place button, which navigates them to the /places/new page containing the creation form.
+* Form Field Analysis (PlaceForm): The form consists of both mandatory and automated fields, with specific validation rules to ensure data quality.
+
+Category	Field Type	Description & Validation Rules
+Mandatory	Coordinates	Requires manual input of decimal latitude and longitude (e.g., 52.5200, 13.4050) or can be set by clicking directly on the map.
+Mandatory	Name	The name of the location. A minimum of 2 characters is required.
+Mandatory	Place Type	A selection between two predefined categories: "🌳 Park/Garden" or "☕ Cafe/Restaurant".
+Optional/Automated	City & Address	These fields are automatically filled via reverse geocoding from Nominatim as soon as coordinates are provided.
+Optional/Automated	Hours, Description, Tags	These are free-text fields. Tags should be entered as a comma-separated list for proper categorization.
+
+* Saving Process Workflow: Upon submission, the system follows a precise sequence to validate and save the new place.
+  1. Validation: The system first verifies that coordinates have been selected on the map or entered manually.
+  2. Firestore Creation: The addPlace() function from the central Data Access Layer is invoked. This backend process automatically generates a geohash, which is essential for the platform's geospatial search and proximity-based queries. It also adds a server timestamp for tracking and sets the default status of the new place to "approved".
+  3. Form Reset: After a successful save, all form fields are cleared, making it easy to add another place immediately.
+
+1.1.3 Deleting a Place
+
+To maintain the quality of the database, administrators can remove outdated or incorrect listings.
+
+* Deletion Workflow:
+  1. Initiation: The administrator clicks the "🗑️ Delete" button located on the desired place card.
+  2. Confirmation: To prevent accidental data loss, the system presents a confirmation dialog asking the administrator to verify the action.
+  3. Backend Action: Upon confirmation, the deletePlace(placeId) function is executed, which permanently removes the corresponding document from the places collection in Firestore.
+  4. UI Update: The deleted place is instantly filtered from the local application state, updating the list in the UI without requiring a full page reload.
+  5. Feedback: A confirmation alert, "Place deleted ✅", is displayed to inform the admin that the operation was successful.
+
+1.2 For Public Users: Exploring the Embeddable Map
+
+The /embed/map view is a public-facing, read-only interface designed to be seamlessly embedded into external websites via an iframe. As a dynamically loaded client-side component, it is designed to avoid potential issues with server-side rendering. Its purpose is to provide easy, no-login-required access to the platform's curated list of approved calm places, extending the reach of the community's efforts.
+
+* User Interaction Model: Users can explore locations by interacting with the sidebar. When a user clicks on a place card in the right-hand list, the map interface executes a flyTo animation, smoothly centering on the selected location's coordinates with a detailed zoom level of 15.
+* Visual Structure: The embeddable widget maintains a clean, two-column layout. The map on the left is flexible and fills the available space, while the right-hand sidebar has a fixed width of 400px and features a dark theme consistent with the brand's aesthetic.
+* Information on Public Place Cards: Each card in the public view provides essential information at a glance:
+  * Name with a corresponding type icon (🌳 or ☕)
+  * A city badge (📍)
+  * Full address (📍)
+  * Opening hours (🕐)
+  * A brief description
+  * Relevant tags, formatted as clickable hashtags
+* Loading and Error States:
+  * Loading State: While data is being fetched, users see an animated, brand-colored spinner accompanied by the text "Loading map...".
+  * Error State: In case of a data-fetching failure, a user-friendly pink error message is displayed along with a "Retry" button that allows the user to reload the component.
+* Embedding Instructions: To integrate the map into an external website, use the following <iframe> code. Key considerations for integration include the use of inline styles to prevent CSS conflicts and the platform's handling of automatic anonymous authentication, which requires no action from the user.
+
+<iframe
+  src="https://your-domain.com/embed/map"
+  width="100%"
+  height="600px"
+  style="border:0;"
+  allowfullscreen=""
+  loading="lazy">
+</iframe>
+
+
+While the 'Places' module focuses on a centrally curated set of static locations, the following Q&A module shifts to dynamic, asynchronous content generated and shaped by the community.
+
+
+--------------------------------------------------------------------------------
+
+
+2.0 The Q&A Module
+
+2.1 For Administrators & Authenticated Users: Answering and Managing Questions
+
+The Q&A module's administrative functions, accessible via /qa and /qa/[id], are designed to moderate community-submitted questions and provide thoughtful, high-quality answers. A critical rule governs this system: a submitted question only becomes public and visible to all users after an administrator has posted an answer to it.
+
+2.1.1 Managing the Question List
+
+* The Main Q&A Dashboard (/qa): This page serves as the central hub for moderation, listing up to 100 questions sorted with the newest submissions first.
+* Information on Each Question Card: Each card provides a snapshot of the question's status and content:
+  * The full text of the question, displayed in bold.
+  * Any additional context provided by the user.
+  * A status badge indicating its current state: "✓ Answered" (green) or "No response" (pink).
+  * A visibility badge: "✓ Public" appears if the question's public flag has been set to true (i.e., it has been answered).
+* Available Actions: Administrators can click on any card to navigate to its detail view for answering. A "🗑️" delete button is also available on each card for removing irrelevant or inappropriate submissions.
+* The Deletion Process: Clicking the delete button triggers a confirmation dialog. Upon confirmation, the question is permanently removed from the Firestore database, and the UI updates instantly without a page reload.
+
+2.1.2 Answering and Editing a Question
+
+* The Detail View Layout (/qa/[id]): This page uses a two-column layout for an efficient workflow. The left column displays the question and its corresponding answer (if one exists), while the right column features a sticky response form that remains visible while scrolling.
+* Posting a New Answer: The process for answering a question is straightforward:
+  1. Input: The administrator enters the answer text (a required field) and any optional, comma-separated references into the form fields.
+  2. Submission: Upon clicking "Post response," the system validates that the answer field is not empty.
+  3. Backend Action: The setAnswer() function is called. This is a critical step, as the function not only saves the answer text and references to Firestore but also automatically sets the question's public status to true, making it visible on all public-facing interfaces.
+  4. UI Update: The page reloads its data to immediately display the newly posted answer.
+* Editing an Existing Answer:
+  * The page initially displays the answer in "read mode," showing the text and any references formatted as green badges.
+  * To make changes, an administrator clicks the "✏️ Modify" button, which activates "edit mode."
+  * In edit mode, the response form is pre-filled with the existing data, allowing for quick modifications. A "Cancel" button is available to discard any changes and exit edit mode.
+
+2.2 For Public Users: Asking a Question
+
+The /qa/embed/questions page provides a streamlined, single-purpose form designed for easy embedding on external sites. This widget allows any user to submit a question to the community anonymously and without friction.
+
+* The User Experience: The interface presents a simple, centered form with two fields: a required textarea for the question (minimum 5 characters) and an optional input field for any additional context.
+* The Visibility Notice: To manage user expectations regarding privacy and moderation, the form includes an explicit informational notice: "The questions will be made public once they receive an answer."
+* Submission and Redirection Flow: The post-submission sequence includes a unique technical behavior designed to create a seamless user journey:
+  1. Anonymous Authentication: The system first ensures an anonymous Firebase session is active for the user.
+  2. Firestore Creation: The question is saved to the Firestore database with its public status automatically set to false.
+  3. Parent Redirection: Once the question is successfully saved, the iframe executes window.parent.location.href. This command targets the parent window hosting the iframe, causing the main website—not the iframe itself—to navigate to the detail page (/qa/${id}) of the newly created question. This allows the user to see their submission in its final context immediately.
+* Embedding Instructions: To embed the question submission form, use the following <iframe> code. It is critical to include all three sandbox attributes (allow-same-origin, allow-scripts, and allow-top-navigation), as these permissions are required for the form and its post-submission redirection to function correctly.
+
+<iframe
+  src="https://your-domain.com/qa/embed/questions"
+  width="100%"
+  height="500px"
+  style="border:0;"
+  sandbox="allow-same-origin allow-scripts allow-top-navigation">
+</iframe>
+
+
+Where the Q&A module facilitates asynchronous community interaction, the Live Sessions module elevates this engagement to scheduled, real-time events.
+
+
+--------------------------------------------------------------------------------
+
+
+3.0 The "Live Sessions" Module
+
+3.1 For Administrators: Managing Live Sessions
+
+The /live administrative interface is a protected area for authenticated, non-anonymous users to create, manage, and review engagement for live YouTube Q&A sessions. This tool provides full control over the platform's event schedule.
+
+3.1.1 Creating and Viewing Sessions
+
+* The Creation Process: An administrator clicks the + New Session button, which reveals an inline form for adding a new event.
+* Session Creation Form: The form includes the following fields for defining a new live session.
+
+Category	Field	Description
+Mandatory	Title	The main title of the live Q&A session.
+Mandatory	Date	The calendar date of the event.
+Mandatory	Time	The start time of the event.
+Mandatory	YouTube Link	The URL pointing to the YouTube Live stream. Requires a valid URL format.
+Optional	Description	Additional details or context about the session.
+
+* The Saving Workflow:
+  1. Validation: The system first checks that all mandatory fields are filled and verifies that the logged-in user is not an anonymous user.
+  2. Data Conversion: The separate date and time inputs are combined into a single object and converted to a standard Firestore Timestamp.
+  3. Creation: The addLiveSession() function is called to save the new session document to Firestore.
+  4. UI Update: The creation form is hidden, and the session list is automatically reloaded to display the new entry.
+* Session Display: Each session is presented on a card showing its title, description, a formatted date and time, and a clickable badge that opens the YouTube link in a new tab.
+* The Session Status System: Each session card displays a status badge determined by its date and a manually set status field:
+  * LIVE NOW (🔴): A green badge with a pulse animation. This status is triggered when an admin manually sets the session's status to "live".
+  * Upcoming: A pink badge that indicates a future session where the status has not been set to "live".
+  * Past: A gray badge for sessions whose scheduled date has passed and whose status is not "live".
+  * Ended: A gray badge that appears when an admin manually sets the status to "ended", officially closing the session.
+* The Deletion Process: The "🗑️ Delete" button on each card allows for session removal. It first prompts for confirmation and then permanently removes the session document from Firestore.
+
+3.1.2 Exporting Attendee Emails
+
+* Purpose of the Export Feature: The "📧 Export Emails" button provides a simple way for administrators to retrieve a complete list of users who have reserved a seat for a specific live session, typically for sending reminders or follow-up materials.
+* Export Modal Workflow:
+  1. Initiation: The administrator clicks the export button on the relevant session card.
+  2. Data Retrieval: The system calls the listSeatReservations() function to fetch all reservation documents associated with that session ID.
+  3. Modal Display: A custom modal window appears, displaying the total number of reservations found.
+  4. Information & Actions: The modal presents the Session Title, YouTube Link, and a complete Email List in separate, read-only fields. Each field is paired with a dedicated "📋 Copy" button for easy data extraction.
+* Copy-to-Clipboard Functionality: Clicking any "📋 Copy" button uses the navigator.clipboard.writeText() browser API to copy the corresponding content. To provide clear feedback, the button's text immediately changes to "✅ Copied!" for two seconds before reverting to its original state.
+
+3.2 For Public Users: Viewing and Reserving Sessions
+
+The /live/embed page is a public-facing, read-only portal where users can discover upcoming live events and reserve a seat directly, all without needing to register for an account.
+
+* Content Filtering: A key difference from the admin view is that this public page automatically filters the content. It only displays sessions with a status of "upcoming" or "live", ensuring that users are only shown relevant, active events.
+* Session Card Information: Each session card clearly displays the event's title, description, and formatted date/time. Active sessions are made prominent with a large "LIVE NOW" badge.
+* The Two-State Reservation System: The user interface for reserving a seat is dynamic and context-aware.
+  * State 1: Initial View: A full-width button's appearance and text change based on the session's status:
+    * For "upcoming" sessions, a pink bordered button displays the text "💌 Save Your Seat".
+    * For "live" sessions, a solid green button prompts the user to "🎥 Join Live Session".
+  * State 2: Reservation Form: Clicking the "Save Your Seat" button reveals an inline form directly within the card, containing an email input field, a "Confirm" button, and a "Cancel" button.
+* Seat Reservation Workflow:
+  1. Validation: After a user enters their email and clicks "Confirm," the system validates that the field is not empty and that the input matches a valid email format.
+  2. Submission: The addSeatReservation() function is called, which saves the sessionId and the user's email to Firestore. For privacy and simplicity, the createdBy field for every reservation is always set to the string literal "anonymous".
+  3. Success Feedback: A temporary success message appears for 5 seconds, confirming the reservation and providing the direct YouTube link if it's available.
+* Embedding Instructions: To integrate this view, use the following <iframe> code. The widget is designed for seamless integration, featuring automatic anonymous authentication and a dark theme that is consistent with the Dirty Roots brand.
+
+<iframe
+  src="https://your-domain.com/live/embed"
+  width="100%"
+  height="600px"
+  style="border:0; border-radius: 24px;"
+  allowfullscreen=""
+  loading="lazy">
+</iframe>
+
+
+Moving from community-focused events, the platform also offers a curated selection of tangible goods through the "Grow Slowly Shop" module.
+
+
+--------------------------------------------------------------------------------
+
+
+4.0 The "Grow Slowly Shop" Module
+
+4.1 For Administrators: Managing Products
+
+The /growslowlyshop page is a protected administrative interface for creating, editing, and removing products. All items managed here are displayed in the public-facing, embeddable shop carousel.
+
+* Product Creation and Editing Workflow:
+  * A single, unified form is used for both creating new products and editing existing ones, streamlining the management process.
+  * The form requires several fields, which are validated by Zod to ensure data integrity: name, label, price, link (a valid URL), and imageBase64.
+  * To edit a product, an administrator clicks the "✏️ Edit" button on a product card. This action pre-populates the form with that product's existing data and changes the submit button's text to "Update Product".
+* Automatic Image Compression Feature: To optimize performance and storage, the system includes a robust, client-side image handling process:
+  * The platform uses the browser-image-compression library to process all uploaded images before they are saved.
+  * Images are automatically resized to a maximum width of 600 pixels.
+  * They are converted to the efficient JPEG format with a quality setting of 70%.
+  * The final compressed image must be under 400KB to be accepted.
+  * As a hard limit, an error is thrown if the compressed image size still exceeds 900KB.
+* Save and Delete Operations:
+  * Saving: The form is intelligent and detects whether it is in "create" or "edit" mode. It calls the appropriate backend function—addProduct() for new items or updateProduct() for existing items.
+  * Deleting: The "🗑️ Delete" button on each product card initiates the removal process. It displays a confirmation prompt to prevent accidental deletion before permanently removing the product from Firestore.
+
+4.2 For Public Users: Browsing the Product Carousel
+
+The /growslowlyshop/embed component is a visually focused, read-only, and embeddable widget that presents curated products in a smooth-scrolling horizontal carousel.
+
+* Carousel Design and Functionality:
+  * The carousel uses a horizontal layout with the CSS property scroll-snap-type set to 'x mandatory'. This ensures a clean, card-by-card scrolling experience for the user.
+  * The browser's default scrollbar is hidden to maintain a minimalist aesthetic.
+  * The entire component uses anonymous Firebase authentication, allowing for immediate and seamless data access without requiring any user login.
+* Structure of a Product Card: Each card in the carousel is designed to be both informative and functional. It acts as a clickable <a> tag that opens the product's external link in a new browser tab.
+  * Background: A background image is rendered using the product's imageBase64 data.
+  * Label: A descriptive label is displayed in gray text in the top-left corner.
+  * Price: The price is formatted as "€X.XX" and positioned in the top-right corner.
+  * Name: The product name is shown at the bottom of the card in a bold, white font.
+* Loading and Empty States:
+  * Loading State: While products are being fetched from the database, a centered, rotating green spinner is displayed.
+  * Empty State: If no products are available, the message "🛍️ No products available yet." appears, informing the user that the shop is currently empty.
+
+This module's focus on commercial products gives way to the experiential, time-sensitive content of the Seasonal Toolkit.
+
+
+--------------------------------------------------------------------------------
+
+
+5.0 The "Seasonal Toolkit" Module
+
+5.1 For Administrators: Curating Seasonal Toolkits
+
+The /seasonal-toolkit administrative page is a protected tool that allows administrators to create and manage time-sensitive content packages, known as toolkits. These toolkits are designed to be automatically displayed to public users only during their specified active periods.
+
+* Toolkit Creation and Editing Process:
+  * A comprehensive form requires a full set of fields to build a complete toolkit: season, title, description, calmReminder (a philosophical phrase), checklist items, lightMapDescription, a microGuide, and the crucial activeFromDate and activeToDate fields that control its visibility.
+  * Optional fields are available for linking to downloadable PDF URLs (checklistPdf, posterPdf, guidePdf).
+  * The editing workflow is initiated by clicking the "✏️ Edit" button. This action populates the form with the selected toolkit's data, intelligently converting the checklist array into a newline-separated string and dates into ISO format for easy modification in the form inputs.
+* Save and Delete Logic:
+  * Saving: On submission, the system processes the checklist text area, converting it back into an array of strings. It then calls either addSeasonalToolkit() (for new toolkits) or updateSeasonalToolkit() (for existing ones).
+  * Deleting: The "🗑️ Delete" button on each toolkit card prompts for confirmation before permanently removing the toolkit from the Firestore database.
+* Toolkit Display in Admin View: In the administrative dashboard, toolkits are presented in a vertical list. Each card displays a season emoji badge (❄️, 🌱, ☀️, 🍂), the toolkit's title and description, and its active date range for quick reference.
+
+5.2 For Public Users: Experiencing the Active Toolkit
+
+The /seasonal-toolkit/embed page is a dynamic and interactive public widget that displays only the currently active toolkit based on the current date. It stands out with unique features like browser-based geolocation and an interactive light map.
+
+* Automatic Temporal Filtering: Upon loading, the component fetches all available toolkits from the database but then applies a client-side filter. It shows only the single toolkit where the current date falls between its activeFrom and activeTo dates, ensuring content is always seasonally relevant.
+* Geolocation and Light Map Functionality:
+  * Location Request: The component requests the user's location via the navigator.geolocation API when it first mounts. If permission is denied or unavailable, a default location is used to ensure functionality.
+  * Solar Position Calculation: A simplified algorithm calculates the sun's approximate position based on the current time of day, creating a personalized experience.
+  * Interactive Map: Users are presented with a map centered on their location, which includes a marker indicating the sun's calculated position. A "🎯" recenter button is always available to return the map to the user's current location.
+* Toolkit Content Drawer: The active toolkit is displayed as a card in a responsive grid. Clicking on this card opens an animated drawer that slides up from the bottom of the screen, revealing the full toolkit content in a structured format:
+  1. Header: The season emoji, title, and a brief description.
+  2. Calm Reminder: The philosophical phrase is displayed prominently in a highlighted green box.
+  3. Checklist: A bulleted list of seasonal items or activities.
+  4. Interactive Light Map: The personalized map showing the user's location and the sun's position.
+  5. Care Guide: The detailed micro-guide text for the season.
+  6. Downloadables: A grid of clearly labeled links to any available PDFs (e.g., checklist, poster, guide).
+* UI States:
+  * Loading State: A spinner with the text "Loading seasonal toolkit..." is shown during the initial data fetch.
+  * Empty State: If no toolkit is currently active for the present date, a message stating "No active seasonal toolkit at the moment." is displayed.
+  * No Location State: If the user denies the geolocation request, a placeholder message "📍 Enable location access..." appears in the map area.
+* Embedding Instructions: To ensure full functionality of the interactive map, this embeddable widget should be used with an <iframe> that includes the allow="geolocation" attribute.

@@ -1,0 +1,763 @@
+Gestión de Lugares por Administradores
+Visualización y Navegación
+Los administradores acceden a la lista de lugares a través de /places page.tsx:72-77 . La interfaz muestra:
+Vista de lista con mapa integrado: Layout de dos columnas con mapa a la izquierda (650px) y lista scrolleable a la derecha page.tsx:117-136
+Contador de lugares: Muestra el total de lugares en el sistema page.tsx:140-142
+Sincronización mapa-lista: Al hacer clic en una tarjeta de lugar, el mapa se centra automáticamente en esas coordenadas con zoom 15 page.tsx:35-38
+Información Mostrada de Cada Lugar
+Cada tarjeta de lugar muestra page.tsx:232-320 :
+Nombre y tipo de lugar (🌳 parque o ☕ café) page.tsx:235-242
+Ciudad con badge de ubicación page.tsx:244-258
+Dirección completa page.tsx:262-266
+Horario de apertura page.tsx:268-273
+Descripción page.tsx:275-279
+Foto (si está disponible) page.tsx:281-294
+Tags categorizados page.tsx:297-320
+Eliminación de Lugares
+Los administradores pueden eliminar lugares mediante el botón "🗑️ Delete" en la esquina superior derecha de cada tarjeta page.tsx:200-230 :
+Confirmación: El sistema solicita confirmación antes de eliminar page.tsx:41-43
+Eliminación en Firestore: Llama a deletePlace(placeId) que elimina el documento de la colección places page.tsx:46
+Actualización de UI: Filtra el lugar eliminado del estado local sin recargar la página page.tsx:47
+Feedback: Muestra alerta de confirmación "Place deleted ✅" page.tsx:48
+Añadir Nuevos Lugares
+Los administradores pueden añadir lugares mediante el botón "+ Add place" que redirige a /places/new page.tsx:95-110 .
+El formulario de creación (PlaceForm) incluye PlaceForm.tsx:183-388 :
+Campos obligatorios:
+Coordenadas: Entrada manual en formato decimal (lat, lng) o selección por clic en mapa PlaceForm.tsx:146-173
+Nombre: Mínimo 2 caracteres PlaceForm.tsx:184-210
+Tipo de lugar: Selección entre "🌳 Park/Garden" o "☕ Cafe/Restaurant" PlaceForm.tsx:235-265
+Campos opcionales autocompletados:
+Ciudad y Dirección: Se obtienen automáticamente mediante geocodificación inversa de Nominatim cuando se seleccionan coordenadas PlaceForm.tsx:56-81
+Horario: Texto libre para especificar horarios de apertura PlaceForm.tsx:290-311
+Descripción: Notas adicionales sobre el lugar PlaceForm.tsx:313-337
+Tags: Lista separada por comas para categorización PlaceForm.tsx:339-360
+Proceso de Guardado
+Al enviar el formulario PlaceForm.tsx:118-141 :
+Validación: Verifica que se hayan seleccionado coordenadas PlaceForm.tsx:119-122
+Autenticación: Asegura sesión anónima si no hay usuario autenticado PlaceForm.tsx:123-124
+Creación en Firestore: Llama a addPlace() que automáticamente:
+Genera el geohash para búsquedas espaciales firestore.ts:49
+Añade timestamp del servidor firestore.ts:50
+Establece status como "approved" por defecto firestore.ts:51
+Reset del formulario: Limpia todos los campos tras guardado exitoso PlaceForm.tsx:136-140
+---------------------------------------------
+Vista Embebible del Mapa (/embed/map)
+La ruta /embed/map proporciona una versión del mapa diseñada específicamente para ser embebida en sitios externos mediante iframes page.tsx:15 . Es un componente cliente de React que carga dinámicamente el mapa para evitar problemas con el renderizado del servidor page.tsx:2-13 .
+Inicialización y Carga de Datos
+Al cargar la página, el componente ejecuta una secuencia de inicialización page.tsx:22-41 :
+Autenticación anónima: Primero establece una sesión anónima de Firebase mediante ensureAnonAuth() page.tsx:25-27
+Carga de lugares: Obtiene hasta 100 lugares desde Firestore usando listLatestPlaces(100) page.tsx:29-31
+Filtrado: Solo muestra lugares con status === 'approved' page.tsx:33
+Layout y Estructura Visual
+El layout ocupa todo el viewport (100vw x 100vh) y se divide en dos secciones page.tsx:112-119 :
+Mapa (lado izquierdo) page.tsx:121-128 :
+Ocupa el espacio flexible restante (flex: 1)
+Usa el componente MapCanvas con altura de 100vh
+Centro y zoom controlados por estado (mapCenter, mapZoom)
+Muestra marcadores 🌿 para cada lugar
+Sidebar (lado derecho) page.tsx:131-138 :
+Ancho fijo de 400px
+Scroll vertical para lista de lugares
+Fondo oscuro (#0F0F0F) con borde izquierdo
+Título "🌿 Calm Places"
+Tarjetas de Lugares
+Cada lugar se muestra en una tarjeta interactiva page.tsx:154-174 que incluye:
+Información mostrada page.tsx:175-250 :
+Nombre con icono de tipo (🌳 para parques, ☕ para cafés) page.tsx:178-189
+Badge de ciudad con 📍 (si existe) page.tsx:191-204
+Dirección con 📍 (si existe) page.tsx:208-216
+Horario con 🕐 (si existe) page.tsx:219-227
+Descripción (si existe) page.tsx:230-239
+Tags con formato hashtag (si existen) page.tsx:242-250
+Efectos hover: Al pasar el mouse, la tarjeta cambia de color y muestra un borde verde page.tsx:166-173 .
+Interacción con el Mapa
+Al hacer clic en una tarjeta, se activa handlePlaceClick() page.tsx:43-46 que:
+Centra el mapa en las coordenadas del lugar
+Hace zoom a nivel 15 para vista detallada
+El componente MapCanvas recibe estos cambios y anima la transición usando flyTo de Leaflet MapCanvas.tsx:77-84 .
+Estados de Carga y Error
+Estado de carga page.tsx:48-78 :
+Muestra un spinner animado con el color de marca (#A4CB3E)
+Texto "Loading map..." en gris
+Ocupa todo el viewport con fondo oscuro
+Estado de error page.tsx:80-110 :
+Muestra mensaje de error en rosa (#FF60A8)
+Botón "Retry" para recargar la página
+Diseño centrado en viewport completo
+Uso en Iframe
+Para embeber este mapa en un sitio externo:
+src="https://tu-dominio.com/embed/map"
+width="100%"
+height="600px"
+frameborder="0">
+La vista está optimizada para este uso con:
+Estilos inline para evitar conflictos con CSS del sitio padre page.tsx:113-119
+Autenticación anónima automática (no requiere login) page.tsx:25-27
+Tema oscuro consistente con la marca Dirty Roots page.tsx:117
+-----------------------------------------------------------------
+Sistema de Preguntas y Respuestas
+El sistema Q&A permite a los usuarios hacer preguntas sobre lugares tranquilos y prácticas de mindfulness, y a usuarios autenticados responderlas page.tsx:1-9 . Las preguntas se vuelven públicas automáticamente cuando reciben una respuesta firestore.ts:95-104 .
+1. Creación de Preguntas
+Formulario de Envío
+Los usuarios pueden crear preguntas desde dos lugares:
+Página principal embebible (/qa/embed/questions) page.tsx:49-87 :
+Diseñada para iframes en sitios externos
+Formulario centrado con fondo oscuro
+Redirige al padre tras crear la pregunta
+Componente QuestionForm QuestionForm.tsx:17-26 :
+Campo obligatorio: Texto de la pregunta (mínimo 5 caracteres)
+Campo opcional: Contexto adicional
+Validación con Zod schema
+Proceso de Guardado
+Al enviar el formulario QuestionForm.tsx:20-26 :
+Autenticación: Llama a ensureAnonAuth() para establecer sesión anónima
+Obtención de UID: Usa auth.currentUser?.uid o "anon" como fallback
+Creación en Firestore: Llama a addQuestion() con los datos
+Estado inicial: La pregunta se crea con public: false firestore.ts:95-104
+Callback: Ejecuta onCreated(id) para redirigir o actualizar UI
+Importante: Las preguntas nuevas NO son públicas hasta que reciben una respuesta firestore.ts:99 .
+2. Visualización de Preguntas
+Lista de Preguntas (/qa)
+La página principal de Q&A muestra todas las preguntas page.tsx:52-88 :
+Inicialización page.tsx:13-25 :
+Establece autenticación anónima
+Carga hasta 100 preguntas con listQuestions(100)
+Ordena por fecha de creación descendente
+Cada tarjeta muestra page.tsx:114-177 :
+Texto de la pregunta (negrita, 18px)
+Contexto adicional (si existe)
+Badge de estado:
+"✓ Answered" (verde) si tiene respuesta page.tsx:180-189
+"No response" (rosa) si no tiene respuesta page.tsx:190-199
+Badge "✓ Public" si public === true page.tsx:201-211
+Botón de eliminar (🗑️) en esquina superior derecha page.tsx:133-162
+Interacción: Al hacer clic en una tarjeta, navega a /qa/${id} para ver detalles page.tsx:164-167 .
+3. Vista Detallada y Respuesta
+Página de Detalle (/qa/[id])
+La vista de detalle usa un layout de dos columnas page.tsx:172-173 :
+Columna izquierda (pregunta y respuesta) page.tsx:174-321 :
+Tarjeta de pregunta: Muestra texto, contexto y badge de estado
+Tarjeta de respuesta (si existe): Muestra texto de respuesta y referencias
+Estado vacío (si no hay respuesta): Emoji 💭 con mensaje "This question still has no answer"
+Columna derecha (formulario sticky) page.tsx:324-424 :
+Formulario para añadir/modificar respuesta
+Campo de texto (5 filas, obligatorio)
+Campo de referencias (opcional, separadas por comas)
+Botón de envío dinámico: "Post response" o "Update response"
+Proceso de Respuesta
+Al enviar una respuesta page.tsx:51-71 :
+Validación: Verifica que el texto no esté vacío con text.trim()
+Autenticación: Asegura sesión con ensureAnonAuth()
+Obtención de UID: Usa auth.currentUser?.uid para atribuir autoría
+Procesamiento de referencias: Divide por comas, limpia espacios y filtra vacíos page.tsx:60
+Guardado: Llama a setAnswer(id, {text, references, createdBy})
+Actualización automática: La función setAnswer() establece public: true firestore.ts:145-149
+Recarga: Actualiza la pregunta para mostrar la nueva respuesta
+Salida de modo edición: Establece isEditing: false
+Edición de Respuestas
+Si ya existe una respuesta page.tsx:219-298 :
+Modo lectura:
+Muestra la respuesta en tarjeta con fondo oscuro
+Botón "✏️ Modify" para activar edición page.tsx:232-255
+Referencias mostradas como badges verdes
+Modo edición page.tsx:73-82 :
+Al hacer clic en "Modify", establece isEditing: true
+Pre-llena el formulario con texto y referencias existentes page.tsx:39-43
+Botón "Cancel" restaura valores originales
+Al guardar, actualiza la respuesta manteniendo public: true
+4. Eliminación de Preguntas
+Los usuarios pueden eliminar preguntas desde la lista page.tsx:27-39 :
+Confirmación: Muestra diálogo "Are you sure you want to delete this question?"
+Eliminación: Llama a deleteQuestion(questionId) firestore.ts:120-123
+Actualización UI: Filtra la pregunta del estado local sin recargar
+Manejo de errores: Muestra alerta si falla
+5. Estados de Carga
+Ambas páginas implementan estados de carga consistentes:
+Estado de carga page.tsx:41-50 :
+Spinner animado con color de marca (#A4CB3E)
+Texto "Loading questions..." o "Loading question..."
+Fondo oscuro (#0B0B0B)
+Estado vacío (lista) page.tsx:90-107 :
+Emoji 💬 grande
+Mensaje "There are no questions yet"
+Invitación "Be the first to ask a question"
+Pregunta no encontrada (detalle) page.tsx:108-135 :
+Emoji ❓
+Mensaje "Question not found"
+Botón para volver a /qa
+Modelo de Datos
+Estructura de Question
+{
+id: string,
+text: string, // Pregunta (obligatorio)
+context?: string, // Contexto adicional (opcional)
+createdBy: string, // UID del creador
+createdAt: Timestamp, // Fecha de creación
+public: boolean, // false hasta que se responde
+answer?: { // Objeto de respuesta (opcional)
+text: string,
+references: string[],
+createdBy: string,
+createdAt: Timestamp
+}
+}
+-------------------------------------------------------
+Vista Embebible de Preguntas (/qa/embed/questions)
+Propósito y Diseño
+Esta ruta proporciona un formulario standalone para crear preguntas, optimizado para integración en sitios externos page.tsx:2-9 . A diferencia de la vista principal /qa, esta interfaz se centra exclusivamente en la creación de preguntas, no en su visualización o respuesta.
+Inicialización del Componente
+El componente EmbedQuestionsPage es un componente cliente de React que implementa un patrón de montaje en dos fases page.tsx:3-15 :
+Fase 1 - Montaje del cliente page.tsx:12-15 :
+Establece mounted: true para indicar que el componente está en el cliente
+Llama a ensureAnonAuth() para establecer autenticación anónima de Firebase
+Este patrón previene problemas de hidratación entre servidor y cliente.
+Estados de Renderizado
+Estado de carga (antes del montaje) page.tsx:17-46 :
+Muestra un spinner animado con el color de marca (#A4CB3E)
+Texto "Loading..." en gris (#B6B9BF)
+Ocupa todo el viewport (100vw x 100vh) con fondo oscuro (#0B0B0B)
+Animación CSS de rotación infinita
+Estado montado (formulario activo) page.tsx:49-88 :
+Layout centrado con flexbox
+Tarjeta de formulario con ancho máximo de 600px
+Fondo oscuro (#0F0F0F) con borde sutil (#242424)
+Bordes redondeados (24px) para estética moderna
+Estructura Visual
+El formulario se presenta en una tarjeta centrada con tres secciones page.tsx:59-86 :
+1. Encabezado page.tsx:67-74 :
+Título "💬 New question" (24px, negrita)
+Color de texto principal (#F5F5F5)
+2. Texto informativo page.tsx:75-81 :
+Explica que "The questions will be made public once they receive an answer"
+Texto secundario en gris (#B6B9BF, 14px)
+Informa al usuario sobre el flujo de visibilidad
+3. Formulario de pregunta page.tsx:82-85 :
+Usa el componente compartido QuestionForm
+Incluye callback onCreated para manejar el post-envío
+Componente QuestionForm
+El formulario reutiliza el componente QuestionForm que implementa validación con Zod QuestionForm.tsx:10-13 :
+Campos del formulario QuestionForm.tsx:28-102 :
+Pregunta (obligatorio) QuestionForm.tsx:32-71 :
+Textarea de 3 filas
+Validación: mínimo 5 caracteres
+Placeholder: "¿Conoces sitios tranquilos en Prenzlauer Berg?"
+Borde verde (#A4CB3E) al hacer focus
+Contexto (opcional) QuestionForm.tsx:73-102 :
+Input de texto simple
+Placeholder: "Café con terraza, poco ruido"
+Mismo estilo visual que el campo de pregunta
+Botón de envío QuestionForm.tsx:104-131 :
+Texto: "Publicar pregunta"
+Fondo verde (#A4CB3E) con efecto hover
+Ancho completo con bordes redondeados (pill shape)
+Flujo de Envío de Pregunta
+Cuando el usuario envía el formulario, se ejecuta la siguiente secuencia QuestionForm.tsx:20-26 :
+Autenticación: Llama a ensureAnonAuth() para asegurar sesión Firebase
+Obtención de UID: Usa auth.currentUser?.uid o "anon" como fallback
+Creación en Firestore: Llama a addQuestion() con:
+text: Texto de la pregunta
+context: Contexto opcional
+createdBy: UID del usuario
+Estado inicial: La pregunta se crea con public: false firestore.ts:95-103
+Reset del formulario: Limpia los campos con reset()
+Callback: Ejecuta onCreated(id) con el ID de la pregunta creada
+Comportamiento de Redirección
+La característica clave de esta vista embebible es su comportamiento post-envío page.tsx:82-85 :
+onCreated={(id) => {
+window.parent.location.href = `/qa/${id}`;
+}}
+Flujo de redirección:
+Tras crear la pregunta exitosamente, obtiene el ID del documento
+Usa window.parent.location.href para navegar la ventana padre (no el iframe)
+Redirige a /qa/${id} en la PWA principal para ver la pregunta recién creada
+Este patrón permite que:
+El iframe proporcione una interfaz ligera de envío
+El sitio padre mantenga control de la navegación
+El usuario vea su pregunta en contexto completo tras crearla
+Uso en Iframe
+Para embeber este formulario en un sitio externo:
+src="https://tu-dominio.com/qa/embed/questions"
+width="100%"
+height="500px"
+frameborder="0"
+sandbox="allow-same-origin allow-scripts allow-top-navigation">
+Consideraciones importantes:
+Requiere sandbox="allow-top-navigation" para permitir la redirección del padre
+Los estilos son inline para evitar conflictos con CSS del sitio padre page.tsx:50-65
+La autenticación es anónima, no requiere login del usuario page.tsx:14
+Diferencias con la Vista Principal /qa
+Característica /qa/embed/questions /qa
+Propósito Solo crear preguntas Ver y gestionar preguntas
+Layout Tarjeta centrada (600px max) Lista completa con grid
+Navegación Redirige al padre tras crear Navegación interna
+Visualización No muestra preguntas existentes Lista todas las preguntas
+Eliminación No disponible Botón 🗑️ en cada tarjeta
+Respuestas No disponible Navega a /qa/[id]
+-------------------------------------------------------------
+Sistema de Sesiones en Vivo (/live)
+El componente LiveSessionsPage es una interfaz administrativa protegida que permite a usuarios autenticados con email gestionar sesiones en vivo de YouTube. Requiere autenticación no anónima mediante el componente ProtectedRoute.
+Inicialización y Carga de Datos
+El componente implementa un patrón de montaje en dos fases similar a otros componentes embebibles:
+Fase 1 - Montaje del cliente:
+Establece mounted: true para indicar renderizado en cliente
+Llama a loadSessions() que ejecuta listLiveSessions(50) para obtener hasta 50 sesiones desde Firestore
+Ordena las sesiones por fecha ascendente usando date.toDate().getTime()
+Protección de ruta: El componente completo está envuelto en , que verifica que el usuario esté autenticado con email (no anónimo).
+Modelo de Datos de Sesión
+Basándome en el código, las sesiones tienen la siguiente estructura:
+{
+id?: string,
+title: string, // Título de la sesión
+description?: string, // Descripción opcional
+date: Timestamp, // Fecha/hora de la sesión
+youtubeLink: string, // URL de YouTube Live
+createdBy: string, // UID del creador
+status?: "live" | "ended" // Estado manual de la sesión
+}
+Creación de Sesiones
+Formulario de Creación
+El formulario se muestra/oculta mediante el botón "+ New Session" que alterna showCreateForm. Incluye:
+Campos obligatorios:
+Título (title): Input de texto con placeholder "e.g., Live Q&A — Winter Reset"
+Fecha (date): Input tipo date para selección de fecha
+Hora (time): Input tipo time para selección de hora
+YouTube Link (youtubeLink): Input tipo url con validación de formato
+Campo opcional:
+Descripción (description): Textarea de 4 filas para detalles adicionales
+Proceso de Guardado
+Al enviar el formulario mediante handleCreateSession():
+Validación de campos: Verifica que título, fecha, hora y YouTube link no estén vacíos
+Verificación de autenticación: Comprueba que auth.currentUser exista y NO sea anónimo (!user.isAnonymous)
+Conversión de fecha: Combina date y time en un objeto Date y lo convierte a Timestamp.fromDate(dateTime)
+Creación en Firestore: Llama a addLiveSession() con el objeto de sesión
+Reset del formulario: Limpia todos los campos y oculta el formulario
+Recarga de datos: Ejecuta loadSessions() para actualizar la lista
+Feedback: Muestra alerta "✅ Session created successfully!"
+Importante: Si el usuario es anónimo, redirige a /auth con mensaje de error.
+Visualización de Sesiones
+Lista de Sesiones
+Cada sesión se muestra en una tarjeta con:
+Información principal:
+Título (20px, negrita, con padding derecho de 200px para botones)
+Descripción (si existe, 14px, color gris)
+Fecha formateada: "Month Day, Year" (e.g., "January 19, 2025")
+Hora formateada: "HH:MM AM/PM" (e.g., "07:00 PM")
+YouTube Link: Badge clickeable que abre en nueva pestaña
+Sistema de Estados
+Las sesiones tienen tres estados posibles determinados por lógica temporal y campo status:
+1. LIVE NOW (🔴):
+Condición: session.status === "live"
+Badge verde (#A4CB3E) con animación de pulso
+Prioridad máxima sobre otros estados
+2. Upcoming:
+Condición: sessionDate >= now && !isLive
+Badge rosa (#FF60A8) con fondo transparente
+Indica sesiones futuras
+3. Past:
+Condición: sessionDate < now && !isLive
+Badge gris (#757575)
+Sesiones que ya pasaron
+4. Ended:
+Condición: session.status === "ended"
+Badge gris (#757575)
+Estado manual para sesiones finalizadas
+Eliminación de Sesiones
+El botón "🗑️ Delete" en la esquina superior derecha ejecuta handleDeleteSession():
+Confirmación: Muestra diálogo "Are you sure you want to delete this session?"
+Eliminación: Llama a deleteLiveSession(sessionId) que elimina el documento de Firestore
+Actualización UI: Filtra la sesión del estado local con sessions.filter(s => s.id !== sessionId)
+Feedback: Muestra alerta "✅ Session deleted"
+Sistema de Exportación de Emails
+Funcionalidad de Reservas
+El botón "📧 Export Emails" ejecuta handleExportEmails(session), que implementa un modal personalizado con manipulación directa del DOM:
+Flujo de exportación:
+Verificación de autenticación: Comprueba que el usuario tenga email (no anónimo)
+Carga de reservas: Llama a listSeatReservations(session.id) para obtener todas las reservas de esa sesión
+Preparación de datos:
+sessionTitle: Título de la sesión
+youtubeLink: URL de YouTube
+emailList: Emails unidos con \n (uno por línea)
+totalReservations: Contador de reservas
+Modal de Exportación
+El modal se crea dinámicamente con document.createElement('div') y contiene:
+Estructura del modal:
+Header: Título "Export Session Data" con botón × para cerrar
+Contador: "Total Reservations: X" en verde
+Tres secciones con campos readonly:
+Session Title: Input con título + botón "📋 Copy"
+YouTube Link: Input con URL + botón "📋 Copy"
+Email List: Textarea con emails (8 filas) + botón "📋 Copy"
+Botón Close: Cierra el modal
+Funcionalidad de Copia
+Cada botón "📋 Copy" ejecuta copyToClipboard(text, buttonId):
+Copia al portapapeles: Usa navigator.clipboard.writeText(text)
+Feedback visual: Cambia el botón a "✅ Copied!" con fondo verde durante 2 segundos
+Restauración: Vuelve al estado original tras el timeout
+Efectos hover: Los botones cambian de transparente a verde sólido al pasar el mouse.
+Cierre del Modal
+El modal se puede cerrar de tres formas:
+Botón × en la esquina superior derecha
+Botón "Close" al final del modal
+Click fuera del modal (en el overlay oscuro)
+Estados de Carga
+Estado inicial (antes de montaje):
+Spinner animado verde (#A4CB3E)
+Texto "Loading..."
+Ocupa todo el viewport (100vw x 100vh)
+Estado de carga de sesiones:
+Spinner dentro de tarjeta con borde
+Texto "Loading sessions..."
+Estado vacío (sin sesiones):
+Emoji 📅 grande (64px)
+Mensaje "No sessions yet"
+Submensaje "Create your first live session"
+Integración con Firestore
+El sistema depende de cuatro funciones de Firestore que deben estar implementadas en pwa/src/lib/firestore.ts:
+listLiveSessions(limit: number): Obtiene sesiones ordenadas por fecha
+addLiveSession(data: LiveSession): Crea nueva sesión
+deleteLiveSession(id: string): Elimina sesión por ID
+listSeatReservations(sessionId: string): Obtiene reservas de una sesión
+Nota importante: Estas funciones NO están visibles en el código proporcionado, por lo que asumo que deben implementarse en firestore.ts siguiendo el mismo patrón que listQuestions(), addQuestion(), etc.
+Modelo de Datos de Reserva
+Basándome en el uso de listSeatReservations(), las reservas deben tener al menos:
+{
+id?: string,
+sessionId: string, // ID de la sesión
+email: string, // Email del usuario reservado
+createdAt: Timestamp // Fecha de reserva
+}
+Diferencias con Otros Sistemas
+Característica /live /qa /places
+Autenticación Email obligatorio Anónima permitida Anónima permitida
+Protección ProtectedRoute Sin protección Sin protección
+Creación Formulario inline Componente separado Ruta /places/new
+Exportación Modal con emails No disponible No disponible
+Estados 4 estados temporales 2 estados (answered/not) 1 estado (approved)
+Ordenamiento Por fecha ascendente Por fecha descendente Sin orden específico
+---------------------------------------------
+Vista Embebible de Sesiones en Vivo (/live/embed)
+El componente EmbedLiveSessionsPage es una interfaz pública de solo lectura y reserva que contrasta con la vista administrativa /live. Usa autenticación anónima y permite a cualquier usuario reservar un asiento proporcionando solo su email.
+Inicialización y Carga de Datos
+El componente implementa un patrón de montaje en dos fases:
+Fase 1 - Montaje del cliente:
+Establece mounted: true para indicar renderizado en cliente
+Llama a ensureAnonAuth() para establecer autenticación anónima de Firebase
+Ejecuta loadSessions() para cargar las sesiones
+Fase 2 - Carga y filtrado de sesiones:
+Obtiene hasta 50 sesiones con listLiveSessions(50)
+Filtra solo sesiones activas: status === "upcoming" || status === "live"
+Ordena por fecha ascendente: Sesiones más próximas primero usando date.toMillis()
+Diferencia clave con /live: La vista administrativa muestra TODAS las sesiones (incluyendo pasadas y finalizadas), mientras que esta vista embebible solo muestra sesiones activas.
+Layout y Estructura Visual
+El layout ocupa todo el espacio disponible con scroll vertical:
+Contenedor principal:
+width: 100%, height: 100%
+Fondo oscuro (#0B0B0B)
+Flexbox con dirección columna
+Overflow hidden en el contenedor, scroll en el contenido
+Área de contenido:
+flex: 1 para ocupar espacio disponible
+overflowY: auto para scroll vertical
+Padding de 32px
+Secciones de la Interfaz
+1. Header Centrado
+Título: "🎙️ Live Q&A Sessions" (32px, negrita)
+Subtítulo: "Join our seasonal live sessions with Adam" (16px, gris)
+Centrado con textAlign: 'center'
+2. Mensaje de Éxito (Condicional)
+Aparece tras reservar exitosamente un asiento:
+Fondo verde translúcido (rgba(164, 203, 62, 0.1))
+Borde verde (#A4CB3E)
+Muestra el YouTube link si está disponible
+Auto-desaparece tras 5 segundos usando setTimeout()
+Dos variantes de mensaje:
+Con link: "✅ Seat reserved! YouTube link: {link}"
+Sin link: "✅ Seat reserved! You'll receive the YouTube link before the session."
+3. Lista de Sesiones
+Cada sesión se muestra en una tarjeta con información completa:
+Información mostrada:
+Título (24px, negrita, #F5F5F5)
+Descripción (16px, gris, line-height 1.6)
+Fecha formateada: "Weekday, Month Day, Year" (e.g., "Monday, January 19, 2025")
+Hora formateada: "HH:MM AM/PM" con emojis 📅 y 🕐
+Badge "LIVE NOW" (si status === "live"):
+Posición absoluta en esquina superior derecha
+Fondo verde (#A4CB3E) con texto negro
+Punto pulsante animado (8px, animación CSS pulse)
+Borde de tarjeta cambia a 2px verde cuando está en vivo
+Sistema de Reserva de Asientos
+Estados de Interacción
+El sistema tiene dos estados controlados por selectedSessionId:
+Estado 1 - Botón de Reserva (cuando selectedSessionId !== session.id):
+Botón de ancho completo (width: 100%)
+Estilo dinámico según estado:
+Si isLive: Fondo verde (#A4CB3E), texto negro, sin borde
+Si upcoming: Fondo transparente, texto rosa (#FF60A8), borde rosa
+Texto dinámico:
+Si isLive: "🎥 Join Live Session"
+Si upcoming: "💌 Save Your Seat"
+Efectos hover diferentes según estado
+Estado 2 - Formulario de Email (cuando selectedSessionId === session.id):
+Muestra tres elementos en flexbox con gap de 12px:
+Input de email:
+flex: 1 con minWidth: 200px para responsividad
+Placeholder: "your@email.com"
+Borde verde (#A4CB3E) al hacer focus
+Deshabilitado durante envío
+Botón "Confirm":
+Fondo verde (#A4CB3E) cuando email válido
+Fondo gris (#2A2A2A) cuando email vacío o enviando
+Texto: "Saving..." durante envío, "Confirm" normalmente
+Cursor not-allowed cuando deshabilitado
+Botón "Cancel":
+Fondo transparente con borde gris
+Limpia el email y cierra el formulario
+Deshabilitado durante envío
+Proceso de Reserva
+Al hacer clic en "Confirm", se ejecuta handleSaveSeat(sessionId):
+Validaciones:
+Email no vacío: Verifica email.trim()
+Formato de email válido: Usa regex /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+Flujo de guardado:
+Establece submitting: true para deshabilitar controles
+Llama a addSeatReservation() con:
+sessionId: ID de la sesión
+email: Email limpio con trim()
+createdBy: Siempre "anonymous" (no usa UID de Firebase)
+Busca la sesión en el array local para obtener youtubeLink
+Establece mensaje de éxito con o sin link
+Limpia el email y cierra el formulario
+Auto-limpia el mensaje tras 5 segundos con setTimeout()
+Manejo de errores:
+Muestra alert genérico: "Error reserving seat. Please try again."
+No proporciona detalles específicos del error al usuario
+Estados de Carga y Vacío
+Estado de Carga
+Muestra mientras !mounted || loading:
+Spinner animado verde (#A4CB3E) de 48px
+Texto "Loading sessions..." en gris
+Fondo oscuro (#0B0B0B)
+Animación CSS spin de rotación infinita
+Estado Vacío
+Muestra cuando sessions.length === 0:
+Emoji 📅 grande (64px)
+Mensaje principal: "No upcoming sessions" (18px, gris)
+Submensaje: "Check back soon for new live Q&A dates" (14px, gris más oscuro)
+Tarjeta con fondo #0F0F0F y borde #242424
+Modelo de Datos de Reserva
+Basándome en el uso de addSeatReservation(), las reservas se crean con:
+{
+sessionId: string, // ID de la sesión
+email: string, // Email del usuario (trimmed)
+createdBy: "anonymous" // Siempre string literal "anonymous"
+}
+Nota importante: A diferencia de otros sistemas que usan auth.currentUser?.uid, este sistema usa el string literal "anonymous" para todas las reservas. Esto significa que no hay trazabilidad de usuarios individuales, solo emails.
+Uso en Iframe
+Para embeber esta vista en un sitio externo:
+src="https://tu-dominio.com/live/embed"
+width="100%"
+height="600px"
+frameborder="0"
+style="border-radius: 24px;">
+Características de integración:
+Estilos inline para evitar conflictos con CSS del sitio padre
+Autenticación anónima automática (no requiere login)
+No redirige la ventana padre (a diferencia de /qa/embed/questions)
+Tema oscuro consistente con la marca Dirty Roots
+Diferencias con la Vista Administrativa /live
+Característica /live/embed /live
+Autenticación Anónima (automática) Email obligatorio (ProtectedRoute)
+Sesiones mostradas Solo upcoming/live Todas (incluyendo pasadas)
+Funcionalidad principal Reservar asientos Crear/gestionar sesiones
+Exportación de emails No disponible Modal con copy buttons
+Eliminación de sesiones No disponible Botón 🗑️ Delete
+Creación de sesiones No disponible Formulario inline
+Ordenamiento Ascendente (próximas primero) Ascendente (próximas primero)
+Feedback de reserva Mensaje temporal con link N/A
+Integración con Firestore
+El sistema depende de dos funciones de Firestore:
+listLiveSessions(limit: number): Obtiene sesiones (compartida con /live)
+addSeatReservation(data: SeatReservation): Crea nueva reserva
+Nota: Estas funciones deben estar implementadas en pwa/src/lib/firestore.ts siguiendo el mismo patrón que otras funciones del sistema.
+
+-----------------------------------------------------
+
+Vista del Administrador (/growslowlyshop/page.tsx) 
+Autenticación y Protección 
+La página administrativa está protegida mediante el componente ProtectedRoute, que requiere autenticación de Firebase para acceder. page.tsx:746-752
+
+Funcionalidades Principales 
+1. Crear Productos
+
+El administrador completa un formulario con validación mediante Zod que requiere: page.tsx:15-21
+
+name: nombre del producto (mínimo 2 caracteres)
+label: etiqueta descriptiva
+price: precio positivo
+link: URL válida del producto
+imageBase64: imagen comprimida en base64
+2. Compresión de Imágenes
+
+El sistema comprime automáticamente las imágenes subidas a máximo 400KB usando browser-image-compression, redimensionándolas a 600px y convirtiéndolas a JPEG con 70% de calidad. page.tsx:63-105 Si la imagen excede 900KB después de la compresión, se rechaza. page.tsx:91-94
+
+3. Editar Productos
+
+Al hacer clic en el botón "✏️ Edit" de un producto, el formulario se pre-rellena con los datos existentes y cambia a modo edición. page.tsx:107-115 page.tsx:641-658 El botón de submit cambia a "Update Product". page.tsx:570
+
+4. Eliminar Productos
+
+El botón "🗑️ Delete" solicita confirmación antes de eliminar permanentemente un producto de Firestore. page.tsx:123-136 page.tsx:659-677
+
+5. Flujo de Guardado
+
+El formulario detecta si está en modo edición o creación: page.tsx:146-180
+
+Modo edición: llama a updateProduct() y actualiza el estado local
+Modo creación: llama a addProduct() con el uid del usuario autenticado y recarga la lista completa
+Visualización de Productos 
+Los productos se muestran en una cuadrícula con tarjetas que incluyen imagen de fondo, nombre, label, precio y botones de edición/eliminación. page.tsx:636-695
+
+Vista del Usuario (/growslowlyshop/embed/page.tsx) 
+Autenticación Anónima 
+El embed utiliza ensureAnonAuth() para establecer una sesión anónima de Firebase sin requerir registro, permitiendo acceso inmediato a los datos. page.tsx:20-27
+
+Patrón de Ciclo de Vida 
+Implementa un patrón de dos fases para evitar problemas de hidratación en SSR: page.tsx:13-28
+
+Fase 1: Establece mounted = true
+Fase 2: Solo cuando mounted === true, ejecuta autenticación y carga de datos
+Carrusel Horizontal 
+Los productos se muestran en un carrusel horizontal con scroll suave: page.tsx:91-108
+
+scrollSnapType: 'x mandatory' para scroll card-by-card
+Scrollbar oculto mediante CSS page.tsx:228-238
+Responsive: en móvil (<768px) las tarjetas ocupan calc(100% - 32px) page.tsx:254-275
+Estructura de Tarjetas 
+Cada tarjeta de producto es un enlace clickeable (<a>) que abre el producto en una nueva pestaña: page.tsx:110-121
+
+Imagen de fondo: 338.75px de altura con backgroundImage usando product.imageBase64 page.tsx:136-143
+Label: texto gris en la esquina superior izquierda
+Precio: formato "€X.XX" en la esquina superior derecha
+Nombre: texto blanco en negrita en la parte inferior
+Carga de Datos 
+Obtiene hasta 50 productos mediante listProducts(50) en una sola llamada. page.tsx:30-39 No hay actualización automática; los datos se cargan una vez al montar el componente.
+
+Estados de UI 
+Estado de carga: Muestra un spinner verde (#A4CB3E) centrado con animación de rotación. page.tsx:41-66
+
+Estado vacío: Si no hay productos, muestra un emoji 🛍️ con el mensaje "No products available yet." page.tsx:77-89
+
+Integración del Embed 
+El código HTML que proporcionaste muestra cómo se integra el embed en una página externa. El iframe apunta a https://dirty-roots.vercel.app/growslowlyshop/embed con altura de 600px y estilos CSS adicionales para ocultar scrollbars en todos los navegadores.
+
+El embed es completamente de solo lectura para usuarios finales - no pueden agregar, editar o eliminar productos, solo visualizarlos y hacer clic en los enlaces externos.
+
+Notes 
+El flujo completo es: el admin crea/edita productos en /growslowlyshop/page.tsx → los datos se guardan en Firestore mediante addProduct() o updateProduct() → el embed en /growslowlyshop/embed/page.tsx los lee mediante listProducts() y los muestra en el carrusel. Ambas interfaces comparten las mismas funciones de Firestore pero con diferentes niveles de acceso (escritura vs solo lectura).
+
+--------------------------------------------------------
+
+Vista del Administrador (/seasonal-toolkit/page.tsx) 
+Autenticación y Protección 
+La página administrativa está protegida mediante ProtectedRoute, requiriendo autenticación de Firebase para acceder. page.tsx:854-860
+
+Funcionalidades Principales 
+1. Crear Toolkits
+
+El administrador completa un formulario con validación mediante Zod que requiere: page.tsx:20-33
+
+season: estación (winter, spring, summer, autumn)
+title: título del toolkit (mínimo 2 caracteres)
+description: descripción corta (mínimo 10 caracteres)
+calmReminder: frase filosófica LITFA (mínimo 5 caracteres)
+checklist: items de checklist (uno por línea, mínimo 10 caracteres)
+lightMapDescription: descripción del mapa de luz (mínimo 10 caracteres)
+microGuide: guía de cuidado (mínimo 20 caracteres)
+checklistPdf, posterPdf, guidePdf: URLs opcionales de PDFs descargables
+activeFromDate, activeToDate: período de actividad del toolkit
+2. Editar Toolkits
+
+Al hacer clic en "✏️ Edit", el formulario se pre-rellena con los datos existentes del toolkit. page.tsx:79-94 El checklist (array) se convierte en texto con saltos de línea para edición, y las fechas Timestamp se convierten a formato ISO para los inputs de tipo date. page.tsx:85-92
+
+3. Eliminar Toolkits
+
+El botón "🗑️ Delete" solicita confirmación antes de eliminar permanentemente un toolkit de Firestore. page.tsx:102-115
+
+4. Flujo de Guardado
+
+El formulario detecta si está en modo edición o creación: page.tsx:117-173
+
+Modo edición: llama a updateSeasonalToolkit() y actualiza el estado local sin recargar
+Modo creación: llama a addSeasonalToolkit() con el uid del usuario autenticado y recarga la lista completa
+El checklist se procesa dividiendo el texto por saltos de línea y filtrando líneas vacías. page.tsx:136 Los PDFs opcionales solo se incluyen si tienen valor. page.tsx:126-129
+
+Visualización de Toolkits 
+Los toolkits se muestran en una lista vertical con tarjetas que incluyen: page.tsx:700-841
+
+Badge de estación con emoji (❄️, 🌱, ☀️, 🍂)
+Título y descripción
+Calm reminder en caja destacada
+Período activo con fechas
+Botones de edición y eliminación
+Vista del Usuario (/seasonal-toolkit/embed/page.tsx) 
+Autenticación Anónima 
+El embed utiliza ensureAnonAuth() para establecer una sesión anónima de Firebase sin requerir registro. page.tsx:38
+
+Patrón de Ciclo de Vida 
+Implementa el mismo patrón de dos fases que el shop para evitar problemas de hidratación en SSR: page.tsx:27-45
+
+Fase 1: Establece mounted = true
+Fase 2: Solo cuando mounted === true, ejecuta autenticación, carga de datos y solicitud de geolocalización
+Filtrado Temporal 
+A diferencia del shop, este embed filtra los toolkits para mostrar solo los activos en el momento actual: page.tsx:76-92
+
+const now = new Date();  
+const activeToolkits = allToolkits.filter(t => {  
+  const from = t.activeFrom.toDate();  
+  const to = t.activeTo.toDate();  
+  return now >= from && now <= to;  
+});
+Geolocalización y Mapa de Luz Solar 
+Solicitud de ubicación: Al montar el componente, solicita la ubicación del usuario mediante navigator.geolocation.getCurrentPosition(). page.tsx:95-115 Si se deniega o no está disponible, usa una ubicación por defecto (50.0, 10.0).
+
+Cálculo de posición solar: Implementa un algoritmo simplificado que calcula la posición del sol basándose en la hora actual: page.tsx:54-74
+
+Convierte la hora actual a decimal (hora + minutos/60)
+Calcula el azimut asumiendo movimiento este-oeste (90° + ((hora - 6) / 12) * 180°)
+Proyecta la posición del sol a ~0.5km de distancia del usuario
+Botón de recentrado: Permite al usuario volver a centrar el mapa en su ubicación, incrementando mapKey para forzar el re-render del componente MapCanvas. page.tsx:117-124
+
+Cuadrícula de Toolkits 
+Los toolkits activos se muestran en una cuadrícula responsive (repeat(auto-fit, minmax(300px, 1fr))) con tarjetas clickeables que abren un drawer con el contenido completo. page.tsx:206-233
+
+Drawer de Contenido Detallado 
+Al hacer clic en un toolkit, se abre un drawer desde abajo con animación translateY que muestra: page.tsx:332-361
+
+1. Header: Emoji de estación + título + descripción page.tsx:366-393
+
+2. Calm Reminder: Frase en caja destacada con color verde (#A4CB3E) e itálica page.tsx:395-412
+
+3. Checklist: Lista de items con bullets, cada uno en su propia caja page.tsx:414-444
+
+4. Mapa Interactivo de Luz: Componente MapCanvas con overlays fijos: page.tsx:486-601
+
+Marcador de usuario (📍): Centrado en 50%, 50%
+Marcador de sol (☀️): En 20%, 20% con animación de pulso
+Info overlay: Muestra hora actual y patrón de luz estacional
+Botón de recentrado (🎯): Botón flotante verde para volver a la ubicación del usuario
+5. Care Guide: Texto de guía con whiteSpace: 'pre-wrap' para preservar saltos de línea page.tsx:639-662
+
+6. Downloadables: Grid de enlaces a PDFs (checklist, poster, guide) si están disponibles page.tsx:664-721
+
+Estados de UI 
+Estado de carga: Spinner verde (#A4CB3E) con mensaje "Loading seasonal toolkit..." page.tsx:138-163
+
+Estado vacío: Si no hay toolkits activos, muestra "No active seasonal toolkit at the moment. Check back soon!" page.tsx:196-205
+
+Sin ubicación: Si no se obtiene la ubicación, muestra un placeholder con mensaje "📍 Enable location access to see your personalized light map" page.tsx:602-622
+
+Integración del Embed 
+El embed se integraría de forma similar al shop, usando un iframe que apunte a /seasonal-toolkit/embed. La diferencia clave es que este embed requiere permisos de geolocalización para funcionar completamente, por lo que el iframe debería incluir allow="geolocation".
+
+Notes 
+El flujo completo es: el admin crea/edita toolkits en /seasonal-toolkit/page.tsx → los datos se guardan en Firestore mediante addSeasonalToolkit() o updateSeasonalToolkit() → el embed en /seasonal-toolkit/embed/page.tsx los lee mediante listSeasonalToolkits(), filtra por fechas activas, y los muestra con mapas interactivos. A diferencia del shop (solo lectura), este embed tiene interactividad mediante geolocalización y mapas dinámicos, pero sigue siendo de solo lectura en cuanto a los datos del toolkit.
