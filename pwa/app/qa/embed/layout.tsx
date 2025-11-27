@@ -13,19 +13,24 @@ export default function EmbedLayout({
   const pathname = usePathname();  
   
   const navItems = [  
-    { path: '/qa/embed/questions', label: '❓ Preguntas', emoji: '❓' },  
-    { path: '/qa/embed/herbarium', label: '🌿 Herbario', emoji: '🌿' },  
+    { path: '/qa/embed/questions',  emoji: '❓' },  
+    { path: '/qa/embed/herbarium',  emoji: '🌿' },  
   ];  
   
   return (  
-    <div style={{   
-      height: '100vh',   
-      display: 'flex',   
+    <div style={{     
+      height: '100vh',     
+      display: 'flex',     
       flexDirection: 'column',  
-      background: '#0B0B0B'   
+      background: '#0B0B0B'     
     }}>  
       {/* Contenido principal */}  
-      <div style={{ flex: 1, overflow: 'hidden' }}>  
+      <div style={{   
+        flex: 1,   
+        overflow: 'hidden',  
+        scrollbarWidth: 'none',  
+        msOverflowStyle: 'none'  
+      }} className="layout-content">  
         {children}  
       </div>  
   
@@ -58,10 +63,22 @@ export default function EmbedLayout({
             }}  
           >  
             <span style={{ fontSize: '20px' }}>{item.emoji}</span>  
-            <span>{item.label}</span>  
           </button>  
         ))}  
       </nav>  
+  
+      <style jsx>{`  
+        .layout-content {  
+          scrollbar-width: none !important; /* Firefox */  
+          -ms-overflow-style: none !important; /* IE/Edge */  
+        }  
+  
+        .layout-content::-webkit-scrollbar {  
+          display: none !important; /* Chrome/Safari/Opera */  
+          width: 0 !important;  
+          height: 0 !important;  
+        }  
+      `}</style>  
     </div>  
   );  
 }

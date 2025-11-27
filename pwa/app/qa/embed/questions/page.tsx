@@ -112,7 +112,7 @@ function QuestionsPage() {
           color: '#F5F5F5',  
           wordBreak: 'break-word'  
         }}>  
-          💬 Community Questions  
+          💬 Ask Adam (gently)  
         </h2>  
   
         {loading ? (  
