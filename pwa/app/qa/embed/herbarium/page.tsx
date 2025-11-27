@@ -178,7 +178,7 @@ function HerbariumPage() {
   }    
     
   function toggleComments(photoId: string) {    
-    setShowComments({ ...showComments, [photoId]: !showComments[photo.id] });    
+    setShowComments({ ...showComments, [photoId]: !showComments[photoId] });
   }    
     
   return (    
@@ -247,10 +247,11 @@ function HerbariumPage() {
           </div>    
         ) : (    
           <div style={{    
-            display: 'grid',    
-            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',    
+            display: 'flex',    
+            flexDirection: 'column',    
+            alignItems: 'center',    
             gap: '24px'    
-          }}>    
+            }}>   
             {photos.map((photo) => {    
               const user = auth.currentUser;    
               const isLiked = user && photo.likes?.includes(user.uid);    
