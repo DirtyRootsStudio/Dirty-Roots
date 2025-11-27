@@ -191,6 +191,19 @@ export type Brand = {
   deletedAt?: Timestamp;  
 };
 
+
+export type PlantPhoto = {  
+  id?: string;  
+  plantName: string;  
+  description: string;  
+  imageBase64: string;  
+  createdBy: string;  
+  createdAt: Timestamp;  
+  status?: "active" | "deleted";  
+}; 
+
+
+
 // ========== PLACES CRUD OPERATIONS ==========  
   
 /**  
@@ -1066,5 +1079,81 @@ export async function deleteBrand(id: string): Promise<void> {
   } catch (error) {  
     console.error("Error deleting brand:", error);  
     throw new Error("Failed to delete brand");  
+  }  
+}
+
+/**  
+ * Crea una nueva foto de planta en Firestore  
+ *   
+ * @param input - Datos de la foto (sin id, createdAt ni status)  
+ * @returns Promise<string> - ID del documento creado  
+ * @throws Error si falla la creación en Firestore  
+ */  
+export async function addPlantPhoto(  
+  input: Omit<PlantPhoto, "id" | "createdAt" | "status">  
+): Promise<string> {  
+  try {  
+    const ref = collection(db, "plantPhotos");  
+    const docRef = await addDoc(ref, {  
+      ...input,  
+      createdAt: serverTimestamp(),  
+      status: "active",  
+    });  
+    return docRef.id;  
+  } catch (error) {  
+    console.error("Error adding plant photo:", error);  
+    throw new Error("Failed to create plant photo");  
+  }  
+}  
+  
+/**  
+ * Lista las fotos de planta más recientes  
+ *   
+ * @param limit - Número máximo de fotos a retornar (default: 50)  
+ * @returns Promise<PlantPhoto[]> - Array de fotos con sus IDs  
+ * @throws Error si falla la consulta a Firestore  
+ */  
+export async function listPlantPhotos(limit: number = 50): Promise<PlantPhoto[]> {  
+  try {  
+    const ref = collection(db, "plantPhotos");  
+    const q = query(  
+      ref,   
+      where("status", "==", "active")  
+      // Remove orderBy to avoid needing composite index  
+    );  
+    const snap = await getDocs(q);  
+      
+    // Sort in memory instead  
+    const photos = snap.docs  
+      .map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }))  
+      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())  
+      .slice(0, limit);  
+        
+    return photos;  
+  } catch (error) {  
+    console.error("Error listing plant photos:", error);  
+    throw new Error("Failed to load plant photos");  
+  }  
+}  
+  
+/**  
+ * Elimina una foto de planta (soft delete)  
+ *   
+ * Cambia el status a 'deleted' en lugar de eliminar permanentemente  
+ *   
+ * @param id - ID de la foto a eliminar  
+ * @returns Promise<void>  
+ * @throws Error si falla la eliminación  
+ */  
+export async function deletePlantPhoto(id: string): Promise<void> {  
+  try {  
+    const ref = doc(db, "plantPhotos", id);  
+    await updateDoc(ref, {  
+      status: "deleted",  
+      deletedAt: serverTimestamp()  
+    });  
+  } catch (error) {  
+    console.error("Error deleting plant photo:", error);  
+    throw new Error("Failed to delete plant photo");  
   }  
 }
