@@ -257,15 +257,18 @@ function HerbariumPage() {
               const isLiked = user && photo.likes?.includes(user.uid);    
     
               return (    
-                <div key={photo.id} style={{    
-                  background: '#0F0F0F',    
-                  borderRadius: '12px',    
-                  border: '1px solid #242424',    
-                  overflow: 'hidden',    
-                  display: 'flex',    
-                  flexDirection: 'column',    
-                  height: '600px'    
-                }}>    
+                <div key={photo.id} style={{      
+                  background: '#0F0F0F',      
+                  borderRadius: '12px',      
+                  border: '1px solid #242424',      
+                  overflow: 'hidden',      
+                  display: 'flex',      
+                  flexDirection: 'column',      
+                  width: '100%',        // ✅ Add fixed width (e.g., '400px' or '100%')  
+                  maxWidth: '400px',    // ✅ Add max-width constraint  
+                  height: '600px',      // Already fixed  
+                  margin: '0 auto'      // ✅ Center the card  
+                }}>   
                   <div style={{    
                     height: '400px',    
                     backgroundImage: `url(${photo.imageBase64})`,    
