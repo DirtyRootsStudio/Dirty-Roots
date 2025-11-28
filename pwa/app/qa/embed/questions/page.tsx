@@ -98,7 +98,7 @@ function QuestionsPage() {
       <div className="questions-scroll" style={{  
         width: '100%',  
         height: '100%',  
-        overflow: 'hidden',  
+        overflow: 'auto',  
         padding: '16px',  
         paddingBottom: '100px',  
         boxSizing: 'border-box',  
