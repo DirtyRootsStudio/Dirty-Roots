@@ -10,10 +10,10 @@ import { auth } from '@/src/lib/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';  
   
 const userAuthSchema = z.object({  
-  displayName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),  
+  displayName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').optional().or(z.literal('')),  
   email: z.string().email('Email inválido'),  
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),  
-});  
+}); 
   
 type UserAuthFormValues = z.infer<typeof userAuthSchema>;  
   

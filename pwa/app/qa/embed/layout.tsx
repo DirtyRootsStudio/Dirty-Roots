@@ -1,7 +1,6 @@
 // pwa/app/qa/embed/layout.tsx  
 'use client';  
   
-import { useState } from 'react';  
 import { useRouter, usePathname } from 'next/navigation';  
   
 // Iconos en base64  
