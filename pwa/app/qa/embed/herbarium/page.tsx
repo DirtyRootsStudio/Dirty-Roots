@@ -212,7 +212,7 @@ function HerbariumPage() {
   }    
     
   function toggleComments(photoId: string) {    
-    setShowComments({ ...showComments, [photoId]: !showComments[photo.id] });    
+    setShowComments({ ...showComments, [photoId]: !showComments[photoId] });
   }    
     
   return (    
@@ -650,6 +650,7 @@ function HerbariumPage() {
             to { opacity: 1; }  
           }  
         `}</style>  
+
       </div>  
     </div>  
   );  

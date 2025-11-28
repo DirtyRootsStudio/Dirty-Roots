@@ -39,7 +39,7 @@ function PlantDetailPage() {
   
     try {  
       if (plant.likes?.includes(user.uid)) {  
-        await removeLikeToPhoto(plant.id!, user.uid);  
+        await removeLikeFromPhoto(plant.id!, user.uid);  
         setPlant({  
           ...plant,  
           likes: plant.likes.filter(id => id !== user.uid),  
