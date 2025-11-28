@@ -24,7 +24,8 @@ import {
   orderBy,  
   limit,  
   getDocs,  
-  doc,  
+  doc,
+  setDoc,  
   getDoc,  
   deleteDoc,  
   updateDoc,  
@@ -215,7 +216,15 @@ export type Comment = {
   createdAt: Timestamp;  
 };
 
-
+export type UserProfile = {  
+  id?: string;  
+  uid: string; // Firebase Auth UID  
+  displayName: string;  
+  bio?: string;  
+  profileImageBase64?: string;  
+  createdAt: Timestamp;  
+  updatedAt?: Timestamp;  
+};
 
 // ========== PLACES CRUD OPERATIONS ==========  
   
@@ -1262,4 +1271,35 @@ export async function deleteCommentFromPhoto(photoId: string, commentId: string)
     console.error("Error deleting comment:", error);  
     throw new Error("Failed to delete comment");  
   }  
+}
+
+
+// Funciones CRUD para perfiles  
+export async function createUserProfile(  
+  input: Omit<UserProfile, "id" | "createdAt" | "updatedAt">  
+): Promise<string> {  
+  const ref = doc(db, "userProfiles", input.uid); // Use UID as document ID  
+  await setDoc(ref, {  
+    ...input,  
+    createdAt: serverTimestamp(),  
+    updatedAt: serverTimestamp(),  
+  });  
+  return input.uid;  
+} 
+  
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {  
+  const ref = doc(db, "userProfiles", uid);  
+  const snap = await getDoc(ref);  
+  return snap.exists() ? { id: snap.id, ...(snap.data() as UserProfile) } : null;  
+}  
+  
+export async function updateUserProfile(  
+  uid: string,  
+  updates: Partial<Omit<UserProfile, "id" | "uid" | "createdAt">>  
+): Promise<void> {  
+  const ref = doc(db, "userProfiles", uid);  
+  await updateDoc(ref, {  
+    ...updates,  
+    updatedAt: serverTimestamp(),  
+  });  
 }

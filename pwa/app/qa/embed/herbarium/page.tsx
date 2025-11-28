@@ -47,10 +47,7 @@ function HerbariumPage() {
   const generateUsername = (user: User | null) => {  
     if (!user) return 'Usuario';  
     if (user.displayName) return user.displayName;  
-    if (user.email) {  
-      return user.email.split('@')[0].charAt(0).toUpperCase() +   
-             user.email.split('@')[0].slice(1);  
-    }  
+    // Eliminar el uso del email - siempre retornar 'Usuario' como fallback  
     return 'Usuario';  
   };  
         

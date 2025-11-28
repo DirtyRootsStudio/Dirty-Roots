@@ -7,9 +7,10 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';  
 import { zodResolver } from '@hookform/resolvers/zod';  
 import { auth } from '@/src/lib/firebase';  
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';  
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';  
   
 const userAuthSchema = z.object({  
+  displayName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),  
   email: z.string().email('Email inválido'),  
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),  
 });  
@@ -21,24 +22,29 @@ export default function UserAuthPage() {
   const [error, setError] = useState('');  
   const [loading, setLoading] = useState(false);  
   const router = useRouter();  
-        
-  const { register, handleSubmit, formState } = useForm<UserAuthFormValues>({  
+          
+  const { register, handleSubmit } = useForm<UserAuthFormValues>({  
     resolver: zodResolver(userAuthSchema),  
   });  
   
   const onSubmit = handleSubmit(async (values) => {  
     setError('');  
     setLoading(true);  
-          
+            
     try {  
       if (isLogin) {  
         await signInWithEmailAndPassword(auth, values.email, values.password);  
       } else {  
-        await createUserWithEmailAndPassword(auth, values.email, values.password);  
+        const result = await createUserWithEmailAndPassword(auth, values.email, values.password);  
+        await updateProfile(result.user, { displayName: values.displayName });  
       }  
       router.push('/qa/embed/questions');  
-    } catch (error: any) {  
-      setError(error.message || 'Error de autenticación');  
+    } catch (error: unknown) {  
+      if (error instanceof Error) {  
+        setError(error.message);  
+      } else {  
+        setError('Error de autenticación');  
+      }  
     } finally {  
       setLoading(false);  
     }  
@@ -70,7 +76,7 @@ export default function UserAuthPage() {
         }}>  
           {isLogin ? '🌿 Entrar' : '🌱 Crear Cuenta'}  
         </h1>  
-              
+                
         {error && (  
           <div style={{  
             borderRadius: '12px',  
@@ -86,6 +92,34 @@ export default function UserAuthPage() {
         )}  
   
         <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>  
+          {!isLogin && (  
+            <div>  
+              <label style={{  
+                display: 'block',  
+                fontSize: '14px',  
+                fontWeight: '600',  
+                marginBottom: '8px',  
+                color: '#F5F5F5'  
+              }}>  
+                Nombre de Usuario  
+              </label>  
+              <input  
+                type="text"  
+                {...register('displayName')}  
+                style={{  
+                  width: '100%',  
+                  background: '#0B0B0B',  
+                  border: '1px solid #2A2A2A',  
+                  borderRadius: '12px',  
+                  padding: '12px 16px',  
+                  color: '#F5F5F5',  
+                  fontSize: '14px'  
+                }}  
+                placeholder="Tu nombre"  
+              />  
+            </div>  
+          )}  
+  
           <div>  
             <label style={{  
               display: 'block',  

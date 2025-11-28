@@ -15,7 +15,8 @@ export default function EmbedLayout({
   const navItems = [  
     { path: '/qa/embed/questions',  emoji: '❓' },  
     { path: '/qa/embed/herbarium',  emoji: '🌿' },  
-  ];  
+    { path: '/qa/embed/profile',    emoji: '👤' }, // ← Añadir perfil  
+  ]; 
   
   return (  
     <div style={{     
