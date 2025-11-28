@@ -1,8 +1,8 @@
-// pwa/app/qa/embed/layout.tsx  
 'use client';  
   
 import { useState } from 'react';  
 import { useRouter, usePathname } from 'next/navigation';  
+import Image from 'next/image';  
   
 export default function EmbedLayout({  
   children,  
@@ -13,21 +13,20 @@ export default function EmbedLayout({
   const pathname = usePathname();  
   
   const navItems = [  
-    { path: '/qa/embed/questions',  emoji: '❓' },  
-    { path: '/qa/embed/herbarium',  emoji: '🌿' },  
-    { path: '/qa/embed/profile',    emoji: '👤' }, // ← Añadir perfil  
-  ]; 
+    { path: '/qa/embed/questions', icon: '/icons/questions.png', label: 'Questions' },  
+    { path: '/qa/embed/herbarium', icon: '/icons/herbarium.png', label: 'Herbarium' },  
+    { path: '/qa/embed/profile', icon: '/icons/profile.png', label: 'Profile' },  
+  ];  
   
   return (  
-    <div style={{     
-      height: '100vh',     
-      display: 'flex',     
+    <div style={{  
+      height: '100vh',  
+      display: 'flex',  
       flexDirection: 'column',  
-      background: '#0B0B0B'     
+      background: '#0B0B0B'  
     }}>  
-      {/* Contenido principal */}  
-      <div style={{   
-        flex: 1,   
+      <div style={{  
+        flex: 1,  
         overflow: 'hidden',  
         scrollbarWidth: 'none',  
         msOverflowStyle: 'none'  
@@ -35,7 +34,6 @@ export default function EmbedLayout({
         {children}  
       </div>  
   
-      {/* Barra de navegación inferior */}  
       <nav style={{  
         height: '70px',  
         background: '#0F0F0F',  
@@ -52,30 +50,35 @@ export default function EmbedLayout({
             style={{  
               background: 'none',  
               border: 'none',  
-              color: pathname === item.path ? '#A4CB3E' : '#B6B9BF',  
-              fontSize: '14px',  
-              fontWeight: '600',  
               cursor: 'pointer',  
               display: 'flex',  
               flexDirection: 'column',  
               alignItems: 'center',  
               gap: '4px',  
-              transition: 'all 0.2s'  
+              transition: 'all 0.2s',  
+              opacity: pathname === item.path ? 1 : 0.6,  
             }}  
           >  
-            <span style={{ fontSize: '20px' }}>{item.emoji}</span>  
+            <div style={{ position: 'relative', width: '48px', height: '48px' }}>  
+              <Image  
+                src={item.icon}  
+                alt={item.label}  
+                fill  
+                style={{ objectFit: 'contain' }}  
+              />  
+            </div>  
           </button>  
         ))}  
       </nav>  
   
       <style jsx>{`  
         .layout-content {  
-          scrollbar-width: none !important; /* Firefox */  
-          -ms-overflow-style: none !important; /* IE/Edge */  
+          scrollbar-width: none !important;  
+          -ms-overflow-style: none !important;  
         }  
   
         .layout-content::-webkit-scrollbar {  
-          display: none !important; /* Chrome/Safari/Opera */  
+          display: none !important;  
           width: 0 !important;  
           height: 0 !important;  
         }  
