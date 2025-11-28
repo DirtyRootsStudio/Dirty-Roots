@@ -85,7 +85,7 @@ function HerbariumPage() {
       setLoading(false);        
       setLoadingMore(false);        
     }        
-  }, [lastVisible]);           
+  }, []);           
             
   useEffect(() => {            
     if (!mounted) return;            
