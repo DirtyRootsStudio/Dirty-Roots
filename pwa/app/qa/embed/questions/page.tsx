@@ -389,6 +389,8 @@ function QuestionsPage() {
         .questions-scroll {  
           scrollbar-width: none !important; /* Firefox */  
           -ms-overflow-style: none !important; /* IE/Edge */  
+          overflow-y: scroll !important;  
+
         }  
   
         .questions-scroll::-webkit-scrollbar {  
