@@ -1132,20 +1132,33 @@ export async function listPlantPhotos(
 ): Promise<PlantPhoto[]> {  
   try {  
     const ref = collection(db, "plantPhotos");  
-    let q = query(ref, where("status", "==", "active"));  
       
     if (startAfterParam) {  
-      q = query(q, startAfter(startAfterParam), orderBy("createdAt", "desc"), limit(limitParam));  
+      // Para paginación: where → orderBy → startAfter → limit  
+      const q = query(  
+        ref,   
+        where("status", "==", "active"),  
+        orderBy("createdAt", "desc"),  
+        startAfter(startAfterParam),  
+        limit(limitParam)  
+      );  
+      const snap = await getDocs(q);  
+      return snap.docs.map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }));  
     } else {  
-      q = query(q, orderBy("createdAt", "desc"), limit(limitParam));  
+      // Para la primera carga: where → orderBy → limit  
+      const q = query(  
+        ref,   
+        where("status", "==", "active"),  
+        orderBy("createdAt", "desc"),  
+        limit(limitParam)  
+      );  
+      const snap = await getDocs(q);  
+      return snap.docs.map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }));  
     }  
-      
-    const snap = await getDocs(q);  
-    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }));  
   } catch (error) {  
     console.error("Error listing plant photos:", error);  
     throw new Error("Failed to load plant photos");  
-  }  
+  } 
 }
   
 /**  
