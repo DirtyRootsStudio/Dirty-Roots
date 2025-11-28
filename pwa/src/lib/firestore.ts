@@ -19,7 +19,6 @@ import {
   collection,  
   addDoc,  
   serverTimestamp,  
-  FieldValue, 
   Timestamp,  
   query,  
   orderBy,  
@@ -29,7 +28,8 @@ import {
   getDoc,  
   deleteDoc,  
   updateDoc,  
-  startAt,  
+  startAt,
+  startAfter,  
   endAt,  
   where  
 } from "firebase/firestore";  
@@ -1126,28 +1126,27 @@ export async function addPlantPhoto(
  * @returns Promise<PlantPhoto[]> - Array de fotos con sus IDs  
  * @throws Error si falla la consulta a Firestore  
  */  
-export async function listPlantPhotos(limit: number = 50): Promise<PlantPhoto[]> {  
+export async function listPlantPhotos(  
+  limitParam: number = 50,  
+  startAfterParam?: Timestamp  
+): Promise<PlantPhoto[]> {  
   try {  
     const ref = collection(db, "plantPhotos");  
-    const q = query(  
-      ref,   
-      where("status", "==", "active")  
-      // Remove orderBy to avoid needing composite index  
-    );  
-    const snap = await getDocs(q);  
+    let q = query(ref, where("status", "==", "active"));  
       
-    // Sort in memory instead  
-    const photos = snap.docs  
-      .map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }))  
-      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())  
-      .slice(0, limit);  
-        
-    return photos;  
+    if (startAfterParam) {  
+      q = query(q, startAfter(startAfterParam), orderBy("createdAt", "desc"), limit(limitParam));  
+    } else {  
+      q = query(q, orderBy("createdAt", "desc"), limit(limitParam));  
+    }  
+      
+    const snap = await getDocs(q);  
+    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }));  
   } catch (error) {  
     console.error("Error listing plant photos:", error);  
     throw new Error("Failed to load plant photos");  
   }  
-}  
+}
   
 /**  
  * Elimina una foto de planta (soft delete)  
