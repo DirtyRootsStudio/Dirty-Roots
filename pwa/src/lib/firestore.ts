@@ -1303,3 +1303,20 @@ export async function updateUserProfile(
     updatedAt: serverTimestamp(),  
   });  
 }
+
+// Obtener una foto de planta por ID  
+export async function getPlantPhoto(id: string): Promise<PlantPhoto | null> {  
+  try {  
+    const ref = doc(db, "plantPhotos", id);  
+    const docSnap = await getDoc(ref);  
+      
+    if (docSnap.exists()) {  
+      return { id: docSnap.id, ...docSnap.data() } as PlantPhoto;  
+    } else {  
+      return null;  
+    }  
+  } catch (error) {  
+    console.error("Error getting plant photo:", error);  
+    throw new Error("Failed to get plant photo");  
+  }  
+}

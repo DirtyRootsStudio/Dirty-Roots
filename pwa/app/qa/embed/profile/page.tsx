@@ -8,6 +8,7 @@ import { getUserProfile, updateUserProfile, createUserProfile, listPlantPhotos }
 import UserProtectedRoute from '@/src/components/UserProtectedRoute';  
 import imageCompression from 'browser-image-compression';  
 import { auth } from '@/src/lib/firebase';  
+import { signOut } from 'firebase/auth';  
 import { useRouter } from 'next/navigation';  
   
 const profileSchema = z.object({  
@@ -63,7 +64,7 @@ function ProfilePage() {
   async function handleImageUpload(file: File) {  
     try {  
       setError('Comprimiendo imagen...');  
-        
+          
       const options = {  
         maxSizeMB: 0.4,  
         maxWidthOrHeight: 600,  
@@ -71,24 +72,24 @@ function ProfilePage() {
         fileType: 'image/jpeg',  
         initialQuality: 0.7  
       };  
-        
+          
       const compressedFile = await imageCompression(file, options);  
-        
+          
       const reader = new FileReader();  
       reader.onloadend = () => {  
         const base64String = reader.result as string;  
         const sizeInBytes = base64String.length;  
-          
+            
         if (sizeInBytes > 900000) {  
           setError('La imagen es demasiado grande. Intenta con una imagen más pequeña.');  
           return;  
         }  
-          
+            
         setValue('profileImageBase64', base64String);  
         setError('');  
       };  
       reader.readAsDataURL(compressedFile);  
-        
+          
     } catch (error) {  
       console.error('Error en compresión de imagen:', error);  
       setError('Error procesando la imagen. Por favor intenta con otra imagen.');  
@@ -127,6 +128,15 @@ function ProfilePage() {
       setSaving(false);  
     }  
   });  
+  
+  async function handleLogout() {  
+    try {  
+      await signOut(auth);  
+      router.push('/auth');  
+    } catch (error) {  
+      console.error('Error al cerrar sesión:', error);  
+    }  
+  }  
   
   if (loading) {  
     return (  
@@ -170,14 +180,30 @@ function ProfilePage() {
       boxSizing: 'border-box'  
     }}>  
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>  
-        <h2 style={{  
-          fontSize: '24px',  
-          fontWeight: 'bold',  
-          marginBottom: '24px',  
-          color: '#F5F5F5'  
-        }}>  
-          👤 Mi Perfil  
-        </h2>  
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>  
+          <h2 style={{  
+            fontSize: '24px',  
+            fontWeight: 'bold',  
+            color: '#F5F5F5'  
+          }}>  
+            👤 Mi Perfil  
+          </h2>  
+          <button  
+            onClick={handleLogout}  
+            style={{  
+              padding: '10px 20px',  
+              borderRadius: '9999px',  
+              border: '1px solid #FF60A8',  
+              background: 'transparent',  
+              color: '#F5F5F5',  
+              fontWeight: '600',  
+              fontSize: '14px',  
+              cursor: 'pointer'  
+            }}  
+          >  
+            Cerrar sesión  
+          </button>  
+        </div>  
   
         {error && (  
           <div style={{  
@@ -219,7 +245,7 @@ function ProfilePage() {
             }}>  
               Foto de perfil  
             </label>  
-              
+                
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>  
               {profileImageBase64 ? (  
                 <div style={{  
@@ -247,7 +273,7 @@ function ProfilePage() {
                   👤  
                 </div>  
               )}  
-                
+                  
               <input  
                 type="file"  
                 accept="image/*"  
@@ -369,7 +395,7 @@ function ProfilePage() {
               {userPlants.map(plant => (  
                 <div  
                   key={plant.id}  
-                  onClick={() => router.push('/qa/embed/herbarium')}  
+                  onClick={() => router.push(`/qa/embed/plant/${plant.id}`)}  
                   style={{  
                     cursor: 'pointer',  
                     borderRadius: '12px',  
