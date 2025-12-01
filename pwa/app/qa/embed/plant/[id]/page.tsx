@@ -15,10 +15,10 @@ function PlantDetailPage() {
   const [showComments, setShowComments] = useState(true);  
   
   useEffect(() => {  
-    if (params.id) {  
+    if (params?.id) {  
       loadPlant(params.id as string);  
     }  
-  }, [params.id]);  
+  }, [params]);
   
   async function loadPlant(plantId: string) {  
     try {  
