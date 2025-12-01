@@ -1333,18 +1333,13 @@ export async function getPlantPhoto(id: string): Promise<PlantPhoto | null> {
 
 // Funciones CRUD para administradores  
 export async function addAdmin(input: Omit<Admin, 'id' | 'createdAt'>): Promise<string> {  
-  try {  
-    const ref = collection(db, "admins");  
-    const docRef = await addDoc(ref, {  
-      ...input,  
-      createdAt: serverTimestamp(),  
-    });  
-    return docRef.id;  
-  } catch (error) {  
-    console.error("Error adding admin:", error);  
-    throw new Error("Failed to create admin");  
-  }  
-}  
+  const ref = doc(db, "admins", input.email); // Use email as document ID  
+  await setDoc(ref, {  
+    ...input,  
+    createdAt: serverTimestamp(),  
+  });  
+  return input.email;  
+} 
   
 export async function listAdmins(): Promise<Admin[]> {  
   try {  
