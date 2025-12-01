@@ -2,11 +2,11 @@
   
 import { useEffect, useState, useRef } from "react";  
 import { ensureAnonAuth } from "@/src/lib/firebase";  
-import { listProducts } from "@/src/lib/firestore";  
+import { listProducts, Product  } from "@/src/lib/firestore";  
   
 export default function EmbedGrowSlowlyShopPage() {  
   const [mounted, setMounted] = useState(false);  
-  const [products, setProducts] = useState<any[]>([]);  
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);  
   const scrollContainerRef = useRef<HTMLDivElement>(null);  
   const [isDragging, setIsDragging] = useState(false);  

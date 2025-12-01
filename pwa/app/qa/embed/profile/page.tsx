@@ -424,7 +424,7 @@ function ProfilePage() {
             </div>  
           ) : (  
             <p style={{ color: '#B6B9BF', textAlign: 'center', padding: '32px' }}>  
-                You haven't uploaded any floors yet. <Link href="/qa/embed/herbarium" style={{ color: '#A4CB3E' }}>Upload your first floor</Link>  
+                You haven&apos;t uploaded any floors yet <Link href="/qa/embed/herbarium" style={{ color: '#A4CB3E' }}>Upload your first floor</Link>  
             </p>  
           )}  
         </div>  

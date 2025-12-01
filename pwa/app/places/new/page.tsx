@@ -1,12 +1,10 @@
 // src/app/places/new/page.tsx  
 "use client";  
   
-import { useRouter } from "next/navigation";  
 import PlaceForm from "@/src/components/PlaceForm";  
 import Link from "next/link";  
   
 export default function NewPlacePage() {  
-  const router = useRouter();  
   
   return (  
     <div style={{ minHeight: '100vh', background: '#0B0B0B', padding: '32px' }}>  
@@ -18,7 +16,7 @@ export default function NewPlacePage() {
               🌿 Add a quiet place  
             </h1>  
             <p style={{ fontSize: '16px', color: '#B6B9BF' }}>  
-              Share a quiet place you've discovered  
+              Share a quiet place you&apos;ve discovered
             </p>  
           </div>  
           <Link   

@@ -1,8 +1,8 @@
 // src/app/qa/[id]/page.tsx    
 "use client";    
     
-import { use, useEffect, useState } from "react";    
-import { getQuestion, setAnswer } from "@/src/lib/firestore";    
+import { use, useEffect, useState  } from "react";    
+import { getQuestion, setAnswer, Question  } from "@/src/lib/firestore";    
 import { ensureAnonAuth, auth } from "@/src/lib/firebase";    
 import Link from "next/link";    
     
@@ -12,7 +12,7 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
   const { id } = use(params);    
       
   const [mounted, setMounted] = useState(false);    
-  const [q, setQ] = useState<any | null>(null);    
+  const [q, setQ] = useState<Question | null>(null);
   const [text, setText] = useState("");    
   const [refs, setRefs] = useState("");    
   const [loading, setLoading] = useState(true);    
@@ -70,16 +70,6 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
     }    
   }    
     
-  function handleCancelEdit() {    
-    if (q?.answer) {    
-      setText(q.answer.text);    
-      setRefs(q.answer.references?.join(", ") || "");    
-    } else {    
-      setText("");    
-      setRefs("");    
-    }    
-    setIsEditing(false);    
-  }    
     
   // Renderizado inicial durante SSR y antes de montar en cliente    
   if (!mounted) {    
@@ -277,10 +267,10 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                     lineHeight: '1.6',    
                     whiteSpace: 'pre-wrap'    
                   }}>    
-                    {q.answer.text}    
+                    {q.answer?.text}    
                   </p>    
                       
-                  {q.answer.references && q.answer.references.length > 0 && (    
+                  {q.answer?.references && q.answer.references.length > 0 && (    
                     <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #1F1F1F' }}>    
                       <p style={{ fontSize: '12px', color: '#B6B9BF', marginBottom: '8px', fontWeight: '600' }}>    
                         References:    

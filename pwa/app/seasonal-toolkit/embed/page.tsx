@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";  
 import dynamic from "next/dynamic";  
 import { ensureAnonAuth } from "@/src/lib/firebase";  
-import { listSeasonalToolkits } from "@/src/lib/firestore";  
+import { listSeasonalToolkits, SeasonalToolkit  } from "@/src/lib/firestore";  
   
 // Import MapCanvas dynamically to avoid SSR issues with Leaflet  
 const MapCanvas = dynamic(() => import("@/src/components/MapCanvas"), {  
@@ -13,9 +13,9 @@ const MapCanvas = dynamic(() => import("@/src/components/MapCanvas"), {
   
 export default function EmbedSeasonalToolkitPage() {  
   const [mounted, setMounted] = useState(false);  
-  const [toolkits, setToolkits] = useState<any[]>([]);  
+  const [toolkits, setToolkits] = useState<SeasonalToolkit[]>([]);
   const [loading, setLoading] = useState(true);  
-  const [selectedToolkit, setSelectedToolkit] = useState<any | null>(null);  
+  const [selectedToolkit, setSelectedToolkit] = useState<SeasonalToolkit | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);  
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);  
   const [locationError, setLocationError] = useState<string | null>(null);  
@@ -123,7 +123,7 @@ export default function EmbedSeasonalToolkitPage() {
     }  
   };  
   
-  const handleOpenKit = (toolkit: any) => {  
+  const handleOpenKit = (toolkit: SeasonalToolkit) => {  
     setSelectedToolkit(toolkit);  
     setDrawerOpen(true);  
   };  
@@ -278,7 +278,7 @@ export default function EmbedSeasonalToolkitPage() {
                   fontStyle: 'italic',  
                   margin: 0  
                 }}>  
-                  "{toolkit.calmReminder}"  
+                  &quot;{toolkit.calmReminder}&quot;
                 </p>  
               </div>  
   
@@ -407,7 +407,7 @@ export default function EmbedSeasonalToolkitPage() {
                 lineHeight: '1.6',  
                 margin: 0  
               }}>  
-                "{selectedToolkit.calmReminder}"  
+                &quot;{selectedToolkit.calmReminder}&quot;
               </p>  
             </div>  
   

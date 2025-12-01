@@ -3,12 +3,12 @@
     
 import { useEffect, useState } from "react";    
 import QuestionForm from "@/src/components/QuestionForm";    
-import { listQuestions } from "@/src/lib/firestore";    
+import { listQuestions, Question  } from "@/src/lib/firestore";    
 import UserProtectedRoute from '@/src/components/UserProtectedRoute';    
     
 function QuestionsPage() {    
   const [mounted, setMounted] = useState(false);    
-  const [questions, setQuestions] = useState<any[]>([]);    
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);    
   const [drawerOpen, setDrawerOpen] = useState(false);    
     
@@ -207,9 +207,9 @@ function QuestionsPage() {
                         lineHeight: '1.5',    
                         marginBottom: '8px'    
                       }}>    
-                        {q.answer.text}    
+                        {q.answer?.text}    
                       </div>    
-                      {q.answer.references && q.answer.references.length > 0 && (    
+                      {q.answer?.references && q.answer.references.length > 0 && (    
                         <div style={{ marginTop: '8px' }}>    
                           <div style={{ fontSize: '11px', color: '#757575', marginBottom: '4px' }}>    
                             References:    

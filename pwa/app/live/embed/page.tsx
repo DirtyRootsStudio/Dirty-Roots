@@ -3,11 +3,11 @@
     
 import { useEffect, useState } from "react";    
 import { ensureAnonAuth } from "@/src/lib/firebase";    
-import { listLiveSessions, addSeatReservation } from "@/src/lib/firestore";    
+import { listLiveSessions, addSeatReservation, LiveSession  } from "@/src/lib/firestore";    
     
 export default function EmbedLiveSessionsPage() {    
   const [mounted, setMounted] = useState(false);    
-  const [sessions, setSessions] = useState<any[]>([]);    
+const [sessions, setSessions] = useState<LiveSession[]>([]);
   const [loading, setLoading] = useState(true);    
   const [email, setEmail] = useState("");    
   const [submitting, setSubmitting] = useState(false);    

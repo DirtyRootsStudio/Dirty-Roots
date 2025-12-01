@@ -1,12 +1,11 @@
 // app/brands/page.tsx  
 'use client';  
-  
+import Image from 'next/image';  
 import { useState, useEffect } from 'react';  
-import { useRouter } from 'next/navigation';  
 import { useForm } from 'react-hook-form';  
 import { z } from 'zod';  
 import { zodResolver } from '@hookform/resolvers/zod';  
-import { addBrand, listBrands, deleteBrand, updateBrand } from '@/src/lib/firestore';  
+import { addBrand, listBrands, deleteBrand, updateBrand, Brand } from '@/src/lib/firestore';  
 import { auth } from '@/src/lib/firebase';  
 import ProtectedRoute from '@/src/components/ProtectedRoute';  
 import imageCompression from 'browser-image-compression';
@@ -25,10 +24,9 @@ function BrandsPage() {
   const [loading, setLoading] = useState(false);  
   const [error, setError] = useState('');  
   const [success, setSuccess] = useState(false);  
-  const [brands, setBrands] = useState<any[]>([]);  
+  const [brands, setBrands] = useState<Brand[]>([]);  
   const [loadingBrands, setLoadingBrands] = useState(true);  
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);  
-  const router = useRouter();  
   
   const { register, handleSubmit, formState, setValue, watch, reset } = useForm<BrandFormValues>({  
     resolver: zodResolver(brandSchema),  
@@ -99,15 +97,15 @@ function BrandsPage() {
     }  
   };  
   
-  const handleEditBrand = (brand: any) => {  
-    setEditingBrandId(brand.id);  
+  const handleEditBrand = (brand: Brand) => {  
+    setEditingBrandId(brand.id || null);  
     setValue('name', brand.name);  
     setValue('description', brand.description);  
     setValue('discount', brand.discount || '');  
     setValue('link', brand.link);  
     setValue('imageBase64', brand.imageBase64);  
     window.scrollTo({ top: 0, behavior: 'smooth' });  
-  };  
+  };    
   
   const handleCancelEdit = () => {  
     setEditingBrandId(null);  
@@ -174,9 +172,10 @@ function BrandsPage() {
       setTimeout(() => {  
         setSuccess(false);  
       }, 2000);  
-    } catch (err: any) {  
-      setError(err.message || 'Error saving brand');  
-    } finally {  
+    } catch (err: unknown) {  
+      const errorMessage = err instanceof Error ? err.message : 'Error saving brand';  
+      setError(errorMessage);     } 
+      finally {  
       setLoading(false);  
     }  
   });  
@@ -445,15 +444,19 @@ function BrandsPage() {
                 overflow: 'hidden',  
                 border: '1px solid #2A2A2A'  
               }}>  
-                <img     
-                  src={imageBase64}     
-                  alt="Preview"     
+                <Image  
+                  src={imageBase64}  
+                  alt="Preview"  
+                  width={0}  
+                  height={0}  
+                  sizes="100vw"  
                   style={{  
                     width: '100%',  
+                    height: 'auto',  
                     maxHeight: '300px',  
                     objectFit: 'cover'  
-                  }}    
-                />  
+                  }}  
+                />
               </div>  
             )}  
           </div>  
@@ -608,7 +611,7 @@ function BrandsPage() {
                     ✏️ Edit  
                   </button>  
                   <button  
-                    onClick={() => handleDeleteBrand(brand.id)}  
+                    onClick={() => brand.id && handleDeleteBrand(brand.id)}
                     style={{  
                       background: '#FF60A8',  
                       border: 'none',  

@@ -2,12 +2,12 @@
 "use client";      
       
 import { useEffect, useState } from "react";      
-import { listQuestions, deleteQuestion } from "@/src/lib/firestore";      
+import { listQuestions, deleteQuestion, Question  } from "@/src/lib/firestore";      
 import Link from "next/link";      
 import { ensureAnonAuth } from "@/src/lib/firebase";      
       
 export default function QaPage() {      
-  const [questions, setQuestions] = useState<any[]>([]);      
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);      
       
   useEffect(() => {      
@@ -133,10 +133,12 @@ export default function QaPage() {
                     {/* Botón eliminar en la esquina superior derecha */}      
                     <div style={{ position: 'absolute', top: '16px', right: '16px', display: 'flex', gap: '8px' }}>      
                       <button      
-                        onClick={(e) => {      
-                          e.stopPropagation();      
-                          handleDeleteQuestion(q.id);      
-                        }}      
+                        onClick={(e) => {  
+                          e.stopPropagation();  
+                          if (q.id) {  
+                            handleDeleteQuestion(q.id);  
+                          }  
+                        }}    
                         style={{      
                           padding: '8px 12px',      
                           borderRadius: '9999px',      

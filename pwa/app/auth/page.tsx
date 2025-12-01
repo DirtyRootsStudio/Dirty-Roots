@@ -33,8 +33,9 @@ export default function AuthPage() {
       // Solo login, sin opción de registro  
       await signInWithEmailAndPassword(auth, values.email, values.password);  
       router.push('/');  
-    } catch (error: any) {  
-      setError(error.message || 'Authentication error');  
+    } catch (error: unknown) {  
+      const errorMessage = error instanceof Error ? error.message : 'Authentication error';  
+      setError(errorMessage);  
     } finally {  
       setLoading(false);  
     }  

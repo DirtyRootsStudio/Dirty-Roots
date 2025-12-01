@@ -10,7 +10,8 @@ import {
   addSeasonalToolkit,   
   listSeasonalToolkits,   
   deleteSeasonalToolkit,   
-  updateSeasonalToolkit   
+  updateSeasonalToolkit,
+  SeasonalToolkit   
 } from '@/src/lib/firestore';  
 import { auth } from '@/src/lib/firebase';  
 import ProtectedRoute from '@/src/components/ProtectedRoute';  
@@ -35,13 +36,13 @@ const toolkitSchema = z.object({
 type ToolkitFormValues = z.infer<typeof toolkitSchema>;  
   
 function SeasonalToolkitPage() {  
-  const [loading, setLoading] = useState(false);  
-  const [error, setError] = useState('');  
-  const [success, setSuccess] = useState(false);  
-  const [toolkits, setToolkits] = useState<any[]>([]);  
-  const [loadingToolkits, setLoadingToolkits] = useState(true);  
-  const [editingToolkitId, setEditingToolkitId] = useState<string | null>(null);  
-  const router = useRouter();  
+  const [loading, setLoading] = useState(false);    
+  const [error, setError] = useState('');    
+  const [success, setSuccess] = useState(false);    
+  const [toolkits, setToolkits] = useState<SeasonalToolkit[]>([]);    
+  const [loadingToolkits, setLoadingToolkits] = useState(true);    
+  const [editingToolkitId, setEditingToolkitId] = useState<string | null>(null);    
+  const router = useRouter(); ;  
   
   const { register, handleSubmit, formState, setValue, reset } = useForm<ToolkitFormValues>({  
     resolver: zodResolver(toolkitSchema),  
@@ -76,8 +77,8 @@ function SeasonalToolkitPage() {
     }  
   }  
   
-  const handleEditToolkit = (toolkit: any) => {  
-    setEditingToolkitId(toolkit.id);  
+  const handleEditToolkit = (toolkit: SeasonalToolkit) => {  
+    setEditingToolkitId(toolkit.id || null);  
     setValue('season', toolkit.season);  
     setValue('title', toolkit.title);  
     setValue('description', toolkit.description);  
@@ -165,8 +166,9 @@ function SeasonalToolkitPage() {
       setTimeout(() => {  
         setSuccess(false);  
       }, 2000);  
-    } catch (err: any) {  
-      setError(err.message || 'Error saving toolkit');  
+    } catch (err: unknown) {  
+      const errorMessage = err instanceof Error ? err.message : 'Error saving toolkit';  
+      setError(errorMessage);  
     } finally {  
       setLoading(false);  
     }  
@@ -309,7 +311,7 @@ function SeasonalToolkitPage() {
             {/* Title */}  
             <div style={{ marginBottom: '24px' }}>  
               <label style={{ display: 'block', color: '#B6B9BF', fontSize: '14px', marginBottom: '8px' }}>  
-                Title * (e.g., "Winter Calm Kit")  
+                Title * (e.g., &quot;Winter Calm Kit&quot;)
               </label>  
               <input  
                 {...register('title')}  
@@ -761,7 +763,7 @@ function SeasonalToolkitPage() {
                       fontStyle: 'italic',  
                       margin: 0  
                     }}>  
-                      "{toolkit.calmReminder}" 
+                    &quot;{toolkit.calmReminder}&quot;
                                           </p>  
                   </div>  
   

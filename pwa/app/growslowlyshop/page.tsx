@@ -1,12 +1,12 @@
 // pwa/app/growslowlyshop/page.tsx  
 'use client';  
-  
+import Image from 'next/image';  
 import { useState, useEffect } from 'react';  
 import { useRouter } from 'next/navigation';  
 import { useForm } from 'react-hook-form';  
 import { z } from 'zod';  
 import { zodResolver } from '@hookform/resolvers/zod';  
-import { addProduct, listProducts, deleteProduct, updateProduct } from '@/src/lib/firestore';  
+import { addProduct, listProducts, deleteProduct, updateProduct, Product } from '@/src/lib/firestore';  
 import { auth } from '@/src/lib/firebase';  
 import ProtectedRoute from '@/src/components/ProtectedRoute';  
 import imageCompression from 'browser-image-compression';  
@@ -26,7 +26,7 @@ function GrowSlowlyShopPage() {
   const [loading, setLoading] = useState(false);  
   const [error, setError] = useState('');  
   const [success, setSuccess] = useState(false);  
-  const [products, setProducts] = useState<any[]>([]);  
+  const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);  
   const [editingProductId, setEditingProductId] = useState<string | null>(null);  
   const router = useRouter();  
@@ -104,8 +104,8 @@ function GrowSlowlyShopPage() {
     }  
     };  
   
-  const handleEditProduct = (product: any) => {  
-    setEditingProductId(product.id);  
+  const handleEditProduct = (product: Product) => {  
+    setEditingProductId(product.id || null);
     setValue('name', product.name);  
     setValue('label', product.label);  
     setValue('price', product.price);  
@@ -165,7 +165,7 @@ function GrowSlowlyShopPage() {
         reset();  
       } else {  
         // Crear nuevo producto  
-        const newProductId = await addProduct({  
+        await addProduct({  
           name: values.name,  
           label: values.label,  
           price: values.price,  
@@ -182,8 +182,9 @@ function GrowSlowlyShopPage() {
       setTimeout(() => {  
         setSuccess(false);  
       }, 2000);  
-    } catch (err: any) {  
-      setError(err.message || 'Error saving product');  
+    } catch (err: unknown) {  
+      const errorMessage = err instanceof Error ? err.message : 'Error saving product';  
+      setError(errorMessage);  
     } finally {  
       setLoading(false);  
     }  
@@ -526,15 +527,19 @@ function GrowSlowlyShopPage() {
                   overflow: 'hidden',  
                   border: '1px solid #2A2A2A'  
                 }}>  
-                  <img   
-                    src={imageBase64}   
-                    alt="Preview"   
+                  <Image  
+                    src={imageBase64}  
+                    alt="Preview"  
+                    width={0}  
+                    height={0}  
+                    sizes="100vw"  
                     style={{  
                       width: '100%',  
+                      height: 'auto',  
                       maxHeight: '300px',  
                       objectFit: 'cover'  
                     }}  
-                  />  
+                  /> 
                 </div>  
               )}  
             </div>  
@@ -657,7 +662,7 @@ function GrowSlowlyShopPage() {
                       ✏️ Edit  
                     </button>  
                     <button  
-                      onClick={() => handleDeleteProduct(product.id)}  
+                      onClick={() => product.id && handleDeleteProduct(product.id)}
                       style={{  
                         background: '#FF60A8',  
                         border: 'none',  

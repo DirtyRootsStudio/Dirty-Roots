@@ -8,7 +8,8 @@ import {
   listLiveSessions,   
   deleteLiveSession,  
   addLiveSession,
-  listSeatReservations   
+  listSeatReservations,
+  LiveSession     
 } from "@/src/lib/firestore";  
 import ProtectedRoute from "@/src/components/ProtectedRoute";  
 import { Timestamp } from "firebase/firestore";  
@@ -17,7 +18,7 @@ import { Timestamp } from "firebase/firestore";
 export default function LiveSessionsPage() {  
   const router = useRouter();  
   const [mounted, setMounted] = useState(false);  
-  const [sessions, setSessions] = useState<any[]>([]);  
+  const [sessions, setSessions] = useState<LiveSession[]>([]);
   const [loading, setLoading] = useState(true);  
   const [showCreateForm, setShowCreateForm] = useState(false);  
   
@@ -121,7 +122,7 @@ export default function LiveSessionsPage() {
   }  
   
   // Export emails functionality  
-  async function handleExportEmails(session: any) {  
+  async function handleExportEmails(session: LiveSession) {  
   try {  
     // Verificar autenticación con email  
     const user = auth.currentUser;  
@@ -344,7 +345,7 @@ export default function LiveSessionsPage() {
             button.style.color = '#A4CB3E';  
           }, 2000);  
         }  
-      } catch (err) {  
+      } catch  {  
         alert('Failed to copy to clipboard');  
       }  
     }  
@@ -411,16 +412,7 @@ export default function LiveSessionsPage() {
   }  
 } 
   
-  // Status helper  
-  function getSessionStatus(session: any) {  
-    const now = new Date();  
-    const sessionDate = session.date?.toDate?.() || new Date(0);  
-      
-    if (session.status === "live") return { text: "🔴 LIVE NOW", color: "#FF60A8" };  
-    if (session.status === "ended") return { text: "Ended", color: "#666666" };  
-    if (sessionDate < now) return { text: "Past", color: "#666666" };  
-    return { text: "Upcoming", color: "#A4CB3E" };  
-  }  
+  
   
   // Loading state  
   if (!mounted) {  
