@@ -1,4 +1,4 @@
-// src/app/qa/[id]/page.tsx  
+// app/community-admin/questions/[id]/page.tsx  
 "use client";  
   
 import { use, useEffect, useState, useCallback } from "react";  
@@ -119,7 +119,7 @@ function QuestionDetailPage({ params }: { params: Promise<{ id: string }> }) {
             Question not found  
           </p>  
           <Link  
-            href="/community/questions"  
+            href="/community-admin/questions"  
             style={{  
               display: 'inline-block',  
               padding: '12px 32px',  
@@ -148,14 +148,14 @@ function QuestionDetailPage({ params }: { params: Promise<{ id: string }> }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>  
           <div>  
             <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#F5F5F5' }}>  
-              💬 Question and Answer  
+              💬 Question Management  
             </h1>  
             <p style={{ fontSize: '16px', color: '#B6B9BF' }}>  
-              {hasAnswer ? 'Community response' : 'Be the first to reply'}  
+              {hasAnswer ? 'Edit answer' : 'Add answer'}  
             </p>  
           </div>  
           <Link  
-            href="/community/questions"  
+            href="/community-admin/questions"  
             style={{  
               padding: '10px 20px',  
               borderRadius: '9999px',  
@@ -167,7 +167,7 @@ function QuestionDetailPage({ params }: { params: Promise<{ id: string }> }) {
               transition: 'all 0.2s'  
             }}  
           >  
-            ← Go back  
+            ← Back to questions  
           </Link>  
         </div>  
       </div>  

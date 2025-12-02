@@ -57,10 +57,10 @@ export default function HomePage() {
       description: 'Discover and share peaceful places'  
     },  
     {  
-      href: '/community',  
-      emoji: '💬',  
-      title: 'Questions',  
-      description: 'Participate in the question and answer community'  
+      href: '/community-admin/posts',  
+      emoji: '🛠️',  
+      title: 'Community Admin',  
+      description: 'Manage community questions, posts and users'  
     },  
     {  
       href: '/live',  

@@ -164,7 +164,7 @@ export default function QaPage() {
                     </div>      
       
                     <Link       
-                      href={`/community/questions/${q.id}`}      
+                      href={`/community-admin/questions/${q.id}`}      
                       style={{ textDecoration: 'none', display: 'block' }}      
                     >      
                       <div style={{ marginBottom: '12px', paddingRight: '100px' }}>      

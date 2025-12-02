@@ -223,8 +223,13 @@ export type UserProfile = {
   displayName: string;  
   bio?: string;  
   profileImageBase64?: string;  
+  status?: 'active' | 'suspended'; // ← Añadir este campo  
+  suspendedAt?: Timestamp; // ← Timestamp de suspensión  
+  suspendedBy?: string; // ← UID del admin que suspendió  
   createdAt: Timestamp;  
-  updatedAt?: Timestamp;  
+  updatedAt?: Timestamp;
+  postsCount?: number;  
+  commentsCount?: number;    
 };
 
 export interface Admin {  
@@ -235,6 +240,8 @@ export interface Admin {
   createdBy: string;  
   createdAt: Timestamp;  
 } 
+
+
 
 // ========== PLACES CRUD OPERATIONS ==========  
   
@@ -1314,6 +1321,29 @@ export async function updateUserProfile(
   });  
 }
 
+export async function suspendUser(  
+  uid: string,  
+  suspendedBy: string  
+): Promise<void> {  
+  const ref = doc(db, "userProfiles", uid);  
+  await updateDoc(ref, {  
+    status: 'suspended',  
+    suspendedAt: serverTimestamp(),  
+    suspendedBy,  
+    updatedAt: serverTimestamp(),  
+  });  
+}  
+  
+export async function unsuspendUser(uid: string): Promise<void> {  
+  const ref = doc(db, "userProfiles", uid);  
+  await updateDoc(ref, {  
+    status: 'active',  
+    suspendedAt: null,  
+    suspendedBy: null,  
+    updatedAt: serverTimestamp(),  
+  });  
+}
+
 // Obtener una foto de planta por ID  
 export async function getPlantPhoto(id: string): Promise<PlantPhoto | null> {  
   try {  
@@ -1331,6 +1361,41 @@ export async function getPlantPhoto(id: string): Promise<PlantPhoto | null> {
   }  
 }
 
+// Contar posts de un usuario  
+export async function countUserPosts(uid: string): Promise<number> {  
+  try {  
+    const q = query(  
+      collection(db, "plantPhotos"),  
+      where("createdBy", "==", uid)  
+    );  
+    const snapshot = await getDocs(q);  
+    return snapshot.size;  
+  } catch (error) {  
+    console.error("Error counting posts:", error);  
+    return 0;  
+  }  
+}  
+  
+// Contar comentarios de un usuario  
+export async function countUserComments(uid: string): Promise<number> {  
+  try {  
+    const allPhotos = await listPlantPhotos(1000);  
+    let commentCount = 0;  
+      
+    allPhotos.forEach(photo => {  
+      if (photo.comments) {  
+        commentCount += photo.comments.filter(  
+          (c: Comment) => c.createdBy === uid  
+        ).length;  
+      }  
+    });  
+      
+    return commentCount;  
+  } catch (error) {  
+    console.error("Error counting comments:", error);  
+    return 0;  
+  }  
+}
 
 // Funciones CRUD para administradores    
 export async function addAdmin(input: Omit<Admin, 'id' | 'createdAt'>): Promise<string> {  
