@@ -38,7 +38,7 @@ export default function UserAuthPage() {
         const result = await createUserWithEmailAndPassword(auth, values.email, values.password);  
         await updateProfile(result.user, { displayName: values.displayName });  
       }  
-      router.push('/qa/embed/questions');  
+      router.push('/community/herbarium');  
     } catch (error: unknown) {  
       if (error instanceof Error) {  
         setError(error.message);  

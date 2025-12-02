@@ -57,7 +57,7 @@ export default function HomePage() {
       description: 'Discover and share peaceful places'  
     },  
     {  
-      href: '/qa',  
+      href: '/community',  
       emoji: '💬',  
       title: 'Questions',  
       description: 'Participate in the question and answer community'  
