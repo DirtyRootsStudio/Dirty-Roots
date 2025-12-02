@@ -9,6 +9,8 @@ import { addBrand, listBrands, deleteBrand, updateBrand, Brand } from '@/src/lib
 import { auth } from '@/src/lib/firebase';  
 import ProtectedRoute from '@/src/components/ProtectedRoute';  
 import imageCompression from 'browser-image-compression';
+import { useRouter } from 'next/navigation';
+
   
 const brandSchema = z.object({  
   name: z.string().min(2, 'Brand name must be at least 2 characters'),  
@@ -27,7 +29,8 @@ function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);  
   const [loadingBrands, setLoadingBrands] = useState(true);  
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);  
-  
+  const router = useRouter();  
+
   const { register, handleSubmit, formState, setValue, watch, reset } = useForm<BrandFormValues>({  
     resolver: zodResolver(brandSchema),  
     defaultValues: {  
@@ -181,14 +184,41 @@ function BrandsPage() {
   });  
   
   return (  
-    <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>  
+    <main style={{ minHeight: '100vh', background: '#0B0B0B', padding: '24px' }}>  
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>  
+      {/* Header con botón back */}  
       <div style={{  
-        background: '#0F0F0F',  
-        borderRadius: '24px',  
-        border: '1px solid #242424',  
-        padding: '40px',  
-        marginBottom: '32px'  
+        marginBottom: '32px',  
+        display: 'flex',  
+        alignItems: 'center',  
+        justifyContent: 'space-between'  
       }}>  
+        <h1 style={{  
+          fontSize: '32px',  
+          fontWeight: 'bold',  
+          color: '#F5F5F5',  
+          margin: 0  
+        }}>  
+          🏷️ Brands  
+        </h1>  
+        <button  
+          onClick={() => router.push('/')}  
+          style={{  
+            padding: '10px 20px',  
+            background: '#0F0F0F',  
+            border: '1px solid #2A2A2A',  
+            borderRadius: '12px',  
+            color: '#F5F5F5',  
+            fontSize: '14px',  
+            cursor: 'pointer',  
+            transition: 'all 0.2s'  
+          }}  
+          onMouseEnter={(e) => e.currentTarget.style.borderColor = '#A4CB3E'}  
+          onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2A2A2A'}  
+        >  
+          ← Go back  
+        </button>  
+      </div>  
         <div style={{  
           display: 'flex',  
           justifyContent: 'space-between',  

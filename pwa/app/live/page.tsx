@@ -501,8 +501,29 @@ export default function LiveSessionsPage() {
             >  
               {showCreateForm ? 'Cancel' : '+ New Session'}  
             </button>  
+
+              <button  
+                onClick={() => router.push('/')}  
+                style={{  
+                  padding: '10px 20px',  
+                  background: '#0F0F0F',  
+                  border: '1px solid #2A2A2A',  
+                  borderRadius: '12px',  
+                  color: '#F5F5F5',  
+                  fontSize: '14px',  
+                  cursor: 'pointer',  
+                  transition: 'all 0.2s'  
+                }}  
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#A4CB3E'}  
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2A2A2A'}  
+              >  
+                ← Go back  
+              </button>
+
           </div>  
   
+
+
           {/* Create Form */}  
           {showCreateForm && (  
             <div style={{  
