@@ -2,12 +2,13 @@
 "use client";  
   
 import { useEffect, useState, useCallback } from "react";  
-import { listPlantPhotos, getUserProfile, UserProfile, suspendUser, unsuspendUser } from "@/src/lib/firestore";  
+import { listPlantPhotos, getUserProfile, UserProfile, suspendUser, unsuspendUser, Comment } from "@/src/lib/firestore";  
 import Link from "next/link";  
 import ProtectedRoute from "@/src/components/ProtectedRoute";  
 import { auth } from "@/src/lib/firebase";  
 import Image from 'next/image';  
 import { useRouter } from 'next/navigation';
+import router from "next/router";
 
 // Extender el tipo UserProfile para incluir los conteos  
 interface UserProfileWithStats extends UserProfile {  
@@ -364,7 +365,7 @@ function UsersPage() {
                 {/* Action Buttons */}  
                 <div style={{ display: 'flex', gap: '8px' }}>  
                   <button  
-                    onClick={() => handleViewUserActivity()}  
+                    onClick={() => handleViewUserActivity(user.uid)}  
                     style={{  
                       flex: 1,  
                       padding: '8px 16px',  

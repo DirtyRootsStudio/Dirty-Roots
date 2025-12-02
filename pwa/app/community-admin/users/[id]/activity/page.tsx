@@ -98,7 +98,7 @@ function UserActivityPage({ params }: { params: Promise<{ id: string }> }) {
           </Link>  
           <div>  
             <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#F5F5F5', marginBottom: '4px' }}>  
-              {user.displayName}'s Activity  
+              {user.displayName}&apos;s Activity  
             </h1>  
             <p style={{ color: '#B6B9BF', fontSize: '14px' }}>  
               UID: {user.uid} • Joined {user.createdAt ? new Date(user.createdAt.toMillis()).toLocaleDateString() : 'N/A'}  
