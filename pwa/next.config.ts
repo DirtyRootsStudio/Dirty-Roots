@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   images: {  
     unoptimized: true,  
   },  
+  turbopack: {}, // Configuración vacía para Turbopack  
 };  
   
 // eslint-disable-next-line @typescript-eslint/no-explicit-any  
