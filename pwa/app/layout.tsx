@@ -1,6 +1,7 @@
 import type { Metadata } from "next";  
 import { Geist, Geist_Mono } from "next/font/google";  
 import "./globals.css";  
+import ServiceWorkerRegister from "./components/ServiceWorkerRegister";  
   
 const geistSans = Geist({  
   variable: "--font-geist-sans",  
@@ -22,6 +23,15 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",  
     title: "Dirty Roots",  
   },  
+  icons: {  
+    icon: [  
+      { url: "/icons/android/android-launchericon-192-192.png", sizes: "192x192" },  
+      { url: "/icons/android/android-launchericon-512-512.png", sizes: "512x512" },  
+    ],  
+    apple: [  
+      { url: "/icons/ios/180.png", sizes: "180x180" },  
+    ],  
+  },  
 };  
   
 export default function RootLayout({  
@@ -31,15 +41,8 @@ export default function RootLayout({
 }>) {  
   return (  
     <html lang="es">  
-      <head>  
-        <link rel="manifest" href="/manifest.json" />  
-        <meta name="theme-color" content="#0B0B0B" />  
-        <meta name="apple-mobile-web-app-capable" content="yes" />  
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />  
-      </head>  
-      <body  
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}  
-      >  
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>  
+        <ServiceWorkerRegister />  
         {children}  
       </body>  
     </html>  

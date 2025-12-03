@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */  
 const withPWA = require('next-pwa')({  
   dest: "public",  
-  disable: process.env.NODE_ENV === "development",  
+  disable: false,  // Cambiar a false para generar SW siempre  
   register: true,  
   skipWaiting: true,  
 });  
