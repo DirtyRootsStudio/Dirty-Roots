@@ -2,7 +2,7 @@
   "name": "Dirty Roots - Lugares Calmados",  
   "short_name": "Dirty Roots",  
   "description": "Descubre y comparte lugares tranquilos. Comunidad de espacios calmados y preguntas sobre bienestar.",  
-  "start_url": "/community",  
+  "start_url": "/community/herbarium",  
   "display": "standalone",  
   "background_color": "#0B0B0B",  
   "theme_color": "#A4CB3E",  
