@@ -2,12 +2,12 @@
   "name": "Dirty Roots - Lugares Calmados",  
   "short_name": "Dirty Roots",  
   "description": "Descubre y comparte lugares tranquilos. Comunidad de espacios calmados y preguntas sobre bienestar.",  
-  "start_url": "/",  
+  "start_url": "/community",  
   "display": "standalone",  
   "background_color": "#0B0B0B",  
   "theme_color": "#A4CB3E",  
   "orientation": "portrait-primary",  
-  "scope": "/",  
+  "scope": "/community/",  
   "lang": "es",  
   "dir": "ltr",  
   "categories": ["lifestyle", "social", "travel"],  
@@ -17,7 +17,7 @@
       "sizes": "72x72",  
       "type": "image/png",  
       "purpose": "any"  
-    },
+    },  
     {  
       "src": "/icons/android/android-launchericon-192-192.png",  
       "sizes": "192x192",  
@@ -50,10 +50,10 @@
   ],  
   "shortcuts": [  
     {  
-      "name": "Lugares",  
-      "short_name": "Lugares",  
-      "description": "Ver mapa de lugares calmados",  
-      "url": "/places",  
+      "name": "Herbario",  
+      "short_name": "Herbario",  
+      "description": "Ver galería de plantas comunitaria",  
+      "url": "/community/herbarium",  
       "icons": [  
         {  
           "src": "/icons/android/android-launchericon-96-96.png",  
@@ -66,7 +66,7 @@
       "name": "Preguntas",  
       "short_name": "Q&A",  
       "description": "Comunidad de preguntas y respuestas",  
-      "url": "/qa",  
+      "url": "/community/questions",  
       "icons": [  
         {  
           "src": "/icons/android/android-launchericon-96-96.png",  
@@ -76,10 +76,10 @@
       ]  
     },  
     {  
-      "name": "Añadir lugar",  
-      "short_name": "Nuevo lugar",  
-      "description": "Compartir un lugar tranquilo",  
-      "url": "/places/new",  
+      "name": "Perfil",  
+      "short_name": "Perfil",  
+      "description": "Mi perfil de usuario",  
+      "url": "/community/profile",  
       "icons": [  
         {  
           "src": "/icons/android/android-launchericon-96-96.png",  
