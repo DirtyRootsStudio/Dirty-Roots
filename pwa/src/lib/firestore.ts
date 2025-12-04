@@ -200,14 +200,18 @@ export type PlantPhoto = {
   plantName: string;  
   description: string;  
   imageBase64: string;  
+  category?: 'new-leaf' | 'fresh-sprout' | 'comeback-story' | 'not-doing-great' |   
+             'droopy-day' | 'overwatered' | 'repotting' | 'pest-patrol' |   
+             'plant-glow-up' | 'caught-in-4k' | 'accidental-jungle' |   
+             'back-from-vacation' | 'plant-funeral';  
   createdBy: string;  
-  userName?: string; // Nombre del usuario que posteó  
+  userName?: string;  
   createdAt: Timestamp;  
   status?: "active" | "deleted";  
-  likes: string[]; // Array de UIDs de usuarios que dieron like  
-  likesCount: number; // Contador de likes  
-  comments: Comment[]; // Array de comentarios  
-};  
+  likes: string[];  
+  likesCount: number;  
+  comments: Comment[];  
+};
   
 export type Comment = {  
   id: string;  
@@ -1154,37 +1158,57 @@ export async function addPlantPhoto(
  */  
 export async function listPlantPhotos(  
   limitParam: number = 50,  
-  startAfterParam?: Timestamp  
+  startAfterParam?: Timestamp,  
+  categoryParam?: string  
 ): Promise<PlantPhoto[]> {  
   try {  
     const ref = collection(db, "plantPhotos");  
       
-    if (startAfterParam) {  
-      // Para paginación: where → orderBy → startAfter → limit  
-      const q = query(  
+    let q;  
+    if (startAfterParam && categoryParam) {  
+      // Para paginación con categoría: where → orderBy → startAfter → limit  
+      q = query(  
+        ref,   
+        where("status", "==", "active"),  
+        where("category", "==", categoryParam),  
+        orderBy("createdAt", "desc"),  
+        startAfter(startAfterParam),  
+        limit(limitParam)  
+      );  
+    } else if (startAfterParam) {  
+      // Para paginación sin categoría: where → orderBy → startAfter → limit  
+      q = query(  
         ref,   
         where("status", "==", "active"),  
         orderBy("createdAt", "desc"),  
         startAfter(startAfterParam),  
         limit(limitParam)  
       );  
-      const snap = await getDocs(q);  
-      return snap.docs.map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }));  
+    } else if (categoryParam) {  
+      // Para primera carga con categoría: where → orderBy → limit  
+      q = query(  
+        ref,   
+        where("status", "==", "active"),  
+        where("category", "==", categoryParam),  
+        orderBy("createdAt", "desc"),  
+        limit(limitParam)  
+      );  
     } else {  
-      // Para la primera carga: where → orderBy → limit  
-      const q = query(  
+      // Para la primera carga sin categoría: where → orderBy → limit  
+      q = query(  
         ref,   
         where("status", "==", "active"),  
         orderBy("createdAt", "desc"),  
         limit(limitParam)  
       );  
-      const snap = await getDocs(q);  
-      return snap.docs.map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }));  
     }  
+      
+    const snap = await getDocs(q);  
+    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as PlantPhoto) }));  
   } catch (error) {  
     console.error("Error listing plant photos:", error);  
     throw new Error("Failed to load plant photos");  
-  } 
+  }  
 }
   
 /**  

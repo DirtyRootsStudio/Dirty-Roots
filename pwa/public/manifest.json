@@ -1,7 +1,7 @@
 {  
-  "name": "Dirty Roots - Lugares Calmados",  
+  "name": "Dirty Roots - RootShare",  
   "short_name": "Dirty Roots",   
-  "description": "Descubre y comparte lugares tranquilos. Comunidad de espacios calmados y preguntas sobre bienestar.",  
+  "description": "Find other calmness addicts like you, upload and share your plants, and gain knowledge from others through the forum",  
   "start_url": "/community/herbarium",  
   "display": "standalone",  
   "background_color": "#0B0B0B",  
@@ -10,7 +10,7 @@
   "scope": "/community/",  
   "lang": "es",  
   "dir": "ltr",  
-  "categories": ["lifestyle", "social", "travel"],  
+  "categories": ["lifestyle", "social", "plants"],  
   "icons": [  
     {  
       "src": "/icons/android/android-launchericon-512-512.png",  
