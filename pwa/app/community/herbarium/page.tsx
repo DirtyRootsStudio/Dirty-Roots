@@ -389,22 +389,7 @@ function HerbariumPage() {
                         >    
                           {photo.userName || 'Usuario'}    
                         </button>                  
-                      </p>  
-                      {photo.category && (  
-                        <div style={{  
-                          marginTop: '4px',  
-                          background: 'rgba(164, 203, 62, 0.2)',  
-                          border: '1px solid #A4CB3E',  
-                          borderRadius: '6px',  
-                          padding: '2px 8px',  
-                          display: 'inline-block'  
-                        }}>  
-                          <span style={{ fontSize: '12px', color: '#A4CB3E' }}>  
-                            {CATEGORIES[photo.category as CategoryKey]?.emoji} {CATEGORIES[photo.category as CategoryKey]?.label}  
-                          </span>  
-                        </div>  
-                      )}  
-                    </div>      
+                      </p>        
                   </div>      
       
                   <div style={{                     
@@ -451,7 +436,23 @@ function HerbariumPage() {
                         >                  
                           💬 {photo.comments?.length || 0}                  
                         </button>      
-                      </div>      
+                      </div>     
+
+                                            {photo.category && (  
+                        <div style={{  
+                          marginTop: '4px',  
+                          background: 'rgba(164, 203, 62, 0.2)',  
+                          border: '1px solid #A4CB3E',  
+                          borderRadius: '6px',  
+                          padding: '2px 8px',  
+                          display: 'inline-block'  
+                        }}>  
+                          <span style={{ fontSize: '12px', color: '#A4CB3E' }}>  
+                            {CATEGORIES[photo.category as CategoryKey]?.emoji} {CATEGORIES[photo.category as CategoryKey]?.label}  
+                          </span>  
+                        </div>  
+                      )}  
+                    </div> 
       
                       {photo.id && showComments[photo.id] && (      
                         <div style={{ marginTop: '12px' }}>      
