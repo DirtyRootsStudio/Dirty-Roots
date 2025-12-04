@@ -1166,7 +1166,6 @@ export async function listPlantPhotos(
       
     let q;  
     if (startAfterParam && categoryParam) {  
-      // Para paginación con categoría: where → orderBy → startAfter → limit  
       q = query(  
         ref,   
         where("status", "==", "active"),  
@@ -1176,7 +1175,6 @@ export async function listPlantPhotos(
         limit(limitParam)  
       );  
     } else if (startAfterParam) {  
-      // Para paginación sin categoría: where → orderBy → startAfter → limit  
       q = query(  
         ref,   
         where("status", "==", "active"),  
@@ -1185,7 +1183,6 @@ export async function listPlantPhotos(
         limit(limitParam)  
       );  
     } else if (categoryParam) {  
-      // Para primera carga con categoría: where → orderBy → limit  
       q = query(  
         ref,   
         where("status", "==", "active"),  
@@ -1194,7 +1191,6 @@ export async function listPlantPhotos(
         limit(limitParam)  
       );  
     } else {  
-      // Para la primera carga sin categoría: where → orderBy → limit  
       q = query(  
         ref,   
         where("status", "==", "active"),  
@@ -1210,6 +1206,7 @@ export async function listPlantPhotos(
     throw new Error("Failed to load plant photos");  
   }  
 }
+
   
 /**  
  * Elimina una foto de planta (soft delete)  

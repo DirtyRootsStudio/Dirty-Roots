@@ -287,7 +287,7 @@ function HerbariumPage() {
               fontSize: '14px'  
             }}  
           >  
-            <option value="all">Todas las categorías</option>  
+            <option value="all">All the categories</option>  
             {Object.entries(CATEGORIES).map(([key, value]) => (  
               <option key={key} value={key}>  
                 {value.emoji} {value.label}  
