@@ -406,7 +406,7 @@ function ProfilePage() {
               {userPlants.map(plant => (  
                 <div  
                   key={plant.id}  
-                  onClick={() => router.push(`/qa/embed/plant/${plant.id}`)}  
+                  onClick={() => router.push(`/community/plant/${plant.id}`)}  
                   style={{  
                     cursor: 'pointer',  
                     borderRadius: '12px',  
