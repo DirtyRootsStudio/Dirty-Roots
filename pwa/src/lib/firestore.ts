@@ -1599,18 +1599,43 @@ export async function checkDiscountEligibility(uid: string): Promise<void> {
 
 // Generar enlace de invitación único  
 export async function generateInviteLink(uid: string): Promise<string> {  
-  const code = generateUniqueCode(); // Función auxiliar  
+  console.log('🔗 [INVITE] Generating invite link for UID:', uid);  
+    
+  // Verificar estado de autenticación  
+  const currentUser = auth.currentUser;  
+  console.log('🔍 [AUTH] Current user state:', {  
+    isAuthenticated: !!currentUser,  
+    isAnonymous: currentUser?.isAnonymous,  
+    uid: currentUser?.uid,  
+    email: currentUser?.email  
+  });  
+    
+  if (!currentUser || currentUser.isAnonymous) {  
+    console.error('❌ [AUTH] User not authenticated or is anonymous');  
+    throw new Error('Usuario no autenticado');  
+  }  
+    
+  const code = generateUniqueCode();  
   const ref = doc(db, "invitations", code);  
     
-  await setDoc(ref, {  
+  const inviteData = {  
     inviterUid: uid,  
     createdAt: serverTimestamp(),  
     used: false,  
     registeredUid: null  
-  });  
+  };  
     
-  return `${window.location.origin}/user-auth?invite=${code}`;  
-}  
+  console.log('🔗 [INVITE] Creating invitation with data:', inviteData);  
+    
+  try {  
+    await setDoc(ref, inviteData);  
+    console.log('✅ [INVITE] Invitation created successfully');  
+    return `${window.location.origin}/user-auth?invite=${code}`;  
+  } catch (error) {  
+    console.error('❌ [INVITE] Failed to create invitation:', error);  
+    throw error;  
+  }  
+}
   
 // Procesar registro cuando alguien usa una invitación  
 export async function processInvitationRegistration(  
@@ -1639,7 +1664,7 @@ export async function processInvitationRegistration(
   
 // Agregar amigo registrado al progreso del challenge  
 export async function addRegisteredFriend(  
-  inviterUid: string,   
+  inviterUid: string,     
   registeredUid: string  
 ): Promise<void> {  
   const profile = await getUserProfile(inviterUid);  
@@ -1647,20 +1672,22 @@ export async function addRegisteredFriend(
     
   const invitedFriends = profile.challengeProgress?.invitedFriends || [];  
     
-  // Evitar duplicados  
   if (!invitedFriends.includes(registeredUid)) {  
     const newInvitedFriends = [...invitedFriends, registeredUid];  
       
-    await updateUserProfile(inviterUid, {  
+    const updateData = {  
       challengeProgress: {  
-        photoDates: profile.challengeProgress?.photoDates || [], // Asegurar array vacío  
+        photoDates: profile.challengeProgress?.photoDates || [],  
         invitedFriends: newInvitedFriends,  
         discountEarned: profile.challengeProgress?.discountEarned || false,  
         discountCode: profile.challengeProgress?.discountCode  
       }  
-    });  
+    };  
       
-    // Verificar si cumple condiciones para descuento  
+    console.log('🔧 [DEBUG] Updating profile with data:', updateData);  
+    console.log('🔧 [DEBUG] Update keys:', Object.keys(updateData));  
+      
+    await updateUserProfile(inviterUid, updateData);  
     await checkDiscountEligibility(inviterUid);  
   }  
 }
