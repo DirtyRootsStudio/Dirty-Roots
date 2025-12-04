@@ -249,21 +249,27 @@ function ProfilePage() {
               Profile Photo  
             </label>  
                 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>  
+            <div style={{   
+              display: 'flex',   
+              alignItems: 'center',   
+              gap: '16px',  
+              flexDirection: window.innerWidth < 768 ? 'column' : 'row'  
+            }}>  
               {profileImageBase64 ? (  
                 <div style={{  
-                  width: '80px',  
-                  height: '80px',  
+                  width: window.innerWidth < 768 ? '100px' : '80px',  
+                  height: window.innerWidth < 768 ? '100px' : '80px',  
                   borderRadius: '50%',  
                   backgroundImage: `url(${profileImageBase64})`,  
                   backgroundSize: 'cover',  
                   backgroundPosition: 'center',  
-                  border: '2px solid #2A2A2A'  
+                  border: '2px solid #2A2A2A',  
+                  flexShrink: 0  
                 }} />  
               ) : (  
                 <div style={{  
-                  width: '80px',  
-                  height: '80px',  
+                  width: window.innerWidth < 768 ? '100px' : '80px',  
+                  height: window.innerWidth < 768 ? '100px' : '80px',  
                   borderRadius: '50%',  
                   background: '#0F0F0F',  
                   border: '2px solid #2A2A2A',  
@@ -271,12 +277,13 @@ function ProfilePage() {
                   alignItems: 'center',  
                   justifyContent: 'center',  
                   fontSize: '32px',  
-                  color: '#B6B9BF'  
+                  color: '#B6B9BF',  
+                  flexShrink: 0  
                 }}>  
                   👤  
                 </div>  
               )}  
-                  
+                
               <input  
                 type="file"  
                 accept="image/*"  
@@ -293,7 +300,8 @@ function ProfilePage() {
                   borderRadius: '12px',  
                   padding: '12px 16px',  
                   color: '#F5F5F5',  
-                  fontSize: '14px'  
+                  fontSize: '14px',  
+                  minWidth: window.innerWidth < 768 ? '100%' : 'auto'  
                 }}  
               />  
             </div>  
