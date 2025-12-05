@@ -72,22 +72,17 @@ function DiscountTiersPage() {
   }, []);  
   
   async function loadAllTiers() {  
-  try {  
-    const data = await listDiscountTiers();  
-    // Convert Date objects to Timestamps for type consistency  
-    const convertedData = data.map(tier => ({  
-      ...tier,  
-      createdAt: Timestamp.fromDate(new Date(tier.createdAt)),  
-      updatedAt: tier.updatedAt ? Timestamp.fromDate(new Date(tier.updatedAt)) : undefined  
-    }));  
-    setTiers(convertedData);  
-  } catch (error) {  
-    console.error('Error loading tiers:', error);  
-  } finally {  
-    setLoadingTiers(false);  
-  }  
-}
-  
+      try {  
+          const data = await listDiscountTiers();  
+          // No conversion needed - data is already in correct Timestamp format  
+          setTiers(data);  
+        } catch (error) {  
+          console.error('Error loading tiers:');  
+        } finally {  
+          setLoadingTiers(false);  
+        }  
+    }   
+      
   const handleEditTier = (tier: DiscountTier) => {  
     setEditingTierId(tier.id || null);  
     setValue('level', tier.level);  
@@ -128,16 +123,14 @@ function DiscountTiersPage() {
     setLoading(true);  
     setSuccess(false);  
   
-    try {  
-      const uid = auth.currentUser?.uid || 'anon';  
-  
+    try {    
       if (editingTierId) {  
         // await updateDiscountTier(editingTierId, values);  
-        setTiers(tiers.map(t =>   
-          t.id === editingTierId   
-            ? { ...t, ...values, updatedAt: new Date() }  
-            : t  
-        ));  
+        setTiers(tiers.map(t =>     
+            t.id === editingTierId     
+                ? { ...t, ...values, updatedAt: Timestamp.fromDate(new Date()) }    
+                : t    
+            ));
         setSuccess(true);  
         setEditingTierId(null);  
         reset();  

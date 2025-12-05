@@ -1741,7 +1741,10 @@ export async function listDiscountTiers(): Promise<DiscountTier[]> {
     const ref = collection(db, "discountTiers");  
     const q = query(ref, orderBy("level", "asc"));  
     const snap = await getDocs(q);  
-    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as DiscountTier) }));
+    return snap.docs.map((d) => ({   
+      ...(d.data() as DiscountTier),   
+      id: d.id // El ID del documento sobrescribe cualquier ID interno  
+    }));
   } catch (error) {  
     console.error("Error listing discount tiers:", error);  
     throw new Error("Failed to load discount tiers");  
