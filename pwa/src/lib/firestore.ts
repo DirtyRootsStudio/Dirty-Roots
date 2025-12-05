@@ -1612,7 +1612,8 @@ export async function checkDiscountEligibility(uid: string): Promise<void> {
       
     // Verificar requisitos (1 foto + amigos requeridos)  
     if (photoCount >= 1 && friendCount >= tier.friendsRequired) {  
-      const discountCode = generateUniqueCode();  
+      // USAR EL CÓDIGO PREDEFINIDO DEL TIER  
+      const discountCode = tier.discountCode;  
         
       await updateUserProfile(uid, {  
         challengeProgress: {  
@@ -1624,11 +1625,10 @@ export async function checkDiscountEligibility(uid: string): Promise<void> {
         }  
       });  
         
-      console.log(`✅ [DISCOUNT] Level ${tier.level} discount generated: ${discountCode}`);  
+      console.log(`✅ [DISCOUNT] Level ${tier.level} discount assigned: ${discountCode}`);  
     }  
   }  
 }
-
 // Generar enlace de invitación único  
 export async function generateInviteLink(uid: string): Promise<string> {  
   console.log('🔗 [INVITE] Generating invite link for UID:', uid);  
