@@ -10,9 +10,9 @@ import { auth } from '@/src/lib/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';  
   
 const userAuthSchema = z.object({  
-  displayName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').optional().or(z.literal('')),  
-  email: z.string().email('Email inválido'),  
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),  
+  displayName: z.string().min(2, 'The name must be at least 2 characters long').optional().or(z.literal('')),  
+  email: z.string().email('Invalid email'),  
+  password: z.string().min(6, 'The password must be at least 6 characters long'),  
 });  
   
 type UserAuthFormValues = z.infer<typeof userAuthSchema>;  
@@ -137,7 +137,7 @@ export default function UserAuthPage() {
           marginBottom: '32px',  
           color: '#F5F5F5'  
         }}>  
-          {isLogin ? '🌿 Entrar' : '🌱 Crear Cuenta'}  
+          {isLogin ? '🌿 Enter' : '🌱 Create Account'}  
         </h1>  
                     
         {error && (  
@@ -164,7 +164,7 @@ export default function UserAuthPage() {
                 marginBottom: '8px',  
                 color: '#F5F5F5'  
               }}>  
-                Nombre de Usuario  
+                Name  
               </label>  
               <input  
                 type="text"  
@@ -178,7 +178,7 @@ export default function UserAuthPage() {
                   color: '#F5F5F5',  
                   fontSize: '14px'  
                 }}  
-                placeholder="Tu nombre"  
+                placeholder="Your name"  
               />  
             </div>  
           )}  
@@ -205,7 +205,7 @@ export default function UserAuthPage() {
                 color: '#F5F5F5',  
                 fontSize: '14px'  
               }}  
-              placeholder="tu@email.com"  
+              placeholder="your@email.com"  
             />  
           </div>  
   
@@ -217,7 +217,7 @@ export default function UserAuthPage() {
               marginBottom: '8px',  
               color: '#F5F5F5'  
             }}>  
-              Contraseña  
+              Password  
             </label>  
             <input  
               type="password"  
@@ -250,7 +250,7 @@ export default function UserAuthPage() {
               cursor: loading ? 'not-allowed' : 'pointer'  
             }}  
           >  
-            {loading ? 'Cargando...' : (isLogin ? 'Entrar' : 'Crear Cuenta')}  
+            {loading ? 'Loading...' : (isLogin ? 'Enter' : 'Create account')}  
           </button>  
   
           <button  
@@ -266,7 +266,7 @@ export default function UserAuthPage() {
               cursor: 'pointer'  
             }}  
           >  
-            {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Entra'}  
+            {isLogin ? 'Don&apos;t have an account? Sign up' : 'Do you already have an account? Log in'}  
           </button>  
         </form>  
       </div>  
