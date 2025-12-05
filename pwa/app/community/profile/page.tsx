@@ -145,7 +145,7 @@ const InviteFriendsComponent = () => {
           color: '#666',  
           marginBottom: '4px'  
         }}>  
-          Progreso de fotos: {Math.min(photoCount, 3)}/3 diferent days  
+          Photo progress: {Math.min(photoCount, 3)}/3 diferent days  
         </div>  
         <div style={{  
           height: '4px',  
@@ -225,7 +225,7 @@ const InviteFriendsComponent = () => {
                   color: '#666',  
                   marginBottom: '4px'  
                 }}>  
-                  Amigos: {Math.min(invitedCount, tier.friendsRequired)}/{tier.friendsRequired}  
+                  Friends: {Math.min(invitedCount, tier.friendsRequired)}/{tier.friendsRequired}  
                 </div>  
                 <div style={{  
                   height: '3px',  
@@ -249,7 +249,7 @@ const InviteFriendsComponent = () => {
                     color: '#A4CB3E',  
                     fontWeight: '600'  
                   }}>  
-                    ✅ Código obtenido: {hasCode}  
+                    ✅ Code obtained: {hasCode}  
                   </div>  
                 )}  
               </div>  
@@ -306,7 +306,7 @@ const InviteFriendsComponent = () => {
               whiteSpace: 'nowrap'  
             }}  
           >  
-            {copied ? '¡Copiado!' : 'Copiar'}  
+            {copied ? 'Copied!' : 'Copy'}  
           </button>  
         </div>  
       )}  
