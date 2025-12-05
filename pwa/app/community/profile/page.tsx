@@ -174,7 +174,7 @@ const InviteFriendsComponent = () => {
             🎁 Niveles de descuento disponibles:  
           </h4>  
           {discountTiers.map((tier) => {  
-            const isAchieved = invitedCount >= tier.friendsRequired && photoCount >= 3;  
+            const isAchieved = invitedCount >= tier.friendsRequired && photoCount >= 1;  
             const hasCode = userProfile?.challengeProgress?.earnedDiscounts?.[`level${tier.level}`];  
               
             return (  
