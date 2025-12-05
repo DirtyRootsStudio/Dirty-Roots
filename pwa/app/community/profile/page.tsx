@@ -348,6 +348,16 @@ function ProfilePage() {
         bio: profile.bio || '',  
         profileImageBase64: profile.profileImageBase64 || '',  
       });  
+
+       // FORZAR verificación de elegibilidad aunque no haya cambios  
+      console.log('🎯 [PROFILE] Forcing discount eligibility check...');  
+      await checkDiscountEligibility(user.uid);  
+        
+      // Recargar para ver si se actualizó  
+      const updatedProfile = await getUserProfile(user.uid);  
+      console.log('📊 [PROFILE] Profile after eligibility check:', {  
+        challengeProgress: updatedProfile?.challengeProgress  
+      });
     }  
       
     const plants = await listPlantPhotos(50);  

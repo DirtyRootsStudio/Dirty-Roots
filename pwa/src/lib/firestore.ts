@@ -1607,10 +1607,10 @@ export async function checkDiscountEligibility(uid: string): Promise<void> {
   for (const tier of tiers.filter(t => t.active)) {  
     const tierKey = `level${tier.level}`;  
       
-    // Si ya tiene el código para este nivel, saltar  
+    // Si ya tiene el código, saltar  
     if (earnedDiscounts[tierKey]) continue;  
       
-    // Verificar si cumple requisitos para este nivel  
+    // Verificar requisitos (1 foto + amigos requeridos)  
     if (photoCount >= 1 && friendCount >= tier.friendsRequired) {  
       const discountCode = generateUniqueCode();  
         
@@ -1623,6 +1623,8 @@ export async function checkDiscountEligibility(uid: string): Promise<void> {
           }  
         }  
       });  
+        
+      console.log(`✅ [DISCOUNT] Level ${tier.level} discount generated: ${discountCode}`);  
     }  
   }  
 }
