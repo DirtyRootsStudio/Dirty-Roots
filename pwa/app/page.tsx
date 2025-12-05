@@ -85,6 +85,12 @@ export default function HomePage() {
       emoji: '🏷️',  
       title: 'Brands',  
       description: 'Manage partner brands and their promotional content'  
+    },
+    {  
+      href: '/discount-tiers',  
+      emoji: '🎁',  
+      title: 'Discount Tiers',  
+      description: 'Configure progressive discount levels and rewards'  
     },  
     {  
       href: '/admins-console',  
