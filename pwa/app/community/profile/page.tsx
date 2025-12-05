@@ -105,7 +105,7 @@ const InviteFriendsComponent = () => {
         alignItems: 'center',  
         gap: '8px'  
       }}>  
-        🎉 Invita a tus amigos y gana descuentos  
+        🎉 Invite your friends and earn discounts  
       </h3>  
   
       {/* Mensaje principal dinámico */}  
@@ -116,7 +116,7 @@ const InviteFriendsComponent = () => {
           marginBottom: '16px',  
           lineHeight: '1.5'  
         }}>  
-          {discountTiers[0]?.description || 'Invita amigos y publica fotos para obtener descuentos especiales.'}  
+          {discountTiers[0]?.description || 'Invite friends and post photos to get special discounts.'}  
         </p>  
       )}  
   
@@ -135,8 +135,8 @@ const InviteFriendsComponent = () => {
           fontSize: '12px',  
           color: '#B6B9BF'  
         }}>  
-          <span>👥 Amigos invitados: {invitedCount}</span>  
-          <span>📸 Fotos publicadas: {photoCount}/3 días</span>  
+          <span>👥 Friends invited: {invitedCount}</span>  
+          <span>📸 Posted photos: {photoCount}/3 días</span>  
         </div>  
           
         {/* Barra de progreso de fotos */}  
@@ -145,7 +145,7 @@ const InviteFriendsComponent = () => {
           color: '#666',  
           marginBottom: '4px'  
         }}>  
-          Progreso de fotos: {Math.min(photoCount, 3)}/3 días distintos  
+          Progreso de fotos: {Math.min(photoCount, 3)}/3 diferent days  
         </div>  
         <div style={{  
           height: '4px',  
@@ -171,7 +171,7 @@ const InviteFriendsComponent = () => {
             color: '#F5F5F5',  
             marginBottom: '12px'  
           }}>  
-            🎁 Niveles de descuento disponibles:  
+            🎁 Available discount levels:  
           </h4>  
           {discountTiers.map((tier) => {  
             const isAchieved = invitedCount >= tier.friendsRequired && photoCount >= 1;  
