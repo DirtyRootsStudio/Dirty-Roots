@@ -177,6 +177,16 @@ const InviteFriendsComponent = () => {
             const isAchieved = invitedCount >= tier.friendsRequired && photoCount >= 1;  
             const hasCode = userProfile?.challengeProgress?.earnedDiscounts?.[`level${tier.level}`];  
               
+            console.log(`🎯 [TIER] Level ${tier.level}:`, {  
+                title: tier.title,  
+                friendsRequired: tier.friendsRequired,  
+                invitedCount,  
+                photoCount,  
+                isAchieved,  
+                hasCode,  
+                tierKey: `level${tier.level}`  
+              });  
+
             return (  
               <div  
                 key={tier.id}  
@@ -323,7 +333,15 @@ function ProfilePage() {
     const user = auth.currentUser;  
     if (!user) return;  
       
-    const profile = await getUserProfile(user.uid);  
+    console.log('🔍 [PROFILE] Loading profile for user:', user.uid);  
+
+
+    const profile = await getUserProfile(user.uid); 
+    console.log('📊 [PROFILE] Profile loaded:', {  
+      uid: profile?.uid,  
+      challengeProgress: profile?.challengeProgress  
+    }); 
+
     if (profile) {  
       reset({  
         displayName: profile.displayName,  
@@ -336,6 +354,9 @@ function ProfilePage() {
     const userPlants = plants.filter(p => p.createdBy === user.uid);  
     setUserPlants(userPlants);  
       
+    console.log('🌿 [PROFILE] User plants loaded:', userPlants.length);  
+
+
     // NUEVO: Actualizar photoDates del challengeProgress  
     const uniqueDates = [...new Set(  
       userPlants.map(plant =>   
@@ -343,21 +364,40 @@ function ProfilePage() {
       )  
     )];  
       
+
+    console.log('📅 [PROFILE] Unique photo dates calculated:', uniqueDates);  
+    console.log('📅 [PROFILE] Current photoDates in profile:', profile?.challengeProgress?.photoDates);  
+      
     // Actualizar perfil solo si las fechas han cambiado  
     if (profile &&   
         JSON.stringify(profile.challengeProgress?.photoDates || []) !==   
         JSON.stringify(uniqueDates)) {  
         
-      await updateUserProfile(user.uid, {  
-        challengeProgress: {  
-          photoDates: uniqueDates,  
-          invitedFriends: profile.challengeProgress?.invitedFriends || [],  
-          earnedDiscounts: profile.challengeProgress?.earnedDiscounts || {}  
-        }  
+        console.log('🔄 [PROFILE] Updating photoDates from',   
+                profile.challengeProgress?.photoDates, 'to', uniqueDates);
+
+        await updateUserProfile(user.uid, {  
+          challengeProgress: {  
+            photoDates: uniqueDates,  
+            invitedFriends: profile.challengeProgress?.invitedFriends || [],  
+            earnedDiscounts: profile.challengeProgress?.earnedDiscounts || {}  
+          }  
       });  
+
+      console.log('✅ [PROFILE] Profile updated with new photoDates');  
+      console.log('🎯 [PROFILE] Checking discount eligibility...')
         
       await checkDiscountEligibility(user.uid);  
-    }  
+
+      // Recargar perfil para ver si se actualizó  
+      const updatedProfile = await getUserProfile(user.uid);  
+      console.log('📊 [PROFILE] Profile after eligibility check:', {  
+        challengeProgress: updatedProfile?.challengeProgress  
+      });  
+    } else {  
+      console.log('ℹ️ [PROFILE] Photo dates unchanged, skipping update');  
+    } 
+      
   } catch (error) {  
     console.error('Error loading profile:', error);  
   } finally {  
