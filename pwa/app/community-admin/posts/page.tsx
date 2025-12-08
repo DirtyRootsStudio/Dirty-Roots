@@ -155,7 +155,7 @@ function PostsPage() {
               ))}  
             </select>  
             <Link      
-              href="/community-admin"      
+              href="/"      
               style={{      
                 padding: '10px 20px',      
                 borderRadius: '9999px',      
