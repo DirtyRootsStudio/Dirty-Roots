@@ -257,6 +257,34 @@ const InviteFriendsComponent = () => {
           })}  
         </div>  
       )}  
+
+      {/* Botón para visitar la página de la empresa */}  
+      <button  
+        onClick={() => window.open('https://www.dirtyrootsberlin.com/', '_blank')}  
+        style={{  
+          width: '100%',  
+          padding: '12px 20px',  
+          background: '#0F0F0F',  
+          color: '#F5F5F5',  
+          border: '1px solid #A4CB3E',  
+          borderRadius: '9999px',  
+          fontSize: '14px',  
+          fontWeight: '600',  
+          cursor: 'pointer',  
+          marginBottom: '16px',  
+          transition: 'all 0.2s'  
+        }}  
+        onMouseEnter={(e) => {  
+          e.currentTarget.style.background = '#A4CB3E';  
+          e.currentTarget.style.color = '#0B0B0B';  
+        }}  
+        onMouseLeave={(e) => {  
+          e.currentTarget.style.background = '#0F0F0F';  
+          e.currentTarget.style.color = '#F5F5F5';  
+        }}  
+      >  
+        🌿 Visit Dirty Roots Berlin  
+      </button> 
   
       <button  
         onClick={generateLink}  

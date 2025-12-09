@@ -80,20 +80,21 @@ function DiscountTiersPage() {
     }  
   }   
       
-  const handleEditTier = (tier: DiscountTier) => {  
-    console.log('✏️ [DISCOUNT-TIERS] Editing tier:', { id: tier.id, name: tier.name, level: tier.level });  
-    setEditingTierId(tier.id || null);  
-    setValue('level', tier.level);  
-    setValue('name', tier.name);  
-    setValue('friendsRequired', tier.friendsRequired);  
-    setValue('discountPercentage', tier.discountPercentage);  
-    setValue('active', tier.active);  
-    setValue('title', tier.title);  
-    setValue('description', tier.description);  
-    setValue('shortMessage', tier.shortMessage);  
-    setValue('longDescription', tier.longDescription || '');  
-    window.scrollTo({ top: 0, behavior: 'smooth' });  
-  };  
+  const handleEditTier = (tier: DiscountTier) => {    
+    console.log('✏️ [DISCOUNT-TIERS] Editing tier:', { id: tier.id, name: tier.name, level: tier.level });    
+    setEditingTierId(tier.id || null);    
+    setValue('level', tier.level);    
+    setValue('name', tier.name);    
+    setValue('friendsRequired', tier.friendsRequired);    
+    setValue('discountPercentage', tier.discountPercentage);    
+    setValue('active', tier.active);    
+    setValue('title', tier.title);    
+    setValue('description', tier.description);    
+    setValue('shortMessage', tier.shortMessage);    
+    setValue('longDescription', tier.longDescription || '');    
+    setValue('discountCode', tier.discountCode); // ← AGREGAR ESTA LÍNEA  
+    window.scrollTo({ top: 0, behavior: 'smooth' });    
+  };
   
   const handleCancelEdit = () => {  
     console.log('🚫 [DISCOUNT-TIERS] Canceling edit mode');  
