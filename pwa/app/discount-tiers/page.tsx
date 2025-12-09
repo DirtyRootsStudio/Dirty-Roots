@@ -57,7 +57,9 @@ function DiscountTiersPage() {
       title: '',  
       description: '',  
       shortMessage: '',  
-      longDescription: ''  
+      longDescription: '',
+      discountCode: ''
+  
     }  
   });  
   
@@ -92,7 +94,7 @@ function DiscountTiersPage() {
     setValue('description', tier.description);    
     setValue('shortMessage', tier.shortMessage);    
     setValue('longDescription', tier.longDescription || '');    
-    setValue('discountCode', tier.discountCode); // ← AGREGAR ESTA LÍNEA  
+    setValue('discountCode', tier.discountCode); // ← LÍNEA FALTANTE  
     window.scrollTo({ top: 0, behavior: 'smooth' });    
   };
   
@@ -122,34 +124,35 @@ function DiscountTiersPage() {
 };
   
   const onSubmit = handleSubmit(async (values) => {  
-  setError('');  
-  setLoading(true);  
-  setSuccess(false);  
-  
-  try {  
-    if (editingTierId) {  
-      // Llamar a la función de actualización real  
-      await updateDiscountTier(editingTierId, values);  
-      console.log('✅ [DISCOUNT-TIERS] Tier updated successfully in backend');  
-    } else {  
-      // Llamar a la función de creación real  
-      const newId = await addDiscountTier(values);  
-      console.log('✅ [DISCOUNT-TIERS] Tier created successfully in backend with ID:', newId);  
+    setError('');  
+    setLoading(true);  
+    setSuccess(false);  
+    
+    // AGREGAR ESTE LOG PARA DEPURAR  
+    console.log('🔍 [DEBUG] Values being sent to update:', values);  
+    console.log('🔍 [DEBUG] Editing tier ID:', editingTierId);  
+    
+    try {  
+      if (editingTierId) {  
+        await updateDiscountTier(editingTierId, values);  
+        console.log('✅ [DISCOUNT-TIERS] Tier updated successfully in backend');  
+      } else {  
+        const newId = await addDiscountTier(values);  
+        console.log('✅ [DISCOUNT-TIERS] Tier created successfully in backend with ID:', newId);  
+      }  
+        
+      setSuccess(true);  
+      reset();  
+      setEditingTierId(null);  
+        
+      await loadAllTiers();  
+    } catch (error) {  
+      console.error('❌ [DISCOUNT-TIERS] Backend operation failed:', error);  
+      setError('Failed to save tier. Please try again.');  
+    } finally {  
+      setLoading(false);  
     }  
-      
-    setSuccess(true);  
-    reset();  
-    setEditingTierId(null);  
-      
-    // Recargar datos del backend  
-    await loadAllTiers();  
-  } catch (error) {  
-    console.error('❌ [DISCOUNT-TIERS] Backend operation failed:', error);  
-    setError('Failed to save tier. Please try again.');  
-  } finally {  
-    setLoading(false);  
-  }  
-});
+  });
   
   console.log('🎨 [DISCOUNT-TIERS] Rendering component state:', {  
     tiersCount: tiers.length,  
@@ -401,29 +404,6 @@ function DiscountTiersPage() {
                 </p>  
               )}  
             </div>  
-          </div>  
-  
-          {/* Activo */}  
-          <div>  
-            <label style={{  
-              display: 'flex',  
-              alignItems: 'center',  
-              fontSize: '14px',  
-              fontWeight: '600',  
-              color: '#F5F5F5',  
-              cursor: 'pointer'  
-            }}>  
-              <input  
-                type="checkbox"  
-                {...register('active')}  
-                style={{  
-                  marginRight: '8px',  
-                  width: '16px',  
-                  height: '16px'  
-                }}  
-              />  
-              Active Tier  
-            </label>  
           </div>  
   
           {/* Título */}  
