@@ -17,16 +17,16 @@ import {
  
 // Schema para discount tiers  
 const discountTierSchema = z.object({  
-  level: z.number().min(1, 'El nivel debe ser al menos 1'),  
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),  
-  friendsRequired: z.number().min(1, 'Se requiere al menos 1 amigo'),  
-  discountPercentage: z.number().min(1, 'El descuento debe ser al menos 1%').max(100, 'Máximo 100%'),  
+  level: z.number().min(1, 'The level must be at least 1'),  
+  name: z.string().min(2, 'The name must be at least 2 characters long'),  
+  friendsRequired: z.number().min(1, 'At least 1 friend is required'),  
+  discountPercentage: z.number().min(1, 'The discount must be at least 1%.').max(100, 'Máximo 100%'),  
   active: z.boolean(),  
-  title: z.string().min(2, 'El título es requerido'),  
-  description: z.string().min(10, 'La descripción debe tener al menos 10 caracteres'),  
-  shortMessage: z.string().min(5, 'El mensaje corto es requerido'),  
+  title: z.string().min(2, 'The title is required'),  
+  description: z.string().min(10, 'The description must be at least 10 characters long.'),  
+  shortMessage: z.string().min(5, 'A short message is required.'),  
   longDescription: z.string().optional(),
-  discountCode: z.string().min(1, 'El código de descuento es requerido')
+  discountCode: z.string().min(1, 'A discount code is required')
   
 });  
   
@@ -94,7 +94,7 @@ function DiscountTiersPage() {
     setValue('description', tier.description);    
     setValue('shortMessage', tier.shortMessage);    
     setValue('longDescription', tier.longDescription || '');    
-    setValue('discountCode', tier.discountCode); // ← LÍNEA FALTANTE  
+    setValue('discountCode', tier.discountCode); 
     window.scrollTo({ top: 0, behavior: 'smooth' });    
   };
   
@@ -431,7 +431,7 @@ function DiscountTiersPage() {
                 outline: 'none',  
                 transition: 'all 0.2s'  
               }}  
-              placeholder="Descuento Básico, Descuento Premium..."  
+              placeholder="Basic Discount, Premium Discount..."  
               onFocus={(e) => e.currentTarget.style.borderColor = '#A4CB3E'}  
               onBlur={(e) => e.currentTarget.style.borderColor = '#2A2A2A'}  
             />  

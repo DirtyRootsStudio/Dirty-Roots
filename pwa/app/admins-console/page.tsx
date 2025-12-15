@@ -11,8 +11,8 @@ import OwnerRoute from '@/src/components/OwnerRoute';
     
 const adminSchema = z.object({    
   email: z.string().email('Email inválido'),    
-  displayName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),    
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),    
+  displayName: z.string().min(2, 'The name must be at least 2 characters long'),    
+  password: z.string().min(6, 'The password must be at least 6 characters long'),    
 });    
     
 type AdminFormValues = z.infer<typeof adminSchema>;    
@@ -39,7 +39,7 @@ function AdminsConsolePage() {
       setAdmins(data);    
     } catch (error) {    
       console.error('Error loading admins:', error);    
-      setError('Error cargando administradores');    
+      setError('Error loading admins');    
     } finally {    
       setLoading(false);    
     }    
@@ -71,7 +71,7 @@ function AdminsConsolePage() {
       const result = await response.json();    
         
       if (!response.ok) {    
-        throw new Error(result.error || 'Error creando administrador');    
+        throw new Error(result.error || 'Unknow error creating admin');    
       }    
         
       setSuccess(true);    
@@ -84,7 +84,7 @@ function AdminsConsolePage() {
       if (error instanceof Error) {    
         setError(`Error: ${error.message}`);    
       } else {    
-        setError('Error desconocido creando administrador');    
+        setError('Unknow error deleting admin');    
       }    
     } finally {    
       setSaving(false);    
@@ -97,7 +97,7 @@ function AdminsConsolePage() {
       return;    
     }    
         
-    if (!confirm('¿Estás seguro de que quieres eliminar este administrador?')) {    
+    if (!confirm('Are you sure about deleting this admin?')) {    
       return;    
     }    
         
@@ -106,7 +106,7 @@ function AdminsConsolePage() {
       setAdmins(admins.filter(a => a.id !== adminId));    
     } catch (error) {    
       console.error('Error deleting admin:', error);    
-      setError('Error eliminando administrador');    
+      setError('Error deleting admin');    
     }    
   }    
     
@@ -237,7 +237,7 @@ function AdminsConsolePage() {
                   color: '#F5F5F5',    
                   fontSize: '14px'    
                 }}    
-                placeholder="admin@ejemplo.com"    
+                placeholder="admin@example.com"    
               />    
             </div>    
     
@@ -263,7 +263,7 @@ function AdminsConsolePage() {
                   color: '#F5F5F5',    
                   fontSize: '14px'    
                 }}    
-                placeholder="Nombre del administrador"    
+                placeholder="Admin's name"    
               />    
             </div>    
     
@@ -289,7 +289,7 @@ function AdminsConsolePage() {
                   color: '#F5F5F5',    
                   fontSize: '14px'    
                 }}    
-                placeholder="Contraseña del administrador"    
+                placeholder="Admin's password"    
               />    
             </div>    
     
@@ -309,7 +309,7 @@ function AdminsConsolePage() {
                 cursor: saving ? 'not-allowed' : 'pointer'    
               }}    
             >    
-              {saving ? 'Procesando...' : '🚀 Create Account and Become an Admin'}    
+              {saving ? 'Processing...' : '🚀 Create Account and Become an Admin'}    
             </button>    
           </form>    
         </div>    
