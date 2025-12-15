@@ -19,8 +19,8 @@ import {
 const discountTierSchema = z.object({  
   level: z.number().min(1, 'The level must be at least 1'),  
   name: z.string().min(2, 'The name must be at least 2 characters long'),  
-  friendsRequired: z.number().min(1, 'At least 1 friend is required'),  
-  photosRequired: z.number().min(1, 'At least 1 photo is required'), // ← Nuevo campo  
+  friendsRequired: z.number().min(0, 'At least 0 friends required'), // ← Cambiado de 1 a 0  
+  photosRequired: z.number().min(0, 'At least 0 photos required'), // ← También cambiar a 0  
   discountPercentage: z.number().min(1, 'The discount must be at least 1%.').max(100, 'Máximo 100%'),  
   active: z.boolean(),  
   title: z.string().min(2, 'The title is required'),  
@@ -51,8 +51,8 @@ function DiscountTiersPage() {
     defaultValues: {  
       level: 1,  
       name: '',  
-      friendsRequired: 1,  
-      photosRequired: 3, // ← Valor por defecto  
+      friendsRequired: 0, // ← Cambiado de 1 a 0  
+      photosRequired: 0, // ← Cambiado de 3 a 0  
       discountPercentage: 10,  
       active: true,  
       title: '',  
@@ -60,7 +60,7 @@ function DiscountTiersPage() {
       shortMessage: '',  
       longDescription: '',  
       discountCode: ''  
-    }  
+    } 
   }); 
   
   useEffect(() => {  
