@@ -1612,7 +1612,7 @@ export async function checkDiscountEligibility(uid: string): Promise<void> {
     if (earnedDiscounts[tierKey]) continue;  
         
     // Verificar requisitos (fotos requeridas + amigos requeridos)  
-    if (photoCount >= tier.photosRequired && friendCount >= tier.friendsRequired) {  
+    if (photoCount >= tier.photosRequired && friendCount >= tier.friendsRequired) {
       const discountCode = tier.discountCode;  
           
       await updateUserProfile(uid, {  
